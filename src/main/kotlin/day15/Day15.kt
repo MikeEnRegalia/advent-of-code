@@ -3,28 +3,24 @@ package day15
 import kotlin.math.max
 
 fun main() {
-    val ingredients = input().also { println(it) }
-
-    println("max score: ${score(ingredients)}, limited to 500 calories: ${score(ingredients, 500)}")
+    val ingredients = input()
+    println("max score: ${ingredients.score()}, limited to 500 calories: ${ingredients.score(500)}")
 }
 
-private fun score(ingredients: List<Ingredient>, calorieLimit: Int? = null): Int {
-    val recipe = mutableMapOf<Ingredient, Int>()
+private fun List<Ingredient>.score(calorieLimit: Int? = null): Int {
     var max = 0
-    for (frosting in 0..100) {
-        for (candy in 0..100) {
-            for (butterscotch in 0..100) {
-                for (sugar in 0..100) {
-                    if (frosting + candy + butterscotch + sugar > 100) {
-                        continue
-                    }
-                    recipe[ingredients.firstOrNull { it.name == "Frosting" }!!] = frosting
-                    recipe[ingredients.firstOrNull { it.name == "Candy" }!!] = candy
-                    recipe[ingredients.firstOrNull { it.name == "Butterscotch" }!!] = butterscotch
-                    recipe[ingredients.firstOrNull { it.name == "Sugar" }!!] = sugar
-                }
 
-                recipe.score().let { if (it.first > max && (calorieLimit == null || it.second <= calorieLimit)) max = it.first }
+    for (a in 0..100) {
+        for (b in 0..100) {
+            for (c in 0..100) {
+                for (d in 0..100) {
+                    if (a + b + c + d > 100) continue
+                    mapOf(get(0) to a, get(1) to b, get(2) to c, get(3) to d)
+                        .score()
+                        .let { (score, calories) ->
+                            if (score > max && (calorieLimit == null || calories <= calorieLimit)) max = score
+                        }
+                }
             }
         }
     }
