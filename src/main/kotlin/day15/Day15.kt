@@ -27,12 +27,11 @@ private fun List<Ingredient>.candidates() = sequence {
     }
 }
 
-private fun Map<Ingredient, Int>.score() =
-    (0..3)
-        .map { n -> entries.sumOf { (i, amount) -> i.propertyValues[n] * amount } }
-        .map { max(it, 0) }
-        .reduce { a, b -> a * b }
-        .let { Score(points = it, calories = entries.sumOf { (i, amount) -> i.calories * amount }) }
+private fun Map<Ingredient, Int>.score() = (0..3)
+    .map { n -> entries.sumOf { (i, amount) -> i.propertyValues[n] * amount } }
+    .map { max(it, 0) }
+    .reduce { a, b -> a * b }
+    .let { Score(points = it, calories = entries.sumOf { (i, amount) -> i.calories * amount }) }
 
 data class Ingredient(
     val name: String,
