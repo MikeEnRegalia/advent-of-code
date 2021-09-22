@@ -1,40 +1,34 @@
 package day18
 
 fun main() {
-    val initial = input()
-
-    val lights = initial.simulate()
-    val lightsStuck = initial.simulate(stuckCorners = true)
-
-    println("lights: ${lights.values.count { it }}, stuck: ${lightsStuck.values.count { it }}")
+    with(input()) { println("lights: ${simulate()}, stuck: ${simulate(stuckCorners = true)}") }
 }
 
-fun Map<Point, Boolean>.simulate(stuckCorners: Boolean = false) = toMutableMap().apply {
-    for (i in 1..100) {
-        val old = toMap()
-        replaceAll { p, on ->
-            if (stuckCorners && p.isCorner) true
-            else {
-                val litNeighbors = p.neighbors().count { stuckCorners && it.isCorner || old[it] == true }
-                when {
-                    on -> litNeighbors in 2..3
-                    else -> litNeighbors == 3
-                }
-            }
+fun Map<Point, Boolean>.simulate(stuckCorners: Boolean = false) = toMutableMap()
+    .apply { repeat(100) { replaceAll(simulateStep(stuckCorners, toMap())) } }
+    .values.count { it }
+
+private fun simulateStep(stuckCorners: Boolean, old: Map<Point, Boolean>) = { p: Point, on: Boolean ->
+    if (stuckCorners && p.isCorner) true else {
+        val litNeighbors = p.neighbors().count { stuckCorners && it.isCorner || old[it] == true }
+        when {
+            on -> litNeighbors in 2..3
+            else -> litNeighbors == 3
         }
     }
-} as Map<Point, Boolean>
+}
 
 data class Point(val x: Int, val y: Int) {
     val isCorner = (x == 0 || x == 99) && (y == 0 || y == 99)
-    fun neighbors() = sequence {
-        for (x in -1..1) {
-            for (y in -1..1) {
-                yield(Point(this@Point.x + x, this@Point.y + y))
-            }
-        }
-    }.filter { it != this }
+
+    private fun withOffset(dx: Int, dy: Int) = Point(x + dx, y + dy)
+
+    fun neighbors() = sequence { nest(-1..1, -1..1) { dx, dy -> yield(this@Point.withOffset(dx, dy)) } }
+        .filter { it != this }
 }
+
+inline fun nest(r1: IntRange, r2: IntRange, f: (Int, Int) -> Unit) =
+    r1.forEach { x1 -> r2.forEach { x2 -> f(x1, x2) } }
 
 fun input() = """###.##..##.#..#.##...#..#.####..#.##.##.##..###...#....#...###..#..###..###.#.#.#..#.##..#...##.#..#
 .#...##.#####..##.......#..####.###.##.#..###.###.....#.#.####.##.###..##...###....#.##.....#.#.#.##
