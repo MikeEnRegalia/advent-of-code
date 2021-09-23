@@ -10,7 +10,7 @@ fun main() {
         .size
         .also { println(it) }
 
-    println(replacements.deconstructNaively(molecule))
+    println(replacements.deconstruct(molecule))
 }
 
 private fun String.replaceAll(from: String, to: String): MutableSet<String> {
@@ -25,7 +25,7 @@ private fun String.replaceAll(from: String, to: String): MutableSet<String> {
     return result
 }
 
-fun List<Pair<String, String>>.deconstructNaively(molecule: String): Int? {
+fun List<Pair<String, String>>.deconstruct(molecule: String): Int? {
     var dest = molecule
     var steps = 0
     while (dest != "e") {
@@ -35,22 +35,6 @@ fun List<Pair<String, String>>.deconstructNaively(molecule: String): Int? {
         if (oldDest == dest) return null
     }
     return steps
-}
-
-fun List<Pair<String, String>>.deconstruct(molecule: String): Int? {
-    //println(molecule)
-    if (molecule == "e") return 0
-
-    val afterOneStep = fold(mutableSetOf<String>()) { acc, (src, dest) ->
-        acc.apply { addAll(molecule.replaceAll(dest, src)) }
-    }
-
-    if (afterOneStep.contains("e")) return 1
-    if (afterOneStep.isEmpty()) return null
-    return afterOneStep
-        .mapNotNull { deconstruct(it) }
-        .minOfOrNull { it }
-        ?.plus(1)
 }
 
 fun input() = """Al => ThF
