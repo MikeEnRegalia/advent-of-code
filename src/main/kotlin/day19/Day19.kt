@@ -2,14 +2,14 @@ package day19
 
 fun main() {
     val (molecule, replacements) = input()
-
     replacements
         .fold(mutableSetOf<String>()) { acc, (from, to) ->
-            acc.apply { addAll(molecule.replaceAll(from, to)) }
+            acc.apply {
+                addAll(molecule.replaceAll(from, to))
+            }
         }
         .size
         .also { println(it) }
-
     println(replacements.deconstruct(molecule))
 }
 
@@ -17,21 +17,25 @@ private fun String.replaceAll(from: String, to: String): MutableSet<String> {
     val result = mutableSetOf<String>()
     var i = 0
     while (true) {
-        val at = indexOf(from, i)
-        if (at == -1) break
-        result.add(substring(0, at) + to + substring(at + from.length))
-        i = at + 1
+        replaceFirst(from, to, i)?.let { (at, e) ->
+            result.add(e)
+            i = at + 1
+        } ?: break
     }
     return result
 }
+
+fun String.replaceFirst(from: String, to: String, i: Int = 0) =
+    indexOf(from, i)
+        .takeIf { it > -1 }
+        ?.let { IndexedValue(it, substring(0, it) + to + substring(it + from.length)) }
 
 fun List<Pair<String, String>>.deconstruct(molecule: String): Int? {
     var dest = molecule
     var steps = 0
     while (dest != "e") {
-        println(dest)
         val oldDest = dest
-        forEach { (from, to) -> dest.replaceAll(to, from).firstOrNull()?.let { dest = it; steps++ } }
+        forEach { (from, to) -> dest.replaceFirst(to, from)?.let { dest = it.value; steps++ } }
         if (oldDest == dest) return null
     }
     return steps
