@@ -1,9 +1,11 @@
 package day17
 
 fun main() {
-    val combos = mutableSetOf<String>()
-    combinations(input(), total = 150) { combos.add(it.joinToString("")) }.also { println(it) }
-    println(combos.count { combo -> combo.length == combos.sortedBy { it.length }[0].length })
+    val combos = mutableSetOf<List<Int>>()
+    combinations(input(), total = 150) { combos.add(it) }.also { println(it) }
+
+    val minCombo = combos.minOf { it.size }
+    println(combos.count { it.size == minCombo })
 }
 
 fun combinations(list: List<Int>, total: Int, prefix: List<Int> = listOf(), f: (List<Int>) -> Unit): Int {
@@ -11,11 +13,14 @@ fun combinations(list: List<Int>, total: Int, prefix: List<Int> = listOf(), f: (
     return when {
         sum < total -> 0
         sum == total -> 1.also { f(prefix.plus(list)) }
-        list.isEmpty() -> 0
         else -> {
+            if (list.isEmpty()) return 0
+
             val first = list.first()
-            val remaining = list.drop(1)
-            combinations(remaining, total - first, prefix.plus(first), f) + combinations(remaining, total, prefix, f)
+            val remaining = list.minus(first)
+            val includingFirst = combinations(remaining, total - first, prefix.plus(first), f)
+            val excludingFirst = combinations(remaining, total, prefix, f)
+            includingFirst + excludingFirst
         }
     }
 }
