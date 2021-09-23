@@ -13,17 +13,15 @@ fun main() {
     println(replacements.deconstruct(molecule))
 }
 
-private fun String.replaceAll(from: String, to: String): MutableSet<String> {
-    val result = mutableSetOf<String>()
-    var i = 0
-    while (true) {
-        replaceFirst(from, to, i)?.let { (at, e) ->
-            result.add(e)
+private fun String.replaceAll(from: String, to: String) =
+    sequence {
+        var i = 0
+        while (true) {
+            val (at, e) = replaceFirst(from, to, i) ?: break
+            yield(e)
             i = at + 1
-        } ?: break
-    }
-    return result
-}
+        }
+    }.toCollection(mutableSetOf()) as Set<String>
 
 fun String.replaceFirst(from: String, to: String, i: Int = 0) =
     indexOf(from, i)
