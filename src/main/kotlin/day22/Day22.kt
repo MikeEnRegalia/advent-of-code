@@ -60,9 +60,9 @@ fun Game.play(turn: Turn): Int? =
                 .filter { !isTooBig(turn.history.sumOf { it.cost }) }
                 .mapNotNull { spell ->
                     wizard.cast(spell, boss)
-                        .let { (w, b) ->
-                            val nextTurn = turn.next(wizard = w, boss = b, spell)
-                            ifGameOver(w, b, nextTurn.history, spell.cost) { return it }
+                        .let { (wizard, boss) ->
+                            val nextTurn = turn.next(wizard = wizard, boss = boss, spell)
+                            ifGameOver(wizard, boss, nextTurn.history, spell.cost) { return it }
                             play(nextTurn)
                         }
                         ?.let { spell.cost + it }
