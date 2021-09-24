@@ -10,34 +10,39 @@ fun main() {
     println("${Game().play(firstTurn)}, hard: ${Game(hard = true).play(firstTurn)}")
 }
 
-data class Turn(val wizard: Player, val boss: Player, val move: Int = 0) {
+data class Turn(val wizard: Player, val boss: Player, val move: Int = 0, val history: List<Spell> = listOf()) {
     val wizardsTurn = move % 2 == 0
-    fun next(wizard: Player = this.wizard, boss: Player = this.boss) =
-        copy(move = move + 1, wizard = wizard, boss = boss)
+    fun next(wizard: Player = this.wizard, boss: Player = this.boss, spell: Spell? = null) =
+        copy(
+            move = move + 1,
+            wizard = wizard,
+            boss = boss,
+            history = if (spell != null) history.plus(spell) else history
+        )
 }
 
-fun Game.play(turn: Turn, history: List<Spell> = listOf()): Int? {
+fun Game.play(turn: Turn): Int? {
 
     val wizardPre = if (hard && turn.wizardsTurn) turn.wizard.healed(-1) else turn.wizard
 
-    ifGameOver(wizardPre, turn.boss, history) { return it }
+    ifGameOver(wizardPre, turn.boss, turn.history) { return it }
 
     var (p1, p2) = wizardPre.applySpellEffects(turn.boss)
 
-    ifGameOver(p1, p2, history) { return it }
+    ifGameOver(p1, p2, turn.history) { return it }
 
     return if (turn.wizardsTurn) {
         // player's turn (only casts spells)
         spells
             .filter { p1.spells.none { s -> it.name == s.name } }
             .filter { it.cost <= p1.mana }
-            .filter { !isTooBig(history.sumOf { it.cost }) }
+            .filter { !isTooBig(turn.history.sumOf { it.cost }) }
             .mapNotNull { spell ->
                 p1.cast(spell, p2)
                     .let { (w, b) ->
-                        val newHistory = history.plus(spell)
-                        ifGameOver(w, b, newHistory, spell.cost) { return it }
-                        play(turn.next(wizard = w, boss = b), newHistory)
+                        val nextTurn = turn.next(wizard = w, boss = b, spell)
+                        ifGameOver(w, b, nextTurn.history, spell.cost) { return it }
+                        play(nextTurn)
                     }
                     ?.let { spell.cost + it }
             }
@@ -45,8 +50,8 @@ fun Game.play(turn: Turn, history: List<Spell> = listOf()): Int? {
     } else {
         // boss's turn (can only hit)
         p1 = p2.hit(p1)
-        ifGameOver(p1, p2, history) { return it }
-        play(turn.next(wizard = p1, boss = p2), history)
+        ifGameOver(p1, p2, turn.history) { return it }
+        play(turn.next(wizard = p1, boss = p2))
     }
 }
 
