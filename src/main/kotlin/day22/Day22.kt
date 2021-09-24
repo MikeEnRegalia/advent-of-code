@@ -6,39 +6,38 @@ import kotlin.math.min
 fun main() {
     val wizard = Player(health = 50, mana = 500)
     val boss = Player(health = 51, damage = 9)
-    println("${play(wizard, boss)}, hard: ${play(wizard, boss, hard = true)}")
+    val firstTurn = Turn(wizard, boss)
+    println("${Game().play(firstTurn)}, hard: ${Game().play(firstTurn, hard = true)}")
 }
 
-fun play(
-    wizard: Player,
-    boss: Player,
-    history: List<Spell> = listOf(),
-    move: Int = 0,
-    tracker: Tracker = Tracker(),
-    hard: Boolean = false
-): Int? {
+data class Turn(val wizard: Player, val boss: Player, val move: Int = 0) {
     val wizardsTurn = move % 2 == 0
+    fun next(wizard: Player = this.wizard, boss: Player = this.boss) =
+        copy(move = move + 1, wizard = wizard, boss = boss)
+}
 
-    val wizardPre = if (hard && wizardsTurn) wizard.healed(-1) else wizard
+fun Game.play(turn: Turn, history: List<Spell> = listOf(), hard: Boolean = false): Int? {
 
-    ifGameOver(wizardPre, boss, tracker, history) { return it }
+    val wizardPre = if (hard && turn.wizardsTurn) turn.wizard.healed(-1) else turn.wizard
 
-    var (p1, p2) = wizardPre.applySpellEffects(boss)
+    ifGameOver(wizardPre, turn.boss, this, history) { return it }
 
-    ifGameOver(p1, p2, tracker, history) { return it }
+    var (p1, p2) = wizardPre.applySpellEffects(turn.boss)
 
-    return if (wizardsTurn) {
+    ifGameOver(p1, p2, this, history) { return it }
+
+    return if (turn.wizardsTurn) {
         // player's turn (only casts spells)
         spells
             .filter { p1.spells.none { s -> it.name == s.name } }
             .filter { it.cost <= p1.mana }
-            .filter { !tracker.isTooBig(history.sumOf { it.cost }) }
+            .filter { !isTooBig(history.sumOf { it.cost }) }
             .mapNotNull { spell ->
                 p1.cast(spell, p2)
                     .let { (w, b) ->
                         val newHistory = history.plus(spell)
-                        ifGameOver(w, b, tracker, newHistory, spell.cost) { return it }
-                        play(w, b, newHistory, move + 1, tracker, hard)
+                        ifGameOver(w, b, this, newHistory, spell.cost) { return it }
+                        play(turn.next(wizard = w, boss = b), newHistory, hard)
                     }
                     ?.let { spell.cost + it }
             }
@@ -46,12 +45,12 @@ fun play(
     } else {
         // boss's turn (can only hit)
         p1 = p2.hit(p1)
-        ifGameOver(p1, p2, tracker, history) { return it }
-        play(p1, p2, history, move + 1, tracker, hard)
+        ifGameOver(p1, p2, this, history) { return it }
+        play(turn.next(wizard = p1, boss = p2), history, hard)
     }
 }
 
-class Tracker {
+class Game {
     private var minMana: Int? = null
     fun registerWinningMana(mana: Int) {
         minMana = min(minMana ?: mana, mana)
@@ -63,7 +62,7 @@ class Tracker {
 inline fun ifGameOver(
     p1: Player,
     p2: Player,
-    tracker: Tracker,
+    tracker: Game,
     history: List<Spell>,
     cost: Int = 0,
     callback: (Int?) -> Unit
