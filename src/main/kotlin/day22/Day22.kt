@@ -19,41 +19,57 @@ data class Turn(val wizard: Player, val boss: Player, val move: Int = 0, val his
             boss = boss,
             history = if (spell != null) history.plus(spell) else history
         )
-}
 
-fun Game.play(turn: Turn): Int? {
-
-    val wizardPre = if (hard && turn.wizardsTurn) turn.wizard.healed(-1) else turn.wizard
-
-    ifGameOver(wizardPre, turn.boss, turn.history) { return it }
-
-    var (p1, p2) = wizardPre.applySpellEffects(turn.boss)
-
-    ifGameOver(p1, p2, turn.history) { return it }
-
-    return if (turn.wizardsTurn) {
-        // player's turn (only casts spells)
-        spells
-            .filter { p1.spells.none { s -> it.name == s.name } }
-            .filter { it.cost <= p1.mana }
-            .filter { !isTooBig(turn.history.sumOf { it.cost }) }
-            .mapNotNull { spell ->
-                p1.cast(spell, p2)
-                    .let { (w, b) ->
-                        val nextTurn = turn.next(wizard = w, boss = b, spell)
-                        ifGameOver(w, b, nextTurn.history, spell.cost) { return it }
-                        play(nextTurn)
-                    }
-                    ?.let { spell.cost + it }
+    fun afterEffects(): Turn {
+        var p1 = wizard
+        var p2 = boss
+        for (spell in p1.spells) {
+            if (spell.damage > 0) {
+                p2 = p1.hit(p2, damage = spell.damage)
             }
-            .minOfOrNull { it }
-    } else {
-        // boss's turn (can only hit)
-        p1 = p2.hit(p1)
-        ifGameOver(p1, p2, turn.history) { return it }
-        play(turn.next(wizard = p1, boss = p2))
+            if (spell.recharge > 0) {
+                p1 = p1.copy(mana = p1.mana + spell.recharge)
+            }
+        }
+        val newSpells = p1.spells
+            .mapNotNull { if (it.duration == null || it.duration == 1) null else it.copy(duration = it.duration - 1) }
+
+        return copy(wizard = p1.copy(spells = newSpells.toSet()), boss = p2)
     }
+
 }
+
+fun Game.play(turn: Turn): Int? =
+    with(turn) {
+        if (hard && wizardsTurn) copy(wizard = wizard.healed(-1)) else turn
+    }.run {
+        ifGameOver(wizard, boss, history) { return it }
+        afterEffects().apply { ifGameOver(wizard, boss, history) { return it } }
+    }.run {
+        if (!turn.wizardsTurn) {
+            // boss's turn (can only hit)
+            with(copy(wizard = boss.hit(wizard))) {
+                ifGameOver(wizard, boss, history) { return it }
+                play(next())
+            }
+        } else {
+            // player's turn (only casts spells)
+            spells
+                .filter { wizard.spells.none { s -> it.name == s.name } }
+                .filter { it.cost <= wizard.mana }
+                .filter { !isTooBig(turn.history.sumOf { it.cost }) }
+                .mapNotNull { spell ->
+                    wizard.cast(spell, boss)
+                        .let { (w, b) ->
+                            val nextTurn = turn.next(wizard = w, boss = b, spell)
+                            ifGameOver(w, b, nextTurn.history, spell.cost) { return it }
+                            play(nextTurn)
+                        }
+                        ?.let { spell.cost + it }
+                }
+                .minOfOrNull { it }
+        }
+    }
 
 data class Game(val hard: Boolean = false) {
     private var minMana: Int? = null
@@ -119,23 +135,6 @@ data class Player(
 
     fun hit(opponent: Player, damage: Int = this.damage) = with(opponent) {
         copy(health = health - (max(1, damage - actualArmor())))
-    }
-
-    fun applySpellEffects(opponent: Player): Pair<Player, Player> {
-        var p1 = this
-        var p2 = opponent
-        for (spell in p1.spells) {
-            if (spell.damage > 0) {
-                p2 = p1.hit(p2, damage = spell.damage)
-            }
-            if (spell.recharge > 0) {
-                p1 = p1.copy(mana = p1.mana + spell.recharge)
-            }
-        }
-        val newSpells = p1.spells
-            .mapNotNull { if (it.duration == null || it.duration == 1) null else it.copy(duration = it.duration - 1) }
-
-        return Pair(p1.copy(spells = newSpells.toSet()), p2)
     }
 
     fun cast(spell: Spell, opponent: Player) = with(copy(mana = mana - spell.cost)) {
