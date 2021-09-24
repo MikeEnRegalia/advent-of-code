@@ -1,6 +1,7 @@
 package day22
 
 import kotlin.math.max
+import kotlin.math.min
 
 val spells = listOf(
     Spell("m", cost = 53, duration = null, damage = 4),
@@ -13,22 +14,16 @@ val spells = listOf(
 fun main() {
     val wizard = Player(health = 50, mana = 500)
     val boss = Player(health = 51, damage = 9)
-
-    val min = play(wizard, boss)
-    println(min)
-    val minHard = play(wizard, boss, hard = true)
-    println(minHard)
+    println("${play(wizard, boss)}, hard: ${play(wizard, boss, hard = true)}")
 }
 
 class Tracker {
-    private var mana = 0
+    private var minMana: Int? = null
     fun registerWinningMana(mana: Int) {
-        if (this.mana == 0 || mana < this.mana) {
-            this.mana = mana
-        }
+        minMana = min(minMana ?: mana, mana)
     }
 
-    fun isTooBig(cost: Int) = mana in 1..cost
+    fun isTooBig(cost: Int) = cost > (minMana ?: cost)
 }
 
 fun play(
@@ -43,35 +38,24 @@ fun play(
 
     val wizardsTurn = move % 2 == 0
 
-    val wizardPre = with(wizard) { if (hard && wizardsTurn) copy(health = health - 1) else this }
+    val wizardPre = if (hard && wizardsTurn) wizard.healed(-1) else wizard
 
-    result(wizardPre, boss)?.let {
-        if (it) tracker.registerWinningMana(history.sumOf { it.cost })
-        return if (it) 0 else null
-    }
+    check(wizardPre, boss, tracker, history) { return if (it) 0 else null }
 
     var (p1, p2) = wizardPre.applySpellEffects(boss)
 
-    result(p1, p2)?.let {
-        if (it) tracker.registerWinningMana(history.sumOf { it.cost })
-        return if (it) 0 else null
-    }
+    check(p1, p2, tracker, history) { return if (it) 0 else null }
 
     return if (wizardsTurn) {
         // player's turn (only casts spells)
-        val allowedSpells = spells
-            .filter { !p1.spells.any { s -> it.name == s.name } }
+        spells
+            .filter { p1.spells.none { s -> it.name == s.name } }
             .filter { it.cost <= p1.mana }
-
-        allowedSpells
             .mapNotNull { spell ->
                 p1.cast(spell, p2)
                     .let { (w, b) ->
                         val newHistory = history.plus(spell)
-                        result(w, b)?.let {
-                            if (it) tracker.registerWinningMana(newHistory.sumOf { it.cost })
-                            return if (it) spell.cost else null
-                        }
+                        check(w, b, tracker, newHistory) { return if (it) spell.cost else null }
                         play(w, b, newHistory, move + 1, tracker, hard)
                     }
                     ?.let { spell.cost + it }
@@ -80,11 +64,15 @@ fun play(
     } else {
         // boss's turn (can only hit)
         p1 = p2.hit(p1)
-        result(p1, p2)?.let {
-            if (it) tracker.registerWinningMana(history.sumOf { it.cost })
-            return if (it) 0 else null
-        }
+        check(p1, p2, tracker, history) { return if (it) 0 else null }
         play(p1, p2, history, move + 1, tracker, hard)
+    }
+}
+
+inline fun check(p1: Player, p2: Player, tracker: Tracker, history: List<Spell>, callback: (Boolean) -> Unit) {
+    result(p1, p2)?.let { wizardWon ->
+        if (wizardWon) tracker.registerWinningMana(history.sumOf { it.cost })
+        callback(wizardWon)
     }
 }
 
@@ -108,6 +96,9 @@ data class Player(
     val spells: Set<Spell> = setOf()
 ) {
     override fun toString() = "$health/${actualArmor()} $spells"
+
+    fun plus(spell: Spell) = copy(spells = spells.plus(spell))
+    fun healed(amount: Int) = copy(health = health + amount)
 
     fun actualArmor() = armor + spells.sumOf { it.armor }
 
@@ -134,13 +125,13 @@ data class Player(
 
     fun cast(spell: Spell, opponent: Player) = with(copy(mana = mana - spell.cost)) {
         if (spell.duration != null) {
-            copy(spells = spells.plus(spell)) to opponent
+            plus(spell) to opponent
         } else {
             var p1 = this
             var p2 = opponent
             with(spell) {
                 if (damage > 0) p2 = p1.hit(p2, damage)
-                if (heal > 0) p1 = p1.copy(health = p1.health + heal)
+                if (heal > 0) p1 = p1.healed(heal)
             }
             p1 to p2
         }
