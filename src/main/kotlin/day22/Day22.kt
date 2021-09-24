@@ -7,7 +7,7 @@ fun main() {
     val wizard = Player(health = 50, mana = 500)
     val boss = Player(health = 51, damage = 9)
     val firstTurn = Turn(wizard, boss)
-    println("${Game().play(firstTurn)}, hard: ${Game().play(firstTurn, hard = true)}")
+    println("${Game().play(firstTurn)}, hard: ${Game(hard = true).play(firstTurn)}")
 }
 
 data class Turn(val wizard: Player, val boss: Player, val move: Int = 0) {
@@ -16,7 +16,7 @@ data class Turn(val wizard: Player, val boss: Player, val move: Int = 0) {
         copy(move = move + 1, wizard = wizard, boss = boss)
 }
 
-fun Game.play(turn: Turn, history: List<Spell> = listOf(), hard: Boolean = false): Int? {
+fun Game.play(turn: Turn, history: List<Spell> = listOf()): Int? {
 
     val wizardPre = if (hard && turn.wizardsTurn) turn.wizard.healed(-1) else turn.wizard
 
@@ -37,7 +37,7 @@ fun Game.play(turn: Turn, history: List<Spell> = listOf(), hard: Boolean = false
                     .let { (w, b) ->
                         val newHistory = history.plus(spell)
                         ifGameOver(w, b, newHistory, spell.cost) { return it }
-                        play(turn.next(wizard = w, boss = b), newHistory, hard)
+                        play(turn.next(wizard = w, boss = b), newHistory)
                     }
                     ?.let { spell.cost + it }
             }
@@ -46,11 +46,11 @@ fun Game.play(turn: Turn, history: List<Spell> = listOf(), hard: Boolean = false
         // boss's turn (can only hit)
         p1 = p2.hit(p1)
         ifGameOver(p1, p2, history) { return it }
-        play(turn.next(wizard = p1, boss = p2), history, hard)
+        play(turn.next(wizard = p1, boss = p2), history)
     }
 }
 
-class Game {
+data class Game(val hard: Boolean = false) {
     private var minMana: Int? = null
     fun registerWinningMana(mana: Int) {
         minMana = min(minMana ?: mana, mana)
