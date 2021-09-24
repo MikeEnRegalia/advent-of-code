@@ -20,11 +20,11 @@ fun Game.play(turn: Turn, history: List<Spell> = listOf(), hard: Boolean = false
 
     val wizardPre = if (hard && turn.wizardsTurn) turn.wizard.healed(-1) else turn.wizard
 
-    ifGameOver(wizardPre, turn.boss, this, history) { return it }
+    ifGameOver(wizardPre, turn.boss, history) { return it }
 
     var (p1, p2) = wizardPre.applySpellEffects(turn.boss)
 
-    ifGameOver(p1, p2, this, history) { return it }
+    ifGameOver(p1, p2, history) { return it }
 
     return if (turn.wizardsTurn) {
         // player's turn (only casts spells)
@@ -36,7 +36,7 @@ fun Game.play(turn: Turn, history: List<Spell> = listOf(), hard: Boolean = false
                 p1.cast(spell, p2)
                     .let { (w, b) ->
                         val newHistory = history.plus(spell)
-                        ifGameOver(w, b, this, newHistory, spell.cost) { return it }
+                        ifGameOver(w, b, newHistory, spell.cost) { return it }
                         play(turn.next(wizard = w, boss = b), newHistory, hard)
                     }
                     ?.let { spell.cost + it }
@@ -45,7 +45,7 @@ fun Game.play(turn: Turn, history: List<Spell> = listOf(), hard: Boolean = false
     } else {
         // boss's turn (can only hit)
         p1 = p2.hit(p1)
-        ifGameOver(p1, p2, this, history) { return it }
+        ifGameOver(p1, p2, history) { return it }
         play(turn.next(wizard = p1, boss = p2), history, hard)
     }
 }
@@ -59,16 +59,15 @@ class Game {
     fun isTooBig(cost: Int) = cost > (minMana ?: cost)
 }
 
-inline fun ifGameOver(
+inline fun Game.ifGameOver(
     p1: Player,
     p2: Player,
-    tracker: Game,
     history: List<Spell>,
     cost: Int = 0,
     callback: (Int?) -> Unit
 ) {
     result(p1, p2)?.let { wizardWon ->
-        if (wizardWon) tracker.registerWinningMana(history.sumOf { it.cost })
+        if (wizardWon) registerWinningMana(history.sumOf { it.cost })
         callback(if (wizardWon) cost else null)
     }
 }
