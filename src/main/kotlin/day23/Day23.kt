@@ -3,14 +3,14 @@ package day23
 fun main() {
     val program = input()
 
-    compute(mutableMapOf("a" to 0, "b" to 0), program)
-    compute(mutableMapOf("a" to 1, "b" to 0), program)
+    compute(mutableMapOf("a" to 0, "b" to 0), program).also { println(it) }
+    compute(mutableMapOf("a" to 1, "b" to 0), program).also { println(it) }
 }
 
 private fun compute(
     r: MutableMap<String, Int>,
     program: List<Pair<String, List<String>>>
-) {
+): Int {
     fun get(reg: String) = r[reg] ?: throw IllegalArgumentException(reg)
 
     var pos = 0
@@ -18,16 +18,13 @@ private fun compute(
         val (instruction, args) = program[pos]
         when (instruction) {
             "hlf" -> {
-                r[args[0]] = get(args[0]) / 2
-                pos++
+                r.set(args[0], get(args[0]) / 2).also { pos++ }
             }
             "tpl" -> {
-                r[args[0]] = get(args[0]) * 3
-                pos++
+                r[args[0]] = get(args[0]) * 3; pos++
             }
             "inc" -> {
-                r[args[0]] = get(args[0]) + 1
-                pos++
+                r[args[0]] = get(args[0]) + 1; pos++
             }
             "jmp" -> {
                 pos += args[0].toInt()
@@ -41,7 +38,7 @@ private fun compute(
             else -> throw IllegalStateException()
         }
     }
-    println(r["b"])
+    return get("b")
 }
 
 fun input() = """jio a, +19
