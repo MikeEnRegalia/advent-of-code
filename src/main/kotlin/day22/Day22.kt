@@ -20,6 +20,8 @@ data class Turn(val wizard: Player, val boss: Player, val move: Int = 0, val his
             history = if (spell != null) history.plus(spell) else history
         )
 
+    fun withWizard(t: (Player) -> Player) = copy(wizard = t(this.wizard))
+
     fun afterEffects(): Turn {
         var p1 = wizard
         var p2 = boss
@@ -41,15 +43,15 @@ data class Turn(val wizard: Player, val boss: Player, val move: Int = 0, val his
 
 fun Game.play(turn: Turn): Int? =
     with(turn) {
-        if (hard && wizardsTurn) copy(wizard = wizard.healed(-1)) else turn
+        if (hard && wizardsTurn) withWizard { it.healed(-1) } else turn
     }.run {
-        ifGameOver(wizard, boss, history) { return it }
-        afterEffects().apply { ifGameOver(wizard, boss, history) { return it } }
+        ifGameOver(this) { return it }
+        afterEffects().apply { ifGameOver(this) { return it } }
     }.run {
         if (!turn.wizardsTurn) {
             // boss's turn (can only hit)
-            with(copy(wizard = boss.hit(wizard))) {
-                ifGameOver(wizard, boss, history) { return it }
+            with(withWizard { boss.hit(it) }) {
+                ifGameOver(this) { return it }
                 play(next())
             }
         } else {
@@ -62,7 +64,7 @@ fun Game.play(turn: Turn): Int? =
                     wizard.cast(spell, boss)
                         .let { (wizard, boss) ->
                             val nextTurn = turn.next(wizard = wizard, boss = boss, spell)
-                            ifGameOver(wizard, boss, nextTurn.history, spell.cost) { return it }
+                            ifGameOver(nextTurn, cost = spell.cost) { return it }
                             play(nextTurn)
                         }
                         ?.let { spell.cost + it }
@@ -78,24 +80,30 @@ data class Game(val hard: Boolean = false) {
     }
 
     fun isTooBig(cost: Int) = cost > (minMana ?: cost)
+
+    val spells = listOf(
+        Spell("m", cost = 53, duration = null, damage = 4),
+        Spell("d", cost = 73, duration = null, damage = 2, heal = 2),
+        Spell("s", cost = 113, duration = 6, armor = 7),
+        Spell("p", cost = 173, duration = 6, damage = 3),
+        Spell("r", cost = 229, duration = 5, recharge = 101)
+    )
 }
 
 inline fun Game.ifGameOver(
-    p1: Player,
-    p2: Player,
-    history: List<Spell>,
+    turn: Turn,
     cost: Int = 0,
     callback: (Int?) -> Unit
 ) {
-    result(p1, p2)?.let { wizardWon ->
-        if (wizardWon) registerWinningMana(history.sumOf { it.cost })
+    turn.result()?.let { wizardWon ->
+        if (wizardWon) registerWinningMana(turn.history.sumOf { it.cost })
         callback(if (wizardWon) cost else null)
     }
 }
 
-fun result(p1: Player, p2: Player) = when {
-    p1.mana <= 0 || p1.health <= 0 -> false
-    p2.health <= 0 -> true
+fun Turn.result() = when {
+    wizard.mana <= 0 || wizard.health <= 0 -> false
+    boss.health <= 0 -> true
     else -> null
 }
 
@@ -110,14 +118,6 @@ data class Spell(
 ) {
     override fun toString() = name
 }
-
-val spells = listOf(
-    Spell("m", cost = 53, duration = null, damage = 4),
-    Spell("d", cost = 73, duration = null, damage = 2, heal = 2),
-    Spell("s", cost = 113, duration = 6, armor = 7),
-    Spell("p", cost = 173, duration = 6, damage = 3),
-    Spell("r", cost = 229, duration = 5, recharge = 101)
-)
 
 data class Player(
     val health: Int = 0,
