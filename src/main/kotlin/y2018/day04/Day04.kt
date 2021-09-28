@@ -7,12 +7,12 @@ fun main() {
             .also { (guard) ->
                 this[guard]!!
                     .findSleepiestMinute()
-                    .also { println(guard.value * it.first) }
+                    .also { (minute) -> println(guard.value * minute) }
             }
 
         mapValues { (_, intervals) -> intervals.findSleepiestMinute() }
             .entries.maxByOrNull { it.value.second }!!
-            .also { println(it.key.value * it.value.first) }
+            .also { (guard, value) -> println(guard.value * value.first) }
     }
 }
 
