@@ -10,29 +10,22 @@ fun main() {
     }
 
     val (allOverlapping, sum) = claims.findOverlaps()
-
     println(sum)
     claims.filterNot { allOverlapping.contains(it) }.forEach { println(it.number) }
 }
 
-private fun List<Claim>.findOverlaps(): Pair<MutableSet<Claim>, Int> {
-    val overlapping = mutableSetOf<Claim>()
-    var sum = 0
-    coordinates().forEach { (x, y) ->
+private fun List<Claim>.findOverlaps() = coordinates()
+    .fold(mutableSetOf<Claim>() to 0L) { (overlapping, sum), (x, y) ->
         val claims = filter { it.contains(x, y) }
-        if (claims.count() > 1) {
-            ++sum
-            overlapping.addAll(claims)
+        if (claims.count() <= 1) overlapping to sum
+        else {
+            overlapping.apply { addAll(claims) } to sum + 1
         }
     }
-    return Pair(overlapping, sum)
-}
 
 private fun coordinates() = sequence {
     for (x in 1..1000) {
-        for (y in 1..1000) {
-            yield(x to y)
-        }
+        for (y in 1..1000) yield(x to y)
     }
 }
 
