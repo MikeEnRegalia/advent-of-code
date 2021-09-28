@@ -71,13 +71,14 @@ private fun List<Int>.byFour() {
 
 fun Iterable<Int>.multiplied() = fold(1L) { acc, x -> acc * x }
 
-fun List<Int>.nCombos(n: Int, sum: Int): Sequence<List<Int>> = sum().let { mySum ->
-    if (mySum < sum) sequenceOf()
-    else if (n == 1) asSequence().filter { it == sum }.map { listOf(it) }
-    else asSequence()
-        .filter { mySum - it >= sum }
-        .flatMap { i -> minus(i).nCombos(n - 1, sum - i).map { it.plus(i) } }
-}
+fun List<Int>.nCombos(n: Int, sum: Int): Sequence<List<Int>> = sum()
+    .let { mySum ->
+        if (mySum < sum) sequenceOf()
+        else if (n == 1) asSequence().filter { it == sum }.map { listOf(it) }
+        else asSequence()
+            .filter { mySum - it >= sum }
+            .flatMap { i -> minus(i).nCombos(n - 1, sum - i).map { it.plus(i) } }
+    }
 
 fun input() = """1
 2
@@ -107,4 +108,6 @@ fun input() = """1
 103
 107
 109
-113""".split("\n").map { it.toInt() }
+113"""
+    .split("\n")
+    .map { it.toInt() }
