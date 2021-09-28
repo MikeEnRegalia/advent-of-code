@@ -5,9 +5,8 @@ fun main() {
         mapValues { (_, intervals) -> intervals.sumOf { it.until - it.begin } }
             .entries.maxByOrNull { it.value }!!
             .also { (guard) ->
-                this[guard]!!
-                    .findSleepiestMinute()
-                    .also { (minute) -> println(guard.value * minute) }
+                val (minute) = this[guard]!!.findSleepiestMinute()
+                println(guard.value * minute)
             }
 
         mapValues { (_, intervals) -> intervals.findSleepiestMinute() }
