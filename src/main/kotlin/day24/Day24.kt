@@ -9,21 +9,24 @@ fun main() {
 
 private fun List<Int>.byThree() {
     val groupSum = sum() / 3
+    var minQE: Long? = null
     for (n in 1..size) {
         nCombos(n, groupSum)
-            .map { firstGroup ->
-                val remaining = minus(firstGroup)
-                (1..remaining.size).firstNotNullOf {
-                    remaining.nCombos(it, groupSum).firstOrNull()
-                }.let {
-                    listOf(firstGroup, it, remaining.minus(it))
+            .map { it to it.multiplied() }
+            .filter { (_, qe) -> minQE?.let { min -> qe < min } ?: true }
+            .mapNotNull { (firstGroup, qe) ->
+                with(minus(firstGroup)) {
+                    qe.takeIf {
+                        (1..size / 2).asSequence()
+                            .mapNotNull { nCombos(it, groupSum).firstOrNull() }
+                            .any()
+                    }
+                        ?.also { minQE = qe }
                 }
             }
-            .forEach { groups ->
-                assert(groups.all { it.sum() == groupSum })
-                println("${groups[0].fold(1L) { acc, it -> acc * it }}")
-                return
-            }
+            .sorted()
+            .firstOrNull()
+            ?.also { println("$it"); return }
     }
 }
 
@@ -31,10 +34,8 @@ private fun List<Int>.byFour() {
     val groupSum = sum() / 4
 
     for (n in 1..size) {
-        println("checking $n")
         nCombos(n, groupSum)
             .mapNotNull { firstGroup ->
-                //println("candidate: $firstGroup")
                 val remaining = minus(firstGroup)
                 (1..remaining.size).asSequence()
                     .mapNotNull { o ->
@@ -54,23 +55,21 @@ private fun List<Int>.byFour() {
                                             moreRemaining.minus(thirdGroup)
                                         )
                                     }
-                                //?.also { println(it) }
                             }
                             .firstOrNull()
-                        //?.also { println(it) }
                     }
                     .firstOrNull()
-                    ?.also { println(it) }
             }
-            .sortedBy { it[0].fold(1L) { acc, x -> acc * x } }
+            .sortedBy { it[0].multiplied() }
             .firstOrNull()
             ?.also { groups ->
-                assert(groups.all { it.sum() == groupSum })
-                println("$n: ${groups[0].fold(1L) { acc, it -> acc * it }}")
+                println(groups[0].multiplied().toString())
                 return
             }
     }
 }
+
+fun Iterable<Int>.multiplied() = fold(1L) { acc, x -> acc * x }
 
 fun List<Int>.nCombos(n: Int, sum: Int): Sequence<List<Int>> = sum().let { mySum ->
     if (mySum < sum) sequenceOf()
