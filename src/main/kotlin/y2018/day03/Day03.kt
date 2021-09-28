@@ -1,18 +1,12 @@
 package y2018.day03
 
+private val regex = """^#(\d+) @ (\d+),(\d+): (\d+)x(\d+)$""".toRegex()
+
 fun main() {
     val claims = generateSequence(::readLine).toList()
         .map { row ->
-            row.split(" ").let {
-                val coordinates = it[2].substringBefore(':').split(",")
-                val size = it[3].split("x")
-                Claim(
-                    it[0].substring(1).toInt(),
-                    coordinates[0].toInt(),
-                    coordinates[1].toInt(),
-                    size[0].toInt(),
-                    size[1].toInt()
-                )
+            with(regex.find(row)!!.groupValues.drop(1).map { it.toInt() }) {
+                Claim(get(0), get(1), get(2), get(3), get(4))
             }
         }
 
