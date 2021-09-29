@@ -25,6 +25,8 @@ private fun compute(points: List<Point>) {
         Point(minOf { it.x }, minOf { it.y }) to Point(maxOf { it.x }, maxOf { it.y })
     }
 
+    println("min: $min, max: $max")
+
     points
         .filter { it.x in (min.x + 1 until max.x) }
         .filter { it.y in (min.y + 1 until max.y) }
@@ -48,14 +50,10 @@ private fun Point.area(otherCenters: List<Point>): Int {
     }
 }
 
-private fun Point.belongsTo(center: Point, otherCenters: List<Point>): Boolean {
-    val distance = distanceTo(center)
-    val minOtherDistance = otherCenters.asSequence()
-        .filter { it != center }
-        .minOfOrNull { distanceTo(it) }
-
-    return minOtherDistance == null || minOtherDistance > distance
-}
+private fun Point.belongsTo(center: Point, otherCenters: List<Point>) = otherCenters.asSequence()
+    .filter { it != center }
+    .minOfOrNull { distanceTo(it) }
+    ?.let { it > distanceTo(center) } ?: true
 
 data class Point(val x: Int, val y: Int) {
     override fun toString() = "${x}x$y"
