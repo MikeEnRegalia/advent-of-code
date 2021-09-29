@@ -1,15 +1,24 @@
 package y2018.day05
 
-fun main() {
-    val polymer = readLine()!!
-    println(polymer.react().length)
+import util.otherCase
+import util.remove
+import util.withoutSubstring
 
-    ('a'..'z')
-        .minOf { polymer.replace(it.toString(), "", ignoreCase = true).react().length }
-        .also { println(it) }
+fun main() {
+    readLine()!!.react().let { reacted ->
+        reacted.length.also { println(it) }
+        'a'.lazyRangeTo('z')
+            .map { reacted.remove(it, ignoreCase = true) }
+            .minOf { it.react().length }.also { println(it) }
+    }
 }
 
-fun String.react(): String {
+fun <T> MutableSet<T>.toggle(t: T) = add(t) || remove(t)
+
+fun Int.lazyRangeTo(t: Int) = (this..t).asSequence()
+fun Char.lazyRangeTo(t: Char) = (this..t).asSequence()
+
+private fun String.react(): String {
     var result = this
     while (true) {
         result.reactOne().let {
@@ -19,14 +28,10 @@ fun String.react(): String {
     }
 }
 
-fun String.reactOne(): String {
-    if (length < 2) return this
-    for (i in 0..length - 2) {
-        if (this[i] == this[i + 1].otherCase()) {
-            return substring(0, i) + substring(i + 2)
-        }
-    }
-    return this
+private fun String.reactOne() = when {
+    length < 2 -> this
+    else -> 0.lazyRangeTo(length - 2)
+        .filter { this[it] == this[it + 1].otherCase() }
+        .map { withoutSubstring(it, 2) }
+        .firstOrNull() ?: this
 }
-
-fun Char.otherCase() = if (isUpperCase()) lowercaseChar() else uppercaseChar()
