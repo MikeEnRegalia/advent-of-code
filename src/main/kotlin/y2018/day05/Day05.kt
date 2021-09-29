@@ -13,8 +13,6 @@ fun main() {
     }
 }
 
-fun <T> MutableSet<T>.toggle(t: T) = add(t) || remove(t)
-
 fun Int.lazyRangeTo(t: Int) = (this..t).asSequence()
 fun Char.lazyRangeTo(t: Char) = (this..t).asSequence()
 
