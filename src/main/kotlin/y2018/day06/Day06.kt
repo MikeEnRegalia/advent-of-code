@@ -3,11 +3,24 @@ package y2018.day06
 import kotlin.math.abs
 
 fun main() {
-    val points = generateSequence(::readLine)
-        .map { it.split(", ".toRegex()) }
-        .map { Point(it[0].toInt(), it[1].toInt()) }
-        .toList()
 
+    val testPoints = """1, 1
+1, 6
+8, 3
+3, 4
+5, 5
+8, 9""".split("\n").asSequence().loadInput()
+
+    compute(testPoints)
+    compute(generateSequence(::readLine).loadInput())
+}
+
+private fun Sequence<String>.loadInput(): List<Point> = this
+    .map { it.split(", ".toRegex()) }
+    .map { Point(it[0].toInt(), it[1].toInt()) }
+    .toList()
+
+private fun compute(points: List<Point>) {
     val (min, max) = with(points) {
         Point(minOf { it.x }, minOf { it.y }) to Point(maxOf { it.x }, maxOf { it.y })
     }
@@ -23,22 +36,23 @@ private fun Point.area(otherCenters: List<Point>): Int {
     var d = 0
     var sum = 1
     while (true) {
-        sum += around(d++)
+        sum += around(++d)
             .filter { it.belongsTo(this, otherCenters) }
             .count()
             .also {
-                if (it == 0) return sum
-                println("$this: $d: $it")
+                if (it == 0) {
+                    println("$this: $sum")
+                    return sum
+                }
             }
     }
 }
 
 private fun Point.belongsTo(center: Point, otherCenters: List<Point>): Boolean {
     val distance = distanceTo(center)
-    val minOtherDistance = otherCenters
+    val minOtherDistance = otherCenters.asSequence()
         .filter { it != center }
-        .map { it to distanceTo(it) }
-        .minOfOrNull { it.second }
+        .minOfOrNull { distanceTo(it) }
 
     return minOtherDistance == null || minOtherDistance > distance
 }
