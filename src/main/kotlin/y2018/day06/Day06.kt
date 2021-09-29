@@ -60,10 +60,10 @@ private fun Point.belongsTo(center: Point, otherCenters: List<Point>): Boolean {
 data class Point(val x: Int, val y: Int) {
     override fun toString() = "${x}x$y"
     fun around(d: Int) = sequence {
-        for (x1 in (x - d)..(x + d)) {
-            for (y1 in (y - d)..(y + d)) {
-                if (x1 == x - d || x1 == x + d || y1 == y - d || y1 == y + d)
-                    yield(Point(x1, y1))
+        for (dx in -d..d) {
+            for (dy in -d..d) {
+                if (dx == -d || dx == d || dy == -d || dy == d)
+                    yield(Point(x + dx, y + dy))
             }
         }
     }
