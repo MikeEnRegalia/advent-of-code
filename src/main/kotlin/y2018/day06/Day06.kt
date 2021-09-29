@@ -11,8 +11,7 @@ fun main() {
 
     allSurrounding(min, max)
         .map { p -> points.filter { center -> p.belongsTo(center, points) } }
-        .filter { it.isNotEmpty() }
-        .map { it[0] }
+        .mapNotNull { it.getOrNull(0) }
         .groupingBy { it }.eachCount()
         .entries.maxByOrNull { it.value }!!
         .also { println(it) }
