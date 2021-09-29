@@ -66,5 +66,5 @@ data class Point(val x: Int, val y: Int) {
         }
     }
 
-    fun distanceTo(other: Point) = abs(x - other.x) + abs(y - other.y)
+    fun distanceTo(p: Point) = abs(x - p.x) + abs(y - p.y)
 }
