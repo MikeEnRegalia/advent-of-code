@@ -13,15 +13,14 @@ fun main() {
         .map { p -> points.filter { center -> p.belongsTo(center, points) } }
         .mapNotNull { it.getOrNull(0) }
         .groupingBy { it }.eachCount()
-        .entries.maxByOrNull { it.value }!!
+        .entries.maxByOrNull { it.value }
         .also { println(it) }
 }
 
 private data class Point(val x: Int, val y: Int)
 
-private fun Sequence<String>.loadInput(): List<Point> = this
-    .map { it.split(", ".toRegex()) }
-    .map { Point(it[0].toInt(), it[1].toInt()) }
+private fun Sequence<String>.loadInput() = this
+    .map { row -> row.split(", ".toRegex()).let { Point(it[0].toInt(), it[1].toInt()) } }
     .toList()
 
 private fun allSurrounding(min: Point, max: Point) = sequence {
