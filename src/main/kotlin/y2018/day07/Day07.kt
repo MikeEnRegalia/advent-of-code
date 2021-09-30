@@ -8,15 +8,14 @@ fun main() {
         }
         .toList()
 
-    val steps = with(rules) { sequenceOf(map { it.first }, map { it.second }) }.flatten().distinct()
+    val steps = rules.flatMap { it.toList() }.distinct()
 
     val done = mutableListOf<String>()
     while (true) {
         steps
             .filterNot { done.contains(it) }
             .filterNot { rules.filterNot { done.contains(it.first) }.map { it.second }.contains(it) }
-            .sorted()
-            .firstOrNull()
+            .minOrNull()
             ?.let { done.add(it) } ?: break
     }
 
