@@ -3,19 +3,16 @@ package y2018.day08
 fun main() {
     val input = readLine()!!.split(" ").map { it.toInt() }
 
-    var sum = 0
-    input.readNodes() { sum += it }
-    println(sum)
-
+    println(input.readNodes().value)
     println(input.sumNodes().value)
 }
 
-fun List<Int>.readNodes(pos: Int = 0, onMetaData: (Int) -> Unit): Int {
+fun List<Int>.readNodes(pos: Int = 0): IndexedValue<Int> {
     val children = this[pos]
     val metadata = this[pos + 1]
-    var newPos = pos + 2
-    for (i in 1..children) newPos = readNodes(newPos, onMetaData)
-    for (i in 1..metadata) onMetaData(this[newPos++])
+    var newPos = IndexedValue(pos + 2, 0)
+    for (i in 1..children) newPos = readNodes(newPos.index).let { IndexedValue(it.index, it.value + newPos.value) }
+    for (i in 1..metadata) newPos = IndexedValue(newPos.index + 1, newPos.value + this[newPos.index])
     return newPos
 }
 
