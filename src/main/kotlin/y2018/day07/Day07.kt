@@ -14,5 +14,29 @@ fun main() {
     }
 
     done.joinToString("").also { println(it) }
+
+    // part 2
+    done.clear()
+
+    fun duration(step: String) = 61 + (step[0] - 'A')
+    val workers = 5
+    var workingOn = listOf<Pair<String, Int>>()
+
+    var second = 0
+    with(rules.flatten().distinct().sorted()) {
+        while (true) {
+            filter { step -> step.isAvailable() && workingOn.none { step == it.first }}
+                .take(workers - workingOn.size)
+                .map { Pair(it, duration(it)) }
+                .let { workingOn = workingOn.plus(it) }
+            workingOn = workingOn.mapNotNull { (step, remainingSeconds) ->
+                if (remainingSeconds == 1) null.also { done.add(step) }
+                else step to remainingSeconds - 1
+            }
+            second++
+            if (done.size == size) break
+        }
+    }
+    done.joinToString("").also { println("$it: $second") }
 }
 
