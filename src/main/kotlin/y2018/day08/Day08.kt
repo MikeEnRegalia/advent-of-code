@@ -1,37 +1,31 @@
 package y2018.day08
 
 fun main() {
-    val input = readLine()!!.split(" ").map { it.toInt() }
-
-    println(input.readNodes().value)
-    println(input.sumNodes().value)
+    with(readLine()!!.split(" ").map { it.toInt() }) {
+        println(sumNodes().value)
+        println(sumNodes(simple = false).value)
+    }
 }
 
-fun List<Int>.readNodes(pos: Int = 0): IndexedValue<Int> {
-    val children = this[pos]
-    val metadata = this[pos + 1]
-    var newPos = IndexedValue(pos + 2, 0)
-    for (i in 1..children) newPos = readNodes(newPos.index).let { IndexedValue(it.index, it.value + newPos.value) }
-    for (i in 1..metadata) newPos = IndexedValue(newPos.index + 1, newPos.value + this[newPos.index])
-    return newPos
-}
-
-fun List<Int>.sumNodes(pos: Int = 0): IndexedValue<Int> {
+fun List<Int>.sumNodes(pos: Int = 0, simple: Boolean = true): IndexedValue<Int> {
     val childrenCount = this[pos]
-    val metadata = this[pos + 1]
-    if (childrenCount == 0) return IndexedValue(pos + 2 + metadata, subList(pos + 2, pos + 2 + metadata).sum())
 
-    val children = mutableListOf<IndexedValue<Int>>()
-    repeat(childrenCount) {
-        val newPos = if (children.isEmpty()) pos + 2 else children.last().index
-        children.add(sumNodes(newPos))
+    val nodeAndChildren = mutableListOf(IndexedValue(pos + 2, 0))
+    repeat(childrenCount) { with(nodeAndChildren) { add(sumNodes(last().index, simple)) } }
+
+    val metadataCount = this[pos + 1]
+    val metadata = (0 until metadataCount)
+        .map { this[nodeAndChildren.last().index + it] }
+
+    val sum = when (simple) {
+        true -> metadata.sum() + nodeAndChildren.sumOf { it.value }
+        false -> when (childrenCount) {
+            0 -> metadata.sum()
+            else -> metadata
+                .filter { it in 1 until nodeAndChildren.size }
+                .sumOf { nodeAndChildren[it].value }
+        }
     }
 
-    var sum = 0
-    for (i in 0 until metadata) {
-        val childIndex = this[children.last().index + i]
-        if (childIndex in 1..children.size) sum += children[childIndex - 1].value
-    }
-
-    return IndexedValue(children.last().index + metadata, sum)
+    return IndexedValue(nodeAndChildren.last().index + metadataCount, sum)
 }
