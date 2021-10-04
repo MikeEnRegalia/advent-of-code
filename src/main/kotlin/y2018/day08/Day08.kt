@@ -13,7 +13,6 @@ fun List<Int>.sumNodes(pos: Int = 0, simple: Boolean = true): IndexedValue<Int> 
         with(metadata) {
             if (simple) nodes.sumOf { it.value } + sum()
             else if (nodes.size == 1) sum()
-            else filter { it in 1 until nodes.size }
-                .sumOf { nodes[it].value }
+            else filter { it in 1 until nodes.size }.sumOf { nodes[it].value }
         }.let { IndexedValue(nodes.last().index + metadata.size, it) }
     }
