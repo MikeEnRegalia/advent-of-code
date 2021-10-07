@@ -43,4 +43,3 @@ private class Circle {
 
 fun <K, V> MutableMap<K, V>.upsert(key: K, defaultValue: V, f: (V) -> V): V =
     compute(key) { _, old -> f(old ?: defaultValue) }!!
-
