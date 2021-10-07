@@ -7,9 +7,9 @@ internal class Day11KtTest {
 
     @Test
     fun testPower() {
-        Cell(122, 79).power(57) shouldBe -5
-        Cell(217, 196).power(39) shouldBe 0
-        Cell(101, 153).power(71) shouldBe 4
+        power(122, 79, 57) shouldBe -5
+        power(217, 196, 39) shouldBe 0
+        power(101, 153, 71) shouldBe 4
     }
 
     @Test
@@ -22,9 +22,10 @@ internal class Day11KtTest {
     fun part1() {
         day11(9810) shouldBe listOf(245, 14, 3)
     }
+
     @Test
     fun part2() {
-        day11(9810, anySquare = true) shouldBe listOf(42, 42, 42)
+        day11(9810, anySquare = true) shouldBe listOf(235, 206, 13)
     }
 }
 
