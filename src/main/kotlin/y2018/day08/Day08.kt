@@ -12,14 +12,14 @@ fun main() {
 }
 
 fun List<Int>.sumNodes(pos: Int = 0, value: (List<Int>, List<Int>) -> Int): IndexedValue<Int> =
-    mutableListOf(IndexedValue(pos + 2, 0))
-        .also { nodes -> this[pos].times { nodes.add(sumNodes(nodes.last().index, value)) } }
+    (1..this[pos])
+        .fold(listOf(IndexedValue(pos + 2, 0))) { nodes, _ -> nodes.plus(sumNodes(nodes.last().index, value)) }
         .let { nodes ->
-            (0 until this[pos + 1])
+            countTo(this[pos + 1] - 1)
                 .map { this[nodes.last().index + it] }
                 .let { metadata ->
                     IndexedValue(nodes.last().index + metadata.size, value(metadata, nodes.drop(1).map { it.value }))
                 }
         }
 
-inline fun Int.times(f: (Int) -> Unit) = repeat(this, f)
+fun countTo(to: Int) = 0..to
