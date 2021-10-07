@@ -14,13 +14,17 @@ internal class Day11KtTest {
 
     @Test
     fun test() {
-        day11(18) shouldBe (33 to 45)
-        day11(42) shouldBe (21 to 61)
+        day11(18) shouldBe listOf(33, 45, 3)
+        day11(42) shouldBe listOf(21, 61, 3)
     }
 
     @Test
     fun part1() {
-        day11(9810) shouldBe 245 to 14
+        day11(9810) shouldBe listOf(245, 14, 3)
+    }
+    @Test
+    fun part2() {
+        day11(9810, anySquare = true) shouldBe listOf(42, 42, 42)
     }
 }
 
