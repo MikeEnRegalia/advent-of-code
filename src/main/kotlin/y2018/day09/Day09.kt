@@ -3,23 +3,19 @@ package y2018.day09
 import java.util.*
 
 fun day09(players: Int, marbles: Int): Long = with(Circle()) {
-    var currentPlayer = 0
+    var player = 0
     val scores = mutableMapOf<Int, Long>()
 
-    for (marbleToPlace in 1 until marbles) {
-        if (marbleToPlace % 23 > 0) {
-            move(2)
-            add(marbleToPlace)
-            move(-1)
-        } else {
+    for (marble in 1 until marbles) {
+        if (marble % 23 == 0) {
             move(-7)
-            val other = next()
-            scores.compute(currentPlayer) { _, old -> (old ?: 0) + marbleToPlace + other }
-            remove()
+            scores.upsert(player, 0) { it + marble + remove() }
+        } else {
+            move(2)
+            insert(marble)
         }
-        currentPlayer = (currentPlayer + 1) % players
+        player = (player + 1) % players
     }
-
     scores.values.maxOf { it }
 }
 
@@ -36,7 +32,10 @@ private class Circle {
         move(if (delta > 0) delta - 1 else delta + 1)
     }
 
-    fun add(marbleToPlace: Int) = i.add(marbleToPlace)
-    fun next(): Int = i.next()
-    fun remove() = i.remove()
+    fun insert(marbleToPlace: Int) = i.add(marbleToPlace).also { move(-1) }
+    fun remove(): Int = i.next().also { i.remove() }
 }
+
+fun <K, V> MutableMap<K, V>.upsert(key: K, defaultValue: V, f: (V) -> V): V =
+    compute(key) { _, old -> f(old ?: defaultValue) }!!
+
