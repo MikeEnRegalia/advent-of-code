@@ -43,18 +43,14 @@ internal class Day12KtTest {
 ..### => #
 ...## => #"""
         val initialState = input.substring("initial state: ".length, input.indexOf("\n\n"))
-            .mapIndexed { index, c -> Pair(index, c == '#') }
-            .filter { it.second }
-            .map { it.first }
+            .mapIndexedNotNull { index, c -> index.takeIf { c == '#' } }
             .toSet()
+
         val rules = input.substring(input.indexOf("\n\n") + 2)
             .split("\n")
             .map { it.split(Regex(""" => """)) }
             .map { (neighbors, plant) ->
-                Pair(neighbors
-                    .mapIndexed { index, c -> Pair(index - 2, c == '#') }
-                    .toMap(), plant == "#"
-                )
+                Pair(neighbors.mapIndexedNotNull { index, c -> (index - 2).takeIf { c == '#' } }.toSet(), plant == "#")
             }
 
         initialState.simulateGrowth(rules, 20) shouldBe 2911
