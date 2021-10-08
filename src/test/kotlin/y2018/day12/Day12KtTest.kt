@@ -55,10 +55,8 @@ internal class Day12KtTest {
                 )
             }
 
-        println(initialState)
-        println(rules)
-
-        simulateGrowth(initialState, rules) shouldBe 42
+        initialState.simulateGrowth(rules) shouldBe 2911
+        initialState.simulateGrowth(rules, 50_000_000_000L) shouldBe 2500_000_000_695L
     }
 
 }
