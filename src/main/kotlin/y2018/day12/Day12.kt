@@ -4,22 +4,21 @@ fun Map<Int, Boolean>.simulateGrowth(rules: List<Pair<Map<Int, Boolean>, Boolean
     var pots = this
     for (turnsLeft in (1..turns).reversed()) {
         (pots.min() - 2..pots.max() + 2)
-            .mapNotNull { index ->
-                rules.find { it.first.entries.all { (d, state) -> state == (pots[index + d] ?: false) } }
-                    ?.let { index to it.second }
-            }
-            .fold(pots.toMutableMap()) { newPots, (i, grow) -> newPots.store(i, grow) }
+            .mapNotNull { rules.match(pots, it) }
+            .fold(mutableMapOf<Int, Boolean>()) { newPots, (i, grow) -> newPots.apply { if (grow) newPots[i] = true } }
             .also {
-                if (it.signature() == pots.signature())
-                    return pots.score() + turnsLeft * (it.score() - pots.score())
+                if (it.shape() == pots.shape()) return pots.score() + turnsLeft * (it.score() - pots.score())
+                else pots = it
             }
-            .also { pots = it }
     }
-    return pots.score().toLong()
+    return pots.score()
 }
 
-private fun MutableMap<Int, Boolean>.store(i: Int, grow: Boolean) = apply { if (grow) this[i] = true else remove(i) }
-private fun Map<Int, Boolean>.score() = keys.sumOf { it }
+private fun List<Pair<Map<Int, Boolean>, Boolean>>.match(pots: Map<Int, Boolean>, index: Int) =
+    find { it.first.entries.all { (d, state) -> state == (pots[index + d] ?: false) } }
+        ?.let { index to it.second }
+
+private fun Map<Int, Boolean>.score() = keys.sumOf { it }.toLong()
 private fun Map<Int, Boolean>.min() = keys.minOf { it }
 private fun Map<Int, Boolean>.max() = keys.maxOf { it }
-private fun Map<Int, Boolean>.signature() = (min()..max()).map { this[it] == true }
+private fun Map<Int, Boolean>.shape() = (min()..max()).map { this[it] == true }
