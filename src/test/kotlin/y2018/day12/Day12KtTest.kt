@@ -48,8 +48,7 @@ internal class Day12KtTest {
 
         val initialState = input.substring("initial state: ".length, input.indexOf("\n\n")).mapPots()
 
-        val rules = input.substring(input.indexOf("\n\n") + 2)
-            .split("\n")
+        val rules = input.substring(input.indexOf("\n\n") + 2).split("\n")
             .map { it.split(Regex(""" => """)) }
             .map { (neighbors, plant) -> neighbors.mapPots(-2) to (plant == "#") }
 
