@@ -44,7 +44,9 @@ internal class Day12KtTest {
 ...## => #"""
         val initialState = input.substring("initial state: ".length, input.indexOf("\n\n"))
             .mapIndexed { index, c -> Pair(index, c == '#') }
-            .toMap()
+            .filter { it.second }
+            .map { it.first }
+            .toSet()
         val rules = input.substring(input.indexOf("\n\n") + 2)
             .split("\n")
             .map { it.split(Regex(""" => """)) }
