@@ -5,7 +5,7 @@ fun Map<Int, Boolean>.simulateGrowth(rules: List<Pair<Map<Int, Boolean>, Boolean
     for (turnsLeft in (1..turns).reversed()) {
         (pots.min() - 2..pots.max() + 2)
             .mapNotNull { rules.match(pots, it) }
-            .fold(mutableMapOf<Int, Boolean>()) { newPots, (i, grow) -> newPots.apply { if (grow) newPots[i] = true } }
+            .associateWith { true }
             .also {
                 if (it.shape() == pots.shape()) return pots.score() + turnsLeft * (it.score() - pots.score())
                 else pots = it
@@ -16,7 +16,7 @@ fun Map<Int, Boolean>.simulateGrowth(rules: List<Pair<Map<Int, Boolean>, Boolean
 
 private fun List<Pair<Map<Int, Boolean>, Boolean>>.match(pots: Map<Int, Boolean>, index: Int) =
     find { it.first.entries.all { (d, state) -> state == (pots[index + d] ?: false) } }
-        ?.let { index to it.second }
+        ?.takeIf { it.second }?.let { index }
 
 private fun Map<Int, Boolean>.score() = keys.sumOf { it }.toLong()
 private fun Map<Int, Boolean>.min() = keys.minOf { it }
