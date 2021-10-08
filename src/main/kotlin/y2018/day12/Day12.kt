@@ -1,24 +1,17 @@
 package y2018.day12
 
 typealias Pots = Map<Int, Boolean>
-typealias Rule = Pair<Pots, Boolean>
 
-fun Pots.simulateGrowth(rules: List<Rule>, generations: Long = 20): Long {
+fun Pots.simulateGrowth(rules: List<Pair<Pots, Boolean>>, generations: Long = 20): Long {
     var pots = this
 
     for (generation in 0 until generations) {
         val newPots = pots.toMutableMap()
-        val (min, max) = pots.keys.minOf { it } to pots.keys.maxOf { it }
-        for (index in (min - 2)..(max + 2)) {
+
+        for (potIndex in (pots.min() - 2)..(pots.max() + 2)) {
             rules.find { (map) ->
-                map.entries.all { (ruleIndex, state) ->
-                    (pots[index + ruleIndex] ?: false) == state
-                }
-            }?.let { (_, grow) ->
-                if (grow) {
-                    newPots[index] = true
-                } else newPots.remove(index)
-            }
+                map.entries.all { (ruleIndex, state) -> state == (pots[potIndex + ruleIndex] ?: false) }
+            }?.let { (_, grow) -> if (grow) newPots[potIndex] = true else newPots.remove(potIndex) }
         }
 
         if (newPots.signature() == pots.signature())
@@ -31,4 +24,6 @@ fun Pots.simulateGrowth(rules: List<Rule>, generations: Long = 20): Long {
 }
 
 private fun Pots.score() = keys.sumOf { it }
-private fun Pots.signature() = (keys.minOf { it }..keys.maxOf { it }).map { this[it] == true }
+private fun Pots.min() = keys.minOf { it }
+private fun Pots.max() = keys.maxOf { it }
+private fun Pots.signature() = (min()..max()).map { this[it] == true }
