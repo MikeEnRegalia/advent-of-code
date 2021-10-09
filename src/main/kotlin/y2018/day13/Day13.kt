@@ -14,8 +14,8 @@ fun crash(input: List<String>): Pair<Point?, Point?> {
 
     var firstCrashAt: Point? = null
     while (movingCars.filterNotNull().size > 1) {
-        for ((index, car) in movingCars.withIndex()) {
-            if (car == null) continue
+        movingCars.withIndex().forEach { (index, car) ->
+            if (car == null) return@forEach
             with(car) {
                 copy(pos = pos.to(direction))
                     .run {
