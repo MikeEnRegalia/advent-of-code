@@ -3,7 +3,9 @@ package y2018.day13
 import y2018.day13.Action.*
 import y2018.day13.Direction.*
 
-fun crash(input: List<String>): Pair<Pair<Int, Int>?, Pair<Int, Int>?> {
+typealias Point = Pair<Int, Int>
+
+fun crash(input: List<String>): Pair<Point?, Point?> {
     val cars = input.mapIndexed { y, row -> row.mapIndexedNotNull { x, c -> c.Car(x, y) } }
         .flatten()
         .sortedWith(compareBy({ it.pos.x }, { it.pos.y }))
@@ -12,7 +14,7 @@ fun crash(input: List<String>): Pair<Pair<Int, Int>?, Pair<Int, Int>?> {
 
     var tick = 0
     val movingCars = mutableListOf<Car?>().apply { addAll(cars) }
-    var firstCrashAt: Pair<Int, Int>? = null
+    var firstCrashAt: Point? = null
     while (true) {
         if (movingCars.filterNotNull().size == 1) break
 
@@ -43,7 +45,7 @@ fun crash(input: List<String>): Pair<Pair<Int, Int>?, Pair<Int, Int>?> {
         tick++
     }
 
-    val lastCarPos = movingCars.firstNotNullOf { it }.pos.let { Pair(it.x, it.y) }
+    val lastCarPos = movingCars.firstNotNullOf { it }.pos.let { Point(it.x, it.y) }
 
     return Pair(firstCrashAt, lastCarPos)
 }
