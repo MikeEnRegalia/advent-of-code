@@ -6,29 +6,21 @@ import y2018.day13.Direction.*
 fun crash(input: List<String>): Pair<Pair<Int, Int>?, Pair<Int, Int>?> {
     val cars = input.mapIndexed { y, row ->
         row.mapIndexedNotNull { x, c ->
-            if (c.isCar()) Car(
-                Pos(x, y),
-                c.toDirection(),
-                TURN_LEFT
-            ) else null
+            if (!c.isCar()) null else Car(Pos(x, y), c.toDirection(), TURN_LEFT)
         }
     }.flatten().sortedWith(compareBy({ it.pos.x }, { it.pos.y }))
 
-    val map = input.map { row -> row.map { c -> c.fixCar() } }
+    val map = input.map { it.map(Char::underneathCar) }
 
     var tick = 0
     val movingCars = mutableListOf<Car?>().apply { addAll(cars) }
     var firstCrashAt: Pair<Int, Int>? = null
     while (true) {
-        if (map.size < 20 && tick in 0..10) {
-            map.render(movingCars).also { println("$tick\n$it") }
-        }
-        if (movingCars.filterNotNull().size == 1) {
-            break
-        }
+        if (movingCars.filterNotNull().size == 1) break
+
         for ((index, car) in movingCars.withIndex()) {
             if (car == null) continue
-            car.moved().let {
+            car.copy(pos = car.pos.move(car.direction)).let {
                 when (val tile = map[it.pos.y][it.pos.x]) {
                     '+' -> it.turnAtIntersection()
                     '/', '\\' -> it.copy(direction = it.direction.turnAtCorner(tile))
@@ -36,12 +28,12 @@ fun crash(input: List<String>): Pair<Pair<Int, Int>?, Pair<Int, Int>?> {
                 }
             }.also { moved ->
                 movingCars[index] = moved
-                val crashedCars = movingCars.filter { it?.pos == moved.pos }
-                if (crashedCars.count() > 1) {
+                val crashed = movingCars.filter { it?.pos == moved.pos }
+                if (crashed.count() > 1) {
                     if (firstCrashAt == null) firstCrashAt = moved.pos.x to moved.pos.y
-                    for ((index2, anotherCar) in movingCars.withIndex()) {
-                        if (crashedCars.contains(anotherCar)) movingCars[index2] = null
-                    }
+                    movingCars.withIndex()
+                        .filter { (_, c) -> crashed.contains(c) }
+                        .forEach { (i) -> movingCars[i] = null }
                 }
             }
         }
@@ -51,17 +43,9 @@ fun crash(input: List<String>): Pair<Pair<Int, Int>?, Pair<Int, Int>?> {
     return Pair(firstCrashAt, lastCarPos?.let { Pair(it.x, it.y) })
 }
 
-fun List<List<Char>>.render(cars: MutableList<Car?>) = mapIndexed { y, row ->
-    row.mapIndexed { x, c ->
-        cars.firstOrNull { car ->
-            car?.pos == Pos(x, y)
-        }?.let { it.direction.asChar() } ?: c
-    }.joinToString("")
-}.joinToString("\n")
-
 private fun Char.isCar() = this == '>' || this == '<' || this == '^' || this == 'v'
 
-private fun Char.fixCar() = when (this) {
+private fun Char.underneathCar() = when (this) {
     '>', '<' -> '-'
     '^', 'v' -> '|'
     else -> this
@@ -77,7 +61,6 @@ data class Pos(val x: Int, val y: Int) {
 }
 
 data class Car(val pos: Pos, val direction: Direction, val nextAction: Action) {
-    fun moved() = copy(pos = pos.move(direction))
     fun turnAtIntersection() = when (nextAction) {
         TURN_LEFT -> copy(direction = direction.left(), nextAction = FORWARD)
         FORWARD -> copy(nextAction = TURN_RIGHT)
@@ -110,13 +93,6 @@ enum class Direction {
         DOWN -> if (tile == '/') LEFT else RIGHT
         LEFT -> if (tile == '/') DOWN else UP
         RIGHT -> if (tile == '/') UP else DOWN
-    }
-
-    fun asChar() = when (this) {
-        UP -> '^'
-        DOWN -> 'v'
-        LEFT -> '<'
-        RIGHT -> '>'
     }
 }
 
