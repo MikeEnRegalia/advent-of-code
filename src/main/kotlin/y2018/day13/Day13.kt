@@ -6,9 +6,7 @@ import y2018.day13.Direction.*
 typealias Point = Pair<Int, Int>
 
 fun crash(input: List<String>) = with(mutableListOf<Cart>()) {
-    val map = input.mapIndexed { y, r ->
-        r.mapIndexed { x, c -> c.underneathCart().also { c.Cart(x, y)?.let { add(it) } } }
-    }
+    val map = input.mapIndexed { y, r -> r.mapIndexed { x, c -> c.asCart(x, y)?.let { add(it); it.track() } ?: c } }
 
     var firstCrashAt: Point? = null
     while (size > 1) {
@@ -37,12 +35,6 @@ fun crash(input: List<String>) = with(mutableListOf<Cart>()) {
 
 private fun Char.isCart() = this == '>' || this == '<' || this == '^' || this == 'v'
 
-private fun Char.underneathCart() = when (this) {
-    '>', '<' -> '-'
-    '^', 'v' -> '|'
-    else -> this
-}
-
 data class Pos(val x: Int, val y: Int) {
     fun to(direction: Direction) = when (direction) {
         UP -> copy(y = y - 1)
@@ -52,9 +44,11 @@ data class Pos(val x: Int, val y: Int) {
     }
 }
 
-internal fun Char.Cart(x: Int, y: Int) = takeIf { it.isCart() }?.let { Cart(Pos(x, y), it.asDirection(), TURN_LEFT) }
+internal fun Char.asCart(x: Int, y: Int) = takeIf { it.isCart() }?.let { Cart(Pos(x, y), it.asDirection(), TURN_LEFT) }
 
 internal data class Cart(val pos: Pos, val direction: Direction, val nextAction: Action, val crashed: Boolean = false) {
+    fun track() = if (direction.vertical()) '|' else '-'
+
     fun drive(map: List<List<Char>>) = copy(pos = pos.to(direction)).run {
         when (map[pos.y][pos.x]) {
             '+' -> atIntersection()
