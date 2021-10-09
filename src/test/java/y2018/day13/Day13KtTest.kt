@@ -164,8 +164,8 @@ internal class Day13KtTest {
         val map = input.trimIndent().split("\n")
 
         with(crash(map)) {
-            first shouldBe Pair(94, 78)
-            second shouldBe Pair(26, 85)
+            first shouldBe Pos(94, 78)
+            second shouldBe Pos(26, 85)
 
         }
     }
@@ -180,7 +180,7 @@ internal class Day13KtTest {
 \>+</ |
   |   ^
   \<->/"""
-        crash(input.split("\n")).second shouldBe Pair(6, 4)
+        crash(input.split("\n")).second shouldBe Pos(6, 4)
     }
 
 }

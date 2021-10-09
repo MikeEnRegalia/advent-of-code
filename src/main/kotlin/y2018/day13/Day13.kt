@@ -3,24 +3,22 @@ package y2018.day13
 import y2018.day13.Action.*
 import y2018.day13.Direction.*
 
-typealias Point = Pair<Int, Int>
-
 fun crash(input: List<String>) = with(mutableListOf<Cart>()) {
     val map = input.mapIndexed { y, r -> r.mapIndexed { x, c -> c.asCart(x, y)?.let { add(it); it.track() } ?: c } }
 
-    var firstCrashAt: Point? = null
+    var firstCrashed: Cart? = null
     while (size > 1) {
         sortWith(compareBy({ it.pos.x }, { it.pos.y }))
 
-        withIndex().forEach { (index, prev) ->
-            prev.drive(map).let { cart ->
+        withIndex().forEach { (index, carFromPreviousTick) ->
+            carFromPreviousTick.drive(map).let { cart ->
                 this[index] = cart
                 val crashed = filter { it.pos == cart.pos }
                 if (crashed.count() > 1) {
-                    if (firstCrashAt == null) firstCrashAt = cart.pos.x to cart.pos.y
+                    if (firstCrashed == null) firstCrashed = cart
                     withIndex()
-                        .filter { (_, c) -> crashed.contains(c) }
-                        .forEach { (i, c) -> this[i] = c.copy(crashed = true) }
+                        .filter { (_, cart) -> crashed.contains(cart) }
+                        .forEach { (i, cart) -> this[i] = cart.crashed() }
                 }
             }
         }
@@ -28,9 +26,7 @@ fun crash(input: List<String>) = with(mutableListOf<Cart>()) {
         removeIf { it.crashed }
     }
 
-    val lastCartPos = firstNotNullOf { it }.pos.let { Point(it.x, it.y) }
-
-    Pair(firstCrashAt, lastCartPos)
+    Pair(firstCrashed?.pos, first().pos)
 }
 
 private fun Char.isCart() = this == '>' || this == '<' || this == '^' || this == 'v'
@@ -63,6 +59,8 @@ internal data class Cart(val pos: Pos, val direction: Direction, val nextAction:
         FORWARD -> copy(nextAction = TURN_RIGHT)
         TURN_RIGHT -> copy(direction = direction.turnedRight(), nextAction = TURN_LEFT)
     }
+
+    fun crashed() = copy(crashed = true)
 }
 
 enum class Direction {
