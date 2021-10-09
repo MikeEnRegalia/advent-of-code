@@ -6,16 +6,15 @@ import y2018.day13.Direction.*
 typealias Point = Pair<Int, Int>
 
 fun crash(input: List<String>): Pair<Point?, Point?> {
-    val movingCars = mutableListOf<Car?>()
+    val movingCars = mutableListOf<Car>()
     val map = input.mapIndexed { y, r ->
         r.mapIndexed { x, c -> c.underneathCar().also { c.Car(x, y)?.let { movingCars.add(it) } } }
     }
-    movingCars.sortWith(compareBy({ it?.pos?.x }, { it?.pos?.y }))
 
     var firstCrashAt: Point? = null
-    while (movingCars.filterNotNull().size > 1) {
+    while (movingCars.size > 1) {
+        movingCars.sortWith(compareBy({ it.pos.x }, { it.pos.y }))
         movingCars.withIndex().forEach { (index, car) ->
-            if (car == null) return@forEach
             with(car) {
                 copy(pos = pos.to(direction))
                     .run {
@@ -27,17 +26,17 @@ fun crash(input: List<String>): Pair<Point?, Point?> {
                         }
                     }.apply {
                         movingCars[index] = this
-                        val crashed = movingCars.filter { it?.pos == pos }
+                        val crashed = movingCars.filter { it.pos == pos }
                         if (crashed.count() > 1) {
                             if (firstCrashAt == null) firstCrashAt = pos.x to pos.y
                             movingCars.withIndex()
                                 .filter { (_, c) -> crashed.contains(c) }
-                                .forEach { (i) -> movingCars[i] = null }
+                                .forEach { (i, c) -> movingCars[i] = c.copy(crashed = true) }
                         }
                     }
-
             }
         }
+        movingCars.removeIf { it.crashed }
     }
 
     val lastCarPos = movingCars.firstNotNullOf { it }.pos.let { Point(it.x, it.y) }
@@ -64,7 +63,7 @@ data class Pos(val x: Int, val y: Int) {
 
 fun Char.Car(x: Int, y: Int) = takeIf { it.isCar() }?.let { Car(Pos(x, y), it.asDirection(), TURN_LEFT) }
 
-data class Car(val pos: Pos, val direction: Direction, val nextAction: Action) {
+data class Car(val pos: Pos, val direction: Direction, val nextAction: Action, val crashed: Boolean = false) {
     fun atIntersection() = when (nextAction) {
         TURN_LEFT -> copy(direction = direction.turnedLeft(), nextAction = FORWARD)
         FORWARD -> copy(nextAction = TURN_RIGHT)
