@@ -1,7 +1,7 @@
 package y2018.day12
 
 typealias Pots = Iterable<Int>
-typealias Rules = Iterable<Pair<Iterable<Int>, Boolean>>
+typealias Rules = Iterable<Pair<Pots, Boolean>>
 
 fun Pots.simulateGrowth(rules: Rules, turns: Long): Long {
     var pots = this
