@@ -5,37 +5,39 @@ import y2018.day13.Direction.*
 
 typealias Point = Pair<Int, Int>
 
-fun crash(input: List<String>) = with(mutableListOf<Car>()) {
+fun crash(input: List<String>) = with(mutableListOf<Cart>()) {
     val map = input.mapIndexed { y, r ->
-        r.mapIndexed { x, c -> c.underneathCar().also { c.Car(x, y)?.let { add(it) } } }
+        r.mapIndexed { x, c -> c.underneathCart().also { c.Cart(x, y)?.let { add(it) } } }
     }
 
     var firstCrashAt: Point? = null
     while (size > 1) {
         sortWith(compareBy({ it.pos.x }, { it.pos.y }))
-        withIndex().forEach { (index, car) ->
-            with(car.drive(map)) {
-                set(index, this)
-                val crashed = filter { it.pos == pos }
+
+        withIndex().forEach { (index, prev) ->
+            prev.drive(map).let { cart ->
+                this[index] = cart
+                val crashed = filter { it.pos == cart.pos }
                 if (crashed.count() > 1) {
-                    if (firstCrashAt == null) firstCrashAt = pos.x to pos.y
+                    if (firstCrashAt == null) firstCrashAt = cart.pos.x to cart.pos.y
                     withIndex()
                         .filter { (_, c) -> crashed.contains(c) }
-                        .forEach { (i, c) -> set(i, c.copy(crashed = true)) }
+                        .forEach { (i, c) -> this[i] = c.copy(crashed = true) }
                 }
             }
         }
+
         removeIf { it.crashed }
     }
 
-    val lastCarPos = firstNotNullOf { it }.pos.let { Point(it.x, it.y) }
+    val lastCartPos = firstNotNullOf { it }.pos.let { Point(it.x, it.y) }
 
-    Pair(firstCrashAt, lastCarPos)
+    Pair(firstCrashAt, lastCartPos)
 }
 
-private fun Char.isCar() = this == '>' || this == '<' || this == '^' || this == 'v'
+private fun Char.isCart() = this == '>' || this == '<' || this == '^' || this == 'v'
 
-private fun Char.underneathCar() = when (this) {
+private fun Char.underneathCart() = when (this) {
     '>', '<' -> '-'
     '^', 'v' -> '|'
     else -> this
@@ -50,9 +52,9 @@ data class Pos(val x: Int, val y: Int) {
     }
 }
 
-internal fun Char.Car(x: Int, y: Int) = takeIf { it.isCar() }?.let { Car(Pos(x, y), it.asDirection(), TURN_LEFT) }
+internal fun Char.Cart(x: Int, y: Int) = takeIf { it.isCart() }?.let { Cart(Pos(x, y), it.asDirection(), TURN_LEFT) }
 
-internal data class Car(val pos: Pos, val direction: Direction, val nextAction: Action, val crashed: Boolean = false) {
+internal data class Cart(val pos: Pos, val direction: Direction, val nextAction: Action, val crashed: Boolean = false) {
     fun drive(map: List<List<Char>>) = copy(pos = pos.to(direction)).run {
         when (map[pos.y][pos.x]) {
             '+' -> atIntersection()
