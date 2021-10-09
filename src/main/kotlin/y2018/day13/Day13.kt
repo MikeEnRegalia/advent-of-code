@@ -20,27 +20,33 @@ fun crash(input: List<String>): Pair<Pair<Int, Int>?, Pair<Int, Int>?> {
 
         for ((index, car) in movingCars.withIndex()) {
             if (car == null) continue
-            car.copy(pos = car.pos.move(car.direction)).let {
-                when (val tile = map[it.pos.y][it.pos.x]) {
-                    '+' -> it.turnAtIntersection()
-                    '/', '\\' -> it.copy(direction = it.direction.turnAtCorner(tile))
-                    else -> it
-                }
-            }.also { moved ->
-                movingCars[index] = moved
-                val crashed = movingCars.filter { it?.pos == moved.pos }
-                if (crashed.count() > 1) {
-                    if (firstCrashAt == null) firstCrashAt = moved.pos.x to moved.pos.y
-                    movingCars.withIndex()
-                        .filter { (_, c) -> crashed.contains(c) }
-                        .forEach { (i) -> movingCars[i] = null }
-                }
+            with(car) {
+                copy(pos = pos.to(direction))
+                    .run {
+                        when (val tile = map[pos.y][pos.x]) {
+                            '+' -> turnAtIntersection()
+                            '/', '\\' -> copy(direction = direction.turnAtCorner(tile))
+                            else -> this
+                        }
+                    }.apply {
+                        movingCars[index] = this
+                        val crashed = movingCars.filter { it?.pos == pos }
+                        if (crashed.count() > 1) {
+                            if (firstCrashAt == null) firstCrashAt = pos.x to pos.y
+                            movingCars.withIndex()
+                                .filter { (_, c) -> crashed.contains(c) }
+                                .forEach { (i) -> movingCars[i] = null }
+                        }
+                    }
+
             }
         }
         tick++
     }
-    val lastCarPos = movingCars.filterNotNull().firstOrNull()?.pos
-    return Pair(firstCrashAt, lastCarPos?.let { Pair(it.x, it.y) })
+
+    val lastCarPos = movingCars.firstNotNullOf { it }.pos.let { Pair(it.x, it.y) }
+
+    return Pair(firstCrashAt, lastCarPos)
 }
 
 private fun Char.isCar() = this == '>' || this == '<' || this == '^' || this == 'v'
@@ -52,7 +58,7 @@ private fun Char.underneathCar() = when (this) {
 }
 
 data class Pos(val x: Int, val y: Int) {
-    fun move(direction: Direction) = when (direction) {
+    fun to(direction: Direction) = when (direction) {
         UP -> copy(y = y - 1)
         DOWN -> copy(y = y + 1)
         LEFT -> copy(x = x - 1)
