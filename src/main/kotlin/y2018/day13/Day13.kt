@@ -4,9 +4,9 @@ import y2018.day13.Action.*
 import y2018.day13.Direction.*
 
 fun crash(input: List<String>): Pair<Pair<Int, Int>?, Pair<Int, Int>?> {
-    val cars = input.mapIndexed { y, row ->
-        row.mapIndexedNotNull { x, c -> c.takeIf { it.isCar() }?.let { Car(Pos(x, y), it.asDirection(), TURN_LEFT) } }
-    }.flatten().sortedWith(compareBy({ it.pos.x }, { it.pos.y }))
+    val cars = input.mapIndexed { y, row -> row.mapIndexedNotNull { x, c -> c.Car(x, y) } }
+        .flatten()
+        .sortedWith(compareBy({ it.pos.x }, { it.pos.y }))
 
     val map = input.map { it.map(Char::underneathCar) }
 
@@ -64,6 +64,8 @@ data class Pos(val x: Int, val y: Int) {
         RIGHT -> copy(x = x + 1)
     }
 }
+
+fun Char.Car(x: Int, y: Int) = takeIf { it.isCar() }?.let { Car(Pos(x, y), it.asDirection(), TURN_LEFT) }
 
 data class Car(val pos: Pos, val direction: Direction, val nextAction: Action) {
     fun atIntersection() = when (nextAction) {
