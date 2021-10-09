@@ -5,9 +5,7 @@ import y2018.day13.Direction.*
 
 fun crash(input: List<String>): Pair<Pair<Int, Int>?, Pair<Int, Int>?> {
     val cars = input.mapIndexed { y, row ->
-        row.mapIndexedNotNull { x, c ->
-            if (!c.isCar()) null else Car(Pos(x, y), c.asDirection(), TURN_LEFT)
-        }
+        row.mapIndexedNotNull { x, c -> c.takeIf { it.isCar() }?.let { Car(Pos(x, y), it.asDirection(), TURN_LEFT) } }
     }.flatten().sortedWith(compareBy({ it.pos.x }, { it.pos.y }))
 
     val map = input.map { it.map(Char::underneathCar) }
