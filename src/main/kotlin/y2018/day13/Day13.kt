@@ -6,18 +6,14 @@ import y2018.day13.Direction.*
 typealias Point = Pair<Int, Int>
 
 fun crash(input: List<String>): Pair<Point?, Point?> {
-    val cars = input.mapIndexed { y, row -> row.mapIndexedNotNull { x, c -> c.Car(x, y) } }
-        .flatten()
-        .sortedWith(compareBy({ it.pos.x }, { it.pos.y }))
+    val movingCars = mutableListOf<Car?>()
+    val map = input.mapIndexed { y, r ->
+        r.mapIndexed { x, c -> c.underneathCar().also { c.Car(x, y)?.let { movingCars.add(it) } } }
+    }
+    movingCars.sortWith(compareBy({ it?.pos?.x }, { it?.pos?.y }))
 
-    val map = input.map { it.map(Char::underneathCar) }
-
-    var tick = 0
-    val movingCars = mutableListOf<Car?>().apply { addAll(cars) }
     var firstCrashAt: Point? = null
-    while (true) {
-        if (movingCars.filterNotNull().size == 1) break
-
+    while (movingCars.filterNotNull().size > 1) {
         for ((index, car) in movingCars.withIndex()) {
             if (car == null) continue
             with(car) {
@@ -42,7 +38,6 @@ fun crash(input: List<String>): Pair<Point?, Point?> {
 
             }
         }
-        tick++
     }
 
     val lastCarPos = movingCars.firstNotNullOf { it }.pos.let { Point(it.x, it.y) }
