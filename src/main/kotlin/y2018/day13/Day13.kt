@@ -6,7 +6,7 @@ import y2018.day13.Direction.*
 fun crash(input: List<String>): Pair<Pair<Int, Int>?, Pair<Int, Int>?> {
     val cars = input.mapIndexed { y, row ->
         row.mapIndexedNotNull { x, c ->
-            if (!c.isCar()) null else Car(Pos(x, y), c.toDirection(), TURN_LEFT)
+            if (!c.isCar()) null else Car(Pos(x, y), c.asDirection(), TURN_LEFT)
         }
     }.flatten().sortedWith(compareBy({ it.pos.x }, { it.pos.y }))
 
@@ -23,9 +23,10 @@ fun crash(input: List<String>): Pair<Pair<Int, Int>?, Pair<Int, Int>?> {
             with(car) {
                 copy(pos = pos.to(direction))
                     .run {
-                        when (val tile = map[pos.y][pos.x]) {
-                            '+' -> turnAtIntersection()
-                            '/', '\\' -> copy(direction = direction.turnAtCorner(tile))
+                        when (map[pos.y][pos.x]) {
+                            '+' -> atIntersection()
+                            '/' -> copy(direction = direction.turnAtSlashCorner())
+                            '\\' -> copy(direction = direction.turnAtBackslashCorner())
                             else -> this
                         }
                     }.apply {
@@ -67,10 +68,10 @@ data class Pos(val x: Int, val y: Int) {
 }
 
 data class Car(val pos: Pos, val direction: Direction, val nextAction: Action) {
-    fun turnAtIntersection() = when (nextAction) {
-        TURN_LEFT -> copy(direction = direction.left(), nextAction = FORWARD)
+    fun atIntersection() = when (nextAction) {
+        TURN_LEFT -> copy(direction = direction.turnedLeft(), nextAction = FORWARD)
         FORWARD -> copy(nextAction = TURN_RIGHT)
-        TURN_RIGHT -> copy(direction = direction.right(), nextAction = TURN_LEFT)
+        TURN_RIGHT -> copy(direction = direction.turnedRight(), nextAction = TURN_LEFT)
     }
 }
 
@@ -80,34 +81,32 @@ enum class Direction {
     LEFT,
     RIGHT;
 
-    fun left() = when (this) {
+    fun turnedLeft() = when (this) {
         UP -> LEFT
         DOWN -> RIGHT
         LEFT -> DOWN
         RIGHT -> UP
     }
 
-    fun right() = when (this) {
-        DOWN -> LEFT
+    fun turnedRight() = when (this) {
         UP -> RIGHT
-        RIGHT -> DOWN
+        DOWN -> LEFT
         LEFT -> UP
+        RIGHT -> DOWN
     }
 
-    fun turnAtCorner(tile: Char) = when (this) {
-        UP -> if (tile == '/') RIGHT else LEFT
-        DOWN -> if (tile == '/') LEFT else RIGHT
-        LEFT -> if (tile == '/') DOWN else UP
-        RIGHT -> if (tile == '/') UP else DOWN
-    }
+    fun vertical() = this == UP || this == DOWN
+
+    fun turnAtSlashCorner() = if (vertical()) turnedRight() else turnedLeft()
+    fun turnAtBackslashCorner() = if (vertical()) turnedLeft() else turnedRight()
 }
 
-private fun Char.toDirection() = when (this) {
+private fun Char.asDirection() = when (this) {
     '>' -> RIGHT
     '<' -> LEFT
     '^' -> UP
     'v' -> DOWN
-    else -> throw IllegalArgumentException()
+    else -> throw IllegalArgumentException(toString())
 }
 
 enum class Action {
