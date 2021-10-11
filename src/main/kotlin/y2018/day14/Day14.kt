@@ -2,27 +2,23 @@ package y2018.day14
 
 import java.util.*
 
-fun scoreRecipesAfter(tenAfter: Int): String {
-    val scores = listOf(3, 7).toMutableList()
-    val elves = mutableListOf(0, 1)
+fun init() = listOf(3, 7).toMutableList() to mutableListOf(0, 1)
 
+fun scoreRecipesAfter(tenAfter: Int): String {
+    val (scores, elves) = init()
     with(scores) {
-        while (size < tenAfter + 10) {
-            elves.round(this)
-        }
+        while (size < tenAfter + 10) elves.nextRound(this)
         return subList(size - 10, size).joinToString("")
     }
 }
 
 fun findScoreSequence(pattern: List<Int>): Int {
-    val scores = listOf(3, 7).toMutableList()
-    val elves = mutableListOf(0, 1)
+    val (scores, elves) = init()
 
     var count = scores.size
     val last = LinkedList(scores)
-
     while (true) {
-        elves.round(scores) {
+        elves.nextRound(scores) {
             last.add(it)
             count++
             if (last.size > pattern.size) last.removeFirst()
@@ -31,7 +27,7 @@ fun findScoreSequence(pattern: List<Int>): Int {
     }
 }
 
-private inline fun MutableList<Int>.round(scoreboard: MutableList<Int>, v: (Int) -> Unit = {}) {
+private inline fun MutableList<Int>.nextRound(scoreboard: MutableList<Int>, v: (Int) -> Unit = {}) {
     sumOf { scoreboard[it] }.let { sum ->
         val first = if (sum < 10) null else sum / 10
         first?.let { scoreboard.add(it); v(it) }
