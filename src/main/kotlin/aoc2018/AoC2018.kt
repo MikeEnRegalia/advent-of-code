@@ -2,8 +2,8 @@ package aoc2018
 
 import kotlin.math.abs
 
-fun day15BeverageBandits(input: String): Int {
-    val map = input.toMap().toMutableMap()
+fun day15BeverageBandits(input: String): Int? {
+    val map = input.toMap()
     var round = 0
     while (true) {
         map.debug().also { println(it) }
@@ -13,14 +13,13 @@ fun day15BeverageBandits(input: String): Int {
                 if (adjacentTarget(pos, tile)?.let { attack(it) } == null) {
                     val targets = targets(tile)
                     if (targets.isEmpty()) {
-                        val elvesSum = map.filterValues { it is Elf }
-                            .entries.sumOf { (it.value as Elf).health }
-                        println("done after $round complete rounds with $elvesSum remaining elves health.")
-                        return round * elvesSum
+                        val health = map.values.sumOf { if (it is Fighter) it.health else 0 }
+                        println("done after $round complete rounds with $health remaining health.")
+                        return round * health
                     }
-                    move(pos, tile, targets)?.let { nextPos ->
-                        adjacentTarget(nextPos, tile)?.let { attack(it) }
-                    }
+                    move(pos, tile, targets)
+                        ?.let { adjacentTarget(it, tile) }
+                        ?.let { attack(it) }
                 }
             }
         }
@@ -28,10 +27,10 @@ fun day15BeverageBandits(input: String): Int {
     }
 }
 
-internal fun Map<Pos, Tile>.debug(): String =
-    (keys.minOf { it.y }..keys.maxOf { it.y }).joinToString("\n") { y ->
-        (keys.minOf { it.x }..keys.maxOf { it.x }).joinToString("") { x ->
-            when (this[Pos(x, y)]!!) {
+internal fun Map<Pos, Tile>.debug(): String = with(keys) {
+    minToMaxOf { it.y }.joinToString("\n") { y ->
+        minToMaxOf { it.x }.joinToString("") { x ->
+            when (get(Pos(x, y))!!) {
                 is Space -> "."
                 is Wall -> "#"
                 is Elf -> "E"
@@ -40,21 +39,27 @@ internal fun Map<Pos, Tile>.debug(): String =
             }
         }
     }
+}
+
+internal inline fun Set<Pos>.minToMaxOf(f: (Pos) -> Int) = minOf(f)..maxOf(f)
 
 internal fun MutableMap<Pos, Tile>.move(pos: Pos, tile: Tile, targets: List<Pos>): Pos? {
+    val inRange = filter { it.value is Space && targets.any { target -> it.key.adjacentTo(target) } }.keys
+    if (inRange.isEmpty()) return null
 
-    val inRange = filter { it.value is Space && targets.any { target -> it.key.adjacentTo(target) } }
-        .keys.mapNotNull { shortestPath(listOf(pos), it)?.let { path -> it to path.drop(1) } }
-    if (inRange.isEmpty()) {
-        println("no targets reachable for $pos")
+    val reachable = reachableFrom(pos, stopAt = inRange)
+    val reachableInRange = inRange.mapNotNull { reachable[it]?.let { path -> it to path } }
+    if (reachableInRange.isEmpty()) {
+        //println("no targets reachable for $pos: $inRange, ${reachable.keys}")
         return null
     }
 
-    val shortestInRange = inRange.filterByMin { it.second.size }
-    val next = if (shortestInRange.size == 1) shortestInRange.first().second.first() else {
-        shortestInRange.first { it.first == shortestInRange.map { it.first }.toSet().byReadingOrder().first() }
-            .second.first()
-    }
+    val shortestInRange = reachableInRange.filterByMin { it.second.size }
+    val next = shortestInRange
+        .first { (shortest) -> shortest == shortestInRange.map { it.first }.toSet().minOf { it } }
+        .second
+        .first()
+
     this[pos] = Space
     this[next] = tile
     println("moved from $pos to $next")
@@ -70,47 +75,38 @@ internal fun <T> List<T>.filterByMin(f: (T) -> Int): List<T> {
     return filter { f(it) == min }
 }
 
-internal class PathFinderOptimizer {
-    var minLength: Int? = null
-    fun registerLength(l: Int) {
-        minLength.let {
-            if (it != null && l > it) minLength = l
+internal fun Map<Pos, Tile>.reachableFrom(start: Pos, stopAt: Set<Pos>): Map<Pos, List<Pos>> {
+    val result = mutableMapOf<Pos, List<Pos>>()
+    fun addNeighborsOf(pos: Pos, fromStartToPos: List<Pos> = listOf()) {
+        for (next in neighborSpaces(pos).sortedBy { stopAt.minOf { stop -> it.distanceTo(stop) } }) {
+            val fromStartToNext = fromStartToPos.plus(next)
+            if (result[next].preferableTo(fromStartToNext)) continue
+
+            val soFar = result.filterKeys { stopAt.contains(it) }.values.minOfOrNull { it.size }
+            if (soFar != null && soFar < fromStartToNext.size) continue
+
+            result[next] = fromStartToNext
+            if (!stopAt.contains(next))
+                addNeighborsOf(next, fromStartToNext)
         }
     }
-
-    fun needLongerThan(l: Int) = minLength.let { it == null || l < it }
+    addNeighborsOf(start)
+    return result
 }
 
-internal fun Map<Pos, Tile>.shortestPath(
-    path: List<Pos>,
-    to: Pos,
-    optimizer: PathFinderOptimizer = PathFinderOptimizer()
-): List<Pos>? =
-    if (!optimizer.needLongerThan(path.size)) null
-    else if (path.last() == to) path
-    else if (path.last().adjacentTo(to)) path.plus(to)
-    else path.last().neighbors().filter { this[it] is Space && !path.contains(it) }
-        .sortedBy { it.distanceTo(to) }
-        .mapNotNull { shortestPath(path.plus(it), to, optimizer) }
-        .minByOrNull { it.size }?.also {
-            optimizer.registerLength(it.size)
-        }
+internal fun List<Pos>?.preferableTo(other: List<Pos>) =
+    this != null && (size < other.size || size == other.size && this[0] < other[0])
 
 internal fun MutableMap<Pos, Tile>.attack(pos: Pos) {
     this[pos] = this[pos]!!.hit().let { if (it is Fighter && it.health <= 0) Space else it }
-        .also { println("attacked: $pos -> ${if (it is Fighter) it.health else 0}") }
 }
 
 internal fun Map<Pos, Tile>.fighters() =
-    filterValues { (it is Elf) || (it is Goblin) }
-        .entries.map { it.key to it.value }.byReadingOrder()
+    filterValues { it is Fighter }.entries.map { it.key to it.value }.sortedBy { it.first }
 
 internal fun Map<Pos, Tile>.targets(tile: Tile) =
     filterValues { if (tile is Elf) (it is Goblin) else (it is Elf) }
-        .keys.byReadingOrder()
-
-internal fun Set<Pos>.byReadingOrder() = sortedWith(compareBy({ it.y }, { it.x }))
-internal fun List<Pair<Pos, Tile>>.byReadingOrder() = sortedWith(compareBy({ it.first.y }, { it.first.x }))
+        .keys.sorted()
 
 internal sealed class Tile {
     abstract fun hit(): Tile
@@ -133,17 +129,22 @@ internal class Goblin(health: Int) : Fighter(health) {
     override fun hit() = Goblin(health - 3)
 }
 
-
-internal data class Pos(val x: Int, val y: Int) {
-    fun adjacentTo(target: Pos) = with(Pos(target.x - x, target.y - y)) {
-        x == 0 && (y == -1 || y == 1) || y == 0 && (x == -1 || x == 1)
-    }
-
+internal data class Pos(val x: Int, val y: Int) : Comparable<Pos> {
     fun neighbors() = listOf(Pos(x - 1, y), Pos(x + 1, y), Pos(x, y - 1), Pos(x, y + 1))
+    fun adjacentTo(target: Pos) = target.neighbors().contains(this)
+
     override fun toString() = "($x,$y)"
+
+    override fun compareTo(other: Pos) = when {
+        this == other -> 0
+        y - other.y != 0 -> y - other.y
+        else -> x - other.x
+    }
 
     fun distanceTo(pos: Pos) = abs(x - pos.x) + abs(y - pos.y)
 }
+
+internal fun Map<Pos, Tile>.neighborSpaces(pos: Pos) = pos.neighbors().filter { this[it] is Space }
 
 internal fun String.toMap() = split("\n")
     .mapIndexed { y, row ->
@@ -156,4 +157,4 @@ internal fun String.toMap() = split("\n")
                 else -> throw IllegalArgumentException(c.toString())
             }.let { Pos(x, y) to it }
         }
-    }.flatten().toMap()
+    }.flatten().toMap().toMutableMap()
