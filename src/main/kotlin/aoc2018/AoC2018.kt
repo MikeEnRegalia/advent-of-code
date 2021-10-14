@@ -3,6 +3,9 @@ package aoc2018
 import aoc2018.Faction.ELF
 import aoc2018.Faction.GOBLIN
 
+internal typealias Dungeon = Map<Pos, Tile>
+internal typealias MutableDungeon = MutableMap<Pos, Tile>
+
 fun day15BeverageBanditsPart2(input: String): Int {
     var attackPower = 4
     while (true) {
@@ -28,7 +31,7 @@ internal fun beverageBandits(input: String, elvesAttackPower: Int = 3): Pair<Int
                 if (adjacentTarget != null) {
                     attack(fighter, adjacentTarget)
                 } else {
-                    val targets = targets(fighter).takeIf { it.isNotEmpty() } ?: return wrapResult(totalElves, round)
+                    val targets = targets(fighter) ?: return wrapResult(totalElves, round)
 
                     val nextPos = move(fighterPos, targets)
                     if (nextPos != null) {
@@ -45,7 +48,7 @@ internal fun beverageBandits(input: String, elvesAttackPower: Int = 3): Pair<Int
 
 private fun Tile.isElf() = this is Fighter && faction == ELF
 
-private fun Map<Pos, Tile>.wrapResult(totalElves: Int, round: Int): Pair<Int, Int> {
+private fun Dungeon.wrapResult(totalElves: Int, round: Int): Pair<Int, Int> {
     val remainingElves = values.count { it.isElf() }
     val elvesLost = totalElves - remainingElves
     val health = values.sumOf { if (it is Fighter) it.health else 0 }
@@ -64,7 +67,7 @@ private fun Char.toTile(elvesAttackPower: Int) = when (this) {
     else -> throw IllegalArgumentException(toString())
 }
 
-internal fun Map<Pos, Tile>.distancesFrom(start: Pos): Map<Pos, Int> = mutableMapOf<Pos, Int>().also { result ->
+internal fun Dungeon.distancesFrom(start: Pos): Map<Pos, Int> = mutableMapOf<Pos, Int>().also { result ->
     fun follow(pos: Pos, travelled: Int = 0) {
         result[pos] = travelled
         pos.neighbors()
@@ -76,7 +79,7 @@ internal fun Map<Pos, Tile>.distancesFrom(start: Pos): Map<Pos, Int> = mutableMa
 }
 
 @Suppress("unused")
-internal fun Map<Pos, Tile>.debug() = with(keys) {
+internal fun Dungeon.debug() = with(keys) {
     minToMaxOf { it.y }.joinToString("\n") { y ->
         minToMaxOf { it.x }.joinToString("") { x -> get(Pos(x, y))!!.toString() }
     }
@@ -84,42 +87,47 @@ internal fun Map<Pos, Tile>.debug() = with(keys) {
 
 internal inline fun Set<Pos>.minToMaxOf(f: (Pos) -> Int) = minOf(f)..maxOf(f)
 
-internal fun MutableMap<Pos, Tile>.move(pos: Pos, targets: List<Pos>): Pos? {
+internal data class RemotePosition(val pos: Pos, val distance: Int)
+
+internal fun Dungeon.move(pos: Pos, targets: List<Pos>): Pos? {
     val allInRange = allInRangeOf(targets) ?: return null
     val reachable = onlyReachable(pos, allInRange) ?: return null
-    return distancesFrom(reachable.closest())
-        .filterKeys { pos.neighbors().contains(it) }
-        .entries
-        .filterByMinOf { it.value }
-        .map { it.key }.minOf { it }
+    return neighborsToward(reachable.closest(), from = pos).closest()
 }
 
-internal fun Map<Pos, Tile>.allInRangeOf(targets: List<Pos>) =
+internal fun Dungeon.neighborsToward(closest: Pos, from: Pos) =
+    distancesFrom(closest)
+        .filterKeys { from.neighbors().contains(it) }
+        .map { RemotePosition(it.key, it.value) }
+
+internal fun Dungeon.allInRangeOf(targets: List<Pos>) =
     filter { (key, value) -> value is Space && targets.anyAdjacentTo(key) }.keys.takeIf { it.isNotEmpty() }
 
-internal fun Map<Pos, Tile>.onlyReachable(pos: Pos, positions: Set<Pos>): List<Pair<Pos, Int>>? {
+internal fun Dungeon.onlyReachable(pos: Pos, positions: Set<Pos>): List<RemotePosition>? {
     val allReachable = distancesFrom(pos)
-    return positions.mapNotNull { allReachable[it]?.let { distance -> it to distance } }.takeIf { it.isNotEmpty() }
+    return positions.mapNotNull { allReachable[it]?.let { distance -> RemotePosition(it, distance) } }
+        .takeIf { it.isNotEmpty() }
 }
 
-internal fun List<Pair<Pos, Int>>.closest() = filterByMinOf { it.second }.map { it.first }.minOf { it }
+internal fun List<RemotePosition>.closest() = filterByMinOf { it.distance }.map { it.pos }.minOf { it }
 
-private fun List<Pos>.anyAdjacentTo(pos: Pos) = any { it.neighbors().contains(pos) }
+internal fun List<Pos>.anyAdjacentTo(pos: Pos) = any { it.neighbors().contains(pos) }
 
-internal fun Map<Pos, Tile>.adjacentTarget(pos: Pos, fighter: Fighter) =
-    filterKeys { it.neighbors().contains(pos) }.targets(fighter).filterByMinOf { (this[it] as Fighter).health }
-        .firstOrNull()
+internal fun Dungeon.adjacentTarget(pos: Pos, fighter: Fighter) =
+    filterKeys { it.neighbors().contains(pos) }.targets(fighter)
+        ?.filterByMinOf { (this[it] as Fighter).health }
+        ?.firstOrNull()
 
 internal fun <T> Collection<T>.filterByMinOf(t: (T) -> Int) =
     if (isEmpty()) this else minOf { t(it) }.let { min -> filter { t(it) == min } }
 
-internal fun MutableMap<Pos, Tile>.attack(attacker: Fighter, victim: Pos) {
+internal fun MutableDungeon.attack(attacker: Fighter, victim: Pos) {
     this[victim] = (this[victim] as Fighter).hitBy(attacker).let { if (it.health <= 0) Space else it }
 }
 
-internal fun Map<Pos, Tile>.fighters() = filterValues { it is Fighter }.entries.sortedBy { it.key }
+internal fun Dungeon.fighters() = filterValues { it is Fighter }.entries.sortedBy { it.key }
 
-internal fun Map<Pos, Tile>.targets(tile: Fighter) = filterValues(tile::isOpponent).keys.sorted()
+internal fun Dungeon.targets(tile: Fighter) = filterValues(tile::isOpponent).keys.sorted().takeIf { it.isNotEmpty() }
 
 internal fun Fighter.isOpponent(tile: Tile) = when (faction) {
     ELF -> tile is Fighter && tile.faction == GOBLIN
@@ -158,5 +166,5 @@ internal data class Pos(val x: Int, val y: Int) : Comparable<Pos> {
     }
 }
 
-internal fun Map<Pos, Tile>.tile(pos: Pos) = this[pos] ?: Space
-internal fun Map<Pos, Tile>.isSpace(pos: Pos) = tile(pos) is Space
+internal fun Dungeon.tile(pos: Pos) = this[pos] ?: Space
+internal fun Dungeon.isSpace(pos: Pos) = tile(pos) is Space
