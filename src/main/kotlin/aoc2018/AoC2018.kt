@@ -8,8 +8,7 @@ fun day15BeverageBanditsPart2(input: String): Int {
     }
 }
 
-fun day15BeverageBanditsPart1(input: String): Int =
-    beverageBandits(input).second
+fun day15BeverageBanditsPart1(input: String): Int = beverageBandits(input).second
 
 internal fun beverageBandits(input: String, elvesAttackPower: Int = 3): Pair<Int, Int> {
     val map = input.toMap(elvesAttackPower)
@@ -50,10 +49,9 @@ private fun Map<Pos, Tile>.wrapResult(totalElves: Int, round: Int): Pair<Int, In
     return elvesLost to round * health
 }
 
-internal fun String.toMap(elvesAttackPower: Int) = split("\n")
-    .mapIndexed { y, row ->
-        row.mapIndexed { x, c -> Pos(x, y) to c.toTile(elvesAttackPower) }
-    }.flatten().toMap().toMutableMap()
+internal fun String.toMap(elvesAttackPower: Int) = split("\n").mapIndexed { y, row ->
+    row.mapIndexed { x, c -> Pos(x, y) to c.toTile(elvesAttackPower) }
+}.flatten().toMap().toMutableMap()
 
 private fun Char.toTile(elvesAttackPower: Int) = when (this) {
     '#' -> Wall
@@ -63,7 +61,7 @@ private fun Char.toTile(elvesAttackPower: Int) = when (this) {
     else -> throw IllegalArgumentException(toString())
 }
 
-internal fun Map<Pos, Tile>.reachableFrom(start: Pos): Map<Pos, Int> = mutableMapOf<Pos, Int>().also { result ->
+internal fun Map<Pos, Tile>.distancesFrom(start: Pos): Map<Pos, Int> = mutableMapOf<Pos, Int>().also { result ->
     fun follow(pos: Pos, travelled: Int = 0) {
         result[pos] = travelled
         pos.neighbors()
@@ -84,16 +82,16 @@ internal fun Map<Pos, Tile>.debug() = with(keys) {
 internal inline fun Set<Pos>.minToMaxOf(f: (Pos) -> Int) = minOf(f)..maxOf(f)
 
 internal fun MutableMap<Pos, Tile>.move(pos: Pos, targets: List<Pos>): Pos? {
-    val allInRange = filter { (key, value) -> value is Space && targets.anyAdjacentTo(key) }.keys
-        .takeIf { it.isNotEmpty() } ?: return null
+    val allInRange = filter { (key, value) -> value is Space && targets.anyAdjacentTo(key) }
+        .keys.takeIf { it.isNotEmpty() } ?: return null
 
-    val allReachable = reachableFrom(pos)
+    val allReachable = distancesFrom(pos)
     val reachable = allInRange.mapNotNull { allReachable[it]?.let { distance -> it to distance } }
         .takeIf { it.isNotEmpty() } ?: return null
 
-    val inRangePos = reachable.filterByMinOf { it.second }.map { it.first }.minOf { it }
+    val destination = reachable.filterByMinOf { it.second }.map { it.first }.minOf { it }
 
-    return reachableFrom(inRangePos)
+    return distancesFrom(destination)
         .filterKeys { pos.neighbors().contains(it) }
         .entries
         .filterByMinOf { it.value }
@@ -101,7 +99,7 @@ internal fun MutableMap<Pos, Tile>.move(pos: Pos, targets: List<Pos>): Pos? {
         .minOf { it }
 }
 
-private fun List<Pos>.anyAdjacentTo(it: Pos) = any { target -> it.adjacentTo(target) }
+private fun List<Pos>.anyAdjacentTo(pos: Pos) = any { it.adjacentTo(pos) }
 
 internal fun Map<Pos, Tile>.adjacentTarget(pos: Pos, tile: Tile) =
     filterKeys { it.adjacentTo(pos) }.targets(tile).filterByMinOf { (this[it] as Fighter).health }.firstOrNull()
@@ -115,8 +113,7 @@ internal fun MutableMap<Pos, Tile>.attack(attacker: Fighter, victim: Pos) {
 
 internal fun Map<Pos, Tile>.fighters() = filterValues { it is Fighter }.entries.sortedBy { it.key }
 
-internal fun Map<Pos, Tile>.targets(tile: Tile) =
-    filterValues(tile::isOpponent).keys.sorted()
+internal fun Map<Pos, Tile>.targets(tile: Tile) = filterValues(tile::isOpponent).keys.sorted()
 
 internal fun Tile.isOpponent(tile: Tile) = if (this is Elf) (tile is Goblin) else (tile is Elf)
 
