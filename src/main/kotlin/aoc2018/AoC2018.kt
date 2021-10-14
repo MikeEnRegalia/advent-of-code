@@ -75,28 +75,28 @@ internal fun Map<Pos, Tile>.debug() = with(keys) {
 internal inline fun Set<Pos>.minToMaxOf(f: (Pos) -> Int) = minOf(f)..maxOf(f)
 
 internal fun MutableMap<Pos, Tile>.move(pos: Pos, fighter: Tile, targets: List<Pos>): Pos? {
-    val inRange = filter { it.value is Space && targets.any { target -> it.key.adjacentTo(target) } }.keys
-    if (inRange.isEmpty()) return null
+    val allInRange = filter { (key, value) -> value is Space && targets.anyAdjacentTo(key) }.keys
+        .takeIf { it.isNotEmpty() } ?: return null
 
-    val reachable = reachableFrom(pos)
-    val reachableInRange = inRange.mapNotNull { reachable[it]?.let { distance -> it to distance } }
-    if (reachableInRange.isEmpty()) return null
+    val allReachable = reachableFrom(pos)
+    val reachable = allInRange.mapNotNull { allReachable[it]?.let { distance -> it to distance } }
+        .takeIf { it.isNotEmpty() } ?: return null
 
-    val shortestInRange = reachableInRange.filterByMinOf { it.second }
-    val destination = shortestInRange
-        .first { (shortest) -> shortest == shortestInRange.map { it.first }.toSet().minOf { it } }
-        .first
+    val inRangePos = reachable.filterByMinOf { it.second }.map { it.first }.minOf { it }
 
-    val next = reachableFrom(destination)
+    return reachableFrom(inRangePos)
         .filterKeys { pos.neighbors().contains(it) }
         .entries
         .filterByMinOf { it.value }
-        .map { it.key }.minOf { it }
-
-    this[pos] = Space
-    this[next] = fighter
-    return next
+        .map { it.key }
+        .minOf { it }
+        .also {
+            this[pos] = Space
+            this[it] = fighter
+        }
 }
+
+private fun List<Pos>.anyAdjacentTo(it: Pos) = any { target -> it.adjacentTo(target) }
 
 internal fun Map<Pos, Tile>.adjacentTarget(pos: Pos, tile: Tile) =
     filterKeys { it.adjacentTo(pos) }.targets(tile).filterByMinOf { (this[it] as Fighter).health }.firstOrNull()
@@ -108,12 +108,11 @@ internal fun MutableMap<Pos, Tile>.attack(attacker: Fighter, victim: Pos) {
     this[victim] = (this[victim] as Fighter).hitBy(attacker).let { if (it.health <= 0) Space else it }
 }
 
-internal fun Map<Pos, Tile>.fighters() =
-    filterValues { it is Fighter }.entries.map { it.key to it.value }.sortedBy { it.first }
+internal fun Map<Pos, Tile>.fighters() = filterValues { it is Fighter }.entries.sortedBy { it.key }
 
-internal fun Map<Pos, Tile>.targets(tile: Tile) =
-    filterValues { if (tile is Elf) (it is Goblin) else (it is Elf) }
-        .keys.sorted()
+internal fun Map<Pos, Tile>.targets(tile: Tile) = filterValues(tile::isOpponent).keys.sorted()
+
+internal fun Tile.isOpponent(tile: Tile) = if (this is Elf) (tile is Goblin) else (tile is Elf)
 
 internal sealed class Tile
 
@@ -140,12 +139,7 @@ internal class Goblin(health: Int, attackPower: Int) : Fighter(health, attackPow
 }
 
 internal data class Pos(val x: Int, val y: Int) : Comparable<Pos> {
-    fun neighbors() = sequenceOf(above(), left(), right(), below())
-
-    fun below() = copy(y = y + 1)
-    fun right() = copy(x = x + 1)
-    fun left() = copy(x = x - 1)
-    fun above() = copy(y = y - 1)
+    fun neighbors() = sequenceOf(copy(y = y - 1), copy(x = x - 1), copy(x = x + 1), copy(y = y + 1))
 
     fun adjacentTo(target: Pos) = target.neighbors().contains(this)
 
