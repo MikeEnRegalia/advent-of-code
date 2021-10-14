@@ -57,6 +57,6 @@ internal class AoC2018KtTest {
 
     @Test
     fun part2() {
-        day15BeverageBanditsPart2(INPUT) shouldBe 191575
+        day15BeverageBanditsPart2(INPUT) shouldBe 75915
     }
 }

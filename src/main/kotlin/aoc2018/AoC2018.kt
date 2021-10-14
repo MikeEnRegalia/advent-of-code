@@ -9,7 +9,7 @@ fun day15BeverageBanditsPart2(input: String): Int {
 }
 
 fun day15BeverageBandits(input: String, elvesAttackPower: Int = 3): Pair<Int, Int> {
-    val map = input.toMap(elvesAttackPower)
+    val map = input.loadInput(elvesAttackPower)
     val totalElves = map.values.count { it is Elf }
 
     var round = 0
@@ -38,6 +38,19 @@ fun day15BeverageBandits(input: String, elvesAttackPower: Int = 3): Pair<Int, In
     }
 }
 
+internal fun String.loadInput(elvesAttackPower: Int) = split("\n")
+    .mapIndexed { y, row ->
+        row.mapIndexed { x, c -> Pos(x, y) to c.toTile(elvesAttackPower) }
+    }.flatten().toMap().toMutableMap()
+
+private fun Char.toTile(elvesAttackPower: Int) = when (this) {
+    '#' -> Wall
+    'E' -> Elf(200, elvesAttackPower)
+    'G' -> Goblin(200, 3)
+    '.' -> Space
+    else -> throw IllegalArgumentException(toString())
+}
+
 internal fun Map<Pos, Tile>.reachableFrom(start: Pos): Map<Pos, Int> {
     val result = mutableMapOf<Pos, Int>()
     fun follow(pos: Pos, travelled: Int = 0) {
@@ -54,16 +67,9 @@ internal fun Map<Pos, Tile>.reachableFrom(start: Pos): Map<Pos, Int> {
 }
 
 @Suppress("unused")
-internal fun Map<Pos, Tile>.debug(fighterAt: Pos? = null): String = with(keys) {
+internal fun Map<Pos, Tile>.debug() = with(keys) {
     minToMaxOf { it.y }.joinToString("\n") { y ->
-        minToMaxOf { it.x }.joinToString("") { x ->
-            val pos = Pos(x, y)
-            if (isSpace(pos)) "."
-            else if (isWall(pos)) "#"
-            else if (get(pos)!! is Elf) if (fighterAt != null && fighterAt == pos) "e" else "E"
-            else if (get(pos)!! is Goblin) if (fighterAt != null && fighterAt == pos) "g" else "G"
-            else throw IllegalStateException()
-        }
+        minToMaxOf { it.x }.joinToString("") { x -> get(Pos(x, y))!!.toString() }
     }
 }
 
@@ -117,8 +123,14 @@ internal fun Map<Pos, Tile>.targets(tile: Tile) =
         .keys.sorted()
 
 internal sealed class Tile
-internal object Wall : Tile()
-internal object Space : Tile()
+
+internal object Wall : Tile() {
+    override fun toString() = "W"
+}
+
+internal object Space : Tile() {
+    override fun toString() = "."
+}
 
 internal abstract class Fighter(val health: Int, val attackPower: Int) : Tile() {
     abstract fun hitBy(fighter: Fighter): Fighter
@@ -126,10 +138,12 @@ internal abstract class Fighter(val health: Int, val attackPower: Int) : Tile() 
 
 internal class Elf(health: Int, attackPower: Int) : Fighter(health, attackPower) {
     override fun hitBy(fighter: Fighter) = Elf(health - fighter.attackPower, attackPower)
+    override fun toString() = "E"
 }
 
 internal class Goblin(health: Int, attackPower: Int) : Fighter(health, attackPower) {
     override fun hitBy(fighter: Fighter) = Goblin(health - fighter.attackPower, attackPower)
+    override fun toString() = "G"
 }
 
 internal data class Pos(val x: Int, val y: Int) : Comparable<Pos> {
@@ -153,17 +167,3 @@ internal data class Pos(val x: Int, val y: Int) : Comparable<Pos> {
 
 internal fun Map<Pos, Tile>.tile(pos: Pos) = this[pos] ?: Space
 internal fun Map<Pos, Tile>.isSpace(pos: Pos) = tile(pos) is Space
-internal fun Map<Pos, Tile>.isWall(pos: Pos) = tile(pos) is Wall
-
-internal fun String.toMap(elvesAttackPower: Int) = split("\n")
-    .mapIndexed { y, row ->
-        row.mapIndexed { x, c ->
-            when (c) {
-                '#' -> Wall
-                'E' -> Elf(200, elvesAttackPower)
-                'G' -> Goblin(200, 3)
-                '.' -> Space
-                else -> throw IllegalArgumentException(c.toString())
-            }.let { Pos(x, y) to it }
-        }
-    }.flatten().toMap().toMutableMap()
