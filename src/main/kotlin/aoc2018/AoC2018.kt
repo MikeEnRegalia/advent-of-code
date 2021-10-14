@@ -8,12 +8,10 @@ internal typealias MutableDungeon = MutableMap<Pos, Tile>
 
 internal data class Score(val elvesDied: Int, val outcome: Int)
 
-fun day15BeverageBanditsPart2(input: String): Int {
-    return toInfinity()
-        .map { power -> input.toDungeon(power).beverageBandits() }
-        .filter { it.elvesDied == 0 }
-        .first().outcome
-}
+fun day15BeverageBanditsPart2(input: String): Int = toInfinity()
+    .map { power -> input.toDungeon(power).beverageBandits() }
+    .filter { it.elvesDied == 0 }
+    .first().outcome
 
 fun day15BeverageBanditsPart1(input: String): Int = input.toDungeon(3).beverageBandits().outcome
 
