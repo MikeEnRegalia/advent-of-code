@@ -25,9 +25,7 @@ internal fun beverageBandits(input: String, elvesAttackPower: Int = 3): Pair<Int
                 if (adjacentTarget != null) {
                     attack(fighter, adjacentTarget)
                 } else {
-                    val targets = targets(fighter)
-                        .takeIf { it.isNotEmpty() }
-                        ?: return wrapResult(totalElves, round)
+                    val targets = targets(fighter).takeIf { it.isNotEmpty() } ?: return wrapResult(totalElves, round)
 
                     val nextPos = move(fighterPos, targets)
                     if (nextPos != null) {
@@ -82,12 +80,14 @@ internal fun Map<Pos, Tile>.debug() = with(keys) {
 internal inline fun Set<Pos>.minToMaxOf(f: (Pos) -> Int) = minOf(f)..maxOf(f)
 
 internal fun MutableMap<Pos, Tile>.move(pos: Pos, targets: List<Pos>): Pos? {
-    val allInRange = filter { (key, value) -> value is Space && targets.anyAdjacentTo(key) }
-        .keys.takeIf { it.isNotEmpty() } ?: return null
+    val allInRange =
+        filter { (key, value) -> value is Space && targets.anyAdjacentTo(key) }
+            .keys.takeIf { it.isNotEmpty() } ?: return null
 
     val allReachable = distancesFrom(pos)
-    val reachable = allInRange.mapNotNull { allReachable[it]?.let { distance -> it to distance } }
-        .takeIf { it.isNotEmpty() } ?: return null
+    val reachable =
+        allInRange.mapNotNull { allReachable[it]?.let { distance -> it to distance } }
+            .takeIf { it.isNotEmpty() } ?: return null
 
     val destination = reachable.filterByMinOf { it.second }.map { it.first }.minOf { it }
 
@@ -95,14 +95,14 @@ internal fun MutableMap<Pos, Tile>.move(pos: Pos, targets: List<Pos>): Pos? {
         .filterKeys { pos.neighbors().contains(it) }
         .entries
         .filterByMinOf { it.value }
-        .map { it.key }
-        .minOf { it }
+        .map { it.key }.minOf { it }
 }
 
-private fun List<Pos>.anyAdjacentTo(pos: Pos) = any { it.adjacentTo(pos) }
+private fun List<Pos>.anyAdjacentTo(pos: Pos) = any { it.neighbors().contains(pos) }
 
 internal fun Map<Pos, Tile>.adjacentTarget(pos: Pos, fighter: Fighter) =
-    filterKeys { it.adjacentTo(pos) }.targets(fighter).filterByMinOf { (this[it] as Fighter).health }.firstOrNull()
+    filterKeys { it.neighbors().contains(pos) }.targets(fighter).filterByMinOf { (this[it] as Fighter).health }
+        .firstOrNull()
 
 internal fun <T> Collection<T>.filterByMinOf(t: (T) -> Int) =
     if (isEmpty()) this else minOf { t(it) }.let { min -> filter { t(it) == min } }
@@ -146,8 +146,6 @@ internal class Goblin(health: Int, attackPower: Int) : Fighter(health, attackPow
 
 internal data class Pos(val x: Int, val y: Int) : Comparable<Pos> {
     fun neighbors() = sequenceOf(copy(y = y - 1), copy(x = x - 1), copy(x = x + 1), copy(y = y + 1))
-
-    fun adjacentTo(target: Pos) = target.neighbors().contains(this)
 
     override fun toString() = "($x,$y)"
 
