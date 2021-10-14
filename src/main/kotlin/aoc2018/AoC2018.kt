@@ -12,28 +12,30 @@ fun day15BeverageBanditsPart1(input: String): Int =
     beverageBandits(input).second
 
 internal fun beverageBandits(input: String, elvesAttackPower: Int = 3): Pair<Int, Int> {
-    val map = input.loadInput(elvesAttackPower)
+    val map = input.toMap(elvesAttackPower)
     val totalElves = map.values.count { it is Elf }
 
     var round = 0
     while (true) {
         with(map) {
-            fighters().forEach { (pos, fighter) ->
-                if (this[pos] is Space) return@forEach
+            fighters().forEach { (fighterPos, fighter) ->
+                if (this[fighterPos] is Space) return@forEach
                 fighter as Fighter
 
-                if (adjacentTarget(pos, fighter)?.let { attack(fighter, it) } == null) {
+                val adjacentTarget = adjacentTarget(fighterPos, fighter)
+                if (adjacentTarget != null) {
+                    attack(fighter, adjacentTarget)
+                } else {
                     val targets = targets(fighter)
-                    if (targets.isEmpty()) {
-                        val remainingElves = map.values.count { it is Elf }
-                        val elvesLost = totalElves - remainingElves
-                        val health = map.values.sumOf { if (it is Fighter) it.health else 0 }
-                        println("done after $round complete rounds with $health remaining health, $elvesLost elves lost.")
-                        return elvesLost to round * health
+                        .takeIf { it.isNotEmpty() }
+                        ?: return wrapResult(totalElves, round)
+
+                    val nextPos = move(fighterPos, targets)
+                    if (nextPos != null) {
+                        this[fighterPos] = Space
+                        this[nextPos] = fighter
+                        adjacentTarget(nextPos, fighter)?.let { attack(fighter, it) }
                     }
-                    move(pos, fighter, targets)
-                        ?.let { adjacentTarget(it, fighter) }
-                        ?.let { attack(fighter, it) }
                 }
             }
         }
@@ -41,7 +43,14 @@ internal fun beverageBandits(input: String, elvesAttackPower: Int = 3): Pair<Int
     }
 }
 
-internal fun String.loadInput(elvesAttackPower: Int) = split("\n")
+private fun Map<Pos, Tile>.wrapResult(totalElves: Int, round: Int): Pair<Int, Int> {
+    val remainingElves = values.count { it is Elf }
+    val elvesLost = totalElves - remainingElves
+    val health = values.sumOf { if (it is Fighter) it.health else 0 }
+    return elvesLost to round * health
+}
+
+internal fun String.toMap(elvesAttackPower: Int) = split("\n")
     .mapIndexed { y, row ->
         row.mapIndexed { x, c -> Pos(x, y) to c.toTile(elvesAttackPower) }
     }.flatten().toMap().toMutableMap()
@@ -74,7 +83,7 @@ internal fun Map<Pos, Tile>.debug() = with(keys) {
 
 internal inline fun Set<Pos>.minToMaxOf(f: (Pos) -> Int) = minOf(f)..maxOf(f)
 
-internal fun MutableMap<Pos, Tile>.move(pos: Pos, fighter: Tile, targets: List<Pos>): Pos? {
+internal fun MutableMap<Pos, Tile>.move(pos: Pos, targets: List<Pos>): Pos? {
     val allInRange = filter { (key, value) -> value is Space && targets.anyAdjacentTo(key) }.keys
         .takeIf { it.isNotEmpty() } ?: return null
 
@@ -90,10 +99,6 @@ internal fun MutableMap<Pos, Tile>.move(pos: Pos, fighter: Tile, targets: List<P
         .filterByMinOf { it.value }
         .map { it.key }
         .minOf { it }
-        .also {
-            this[pos] = Space
-            this[it] = fighter
-        }
 }
 
 private fun List<Pos>.anyAdjacentTo(it: Pos) = any { target -> it.adjacentTo(target) }
@@ -110,7 +115,8 @@ internal fun MutableMap<Pos, Tile>.attack(attacker: Fighter, victim: Pos) {
 
 internal fun Map<Pos, Tile>.fighters() = filterValues { it is Fighter }.entries.sortedBy { it.key }
 
-internal fun Map<Pos, Tile>.targets(tile: Tile) = filterValues(tile::isOpponent).keys.sorted()
+internal fun Map<Pos, Tile>.targets(tile: Tile) =
+    filterValues(tile::isOpponent).keys.sorted()
 
 internal fun Tile.isOpponent(tile: Tile) = if (this is Elf) (tile is Goblin) else (tile is Elf)
 
