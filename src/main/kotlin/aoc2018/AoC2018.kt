@@ -101,8 +101,8 @@ internal fun MutableMap<Pos, Tile>.move(pos: Pos, targets: List<Pos>): Pos? {
 
 private fun List<Pos>.anyAdjacentTo(pos: Pos) = any { it.adjacentTo(pos) }
 
-internal fun Map<Pos, Tile>.adjacentTarget(pos: Pos, tile: Tile) =
-    filterKeys { it.adjacentTo(pos) }.targets(tile).filterByMinOf { (this[it] as Fighter).health }.firstOrNull()
+internal fun Map<Pos, Tile>.adjacentTarget(pos: Pos, fighter: Fighter) =
+    filterKeys { it.adjacentTo(pos) }.targets(fighter).filterByMinOf { (this[it] as Fighter).health }.firstOrNull()
 
 internal fun <T> Collection<T>.filterByMinOf(t: (T) -> Int) =
     if (isEmpty()) this else minOf { t(it) }.let { min -> filter { t(it) == min } }
@@ -113,9 +113,12 @@ internal fun MutableMap<Pos, Tile>.attack(attacker: Fighter, victim: Pos) {
 
 internal fun Map<Pos, Tile>.fighters() = filterValues { it is Fighter }.entries.sortedBy { it.key }
 
-internal fun Map<Pos, Tile>.targets(tile: Tile) = filterValues(tile::isOpponent).keys.sorted()
+internal fun Map<Pos, Tile>.targets(tile: Fighter) = filterValues(tile::isOpponent).keys.sorted()
 
-internal fun Tile.isOpponent(tile: Tile) = if (this is Elf) (tile is Goblin) else (tile is Elf)
+internal fun Fighter.isOpponent(tile: Tile) = when (this) {
+    is Elf -> tile is Goblin
+    else -> tile is Elf
+}
 
 internal sealed class Tile
 
