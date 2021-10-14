@@ -22,7 +22,7 @@ internal fun beverageBandits(input: String, elvesAttackPower: Int = 3): Pair<Int
                 if (this[pos] is Space) return@forEach
                 fighter as Fighter
 
-                if (adjacentTarget(pos, fighter)?.let { attack(it, fighter) } == null) {
+                if (adjacentTarget(pos, fighter)?.let { attack(fighter, it) } == null) {
                     val targets = targets(fighter)
                     if (targets.isEmpty()) {
                         val remainingElves = map.values.count { it is Elf }
@@ -33,7 +33,7 @@ internal fun beverageBandits(input: String, elvesAttackPower: Int = 3): Pair<Int
                     }
                     move(pos, fighter, targets)
                         ?.let { adjacentTarget(it, fighter) }
-                        ?.let { attack(it, fighter) }
+                        ?.let { attack(fighter, it) }
                 }
             }
         }
@@ -54,8 +54,7 @@ private fun Char.toTile(elvesAttackPower: Int) = when (this) {
     else -> throw IllegalArgumentException(toString())
 }
 
-internal fun Map<Pos, Tile>.reachableFrom(start: Pos): Map<Pos, Int> {
-    val result = mutableMapOf<Pos, Int>()
+internal fun Map<Pos, Tile>.reachableFrom(start: Pos): Map<Pos, Int> = mutableMapOf<Pos, Int>().also { result ->
     fun follow(pos: Pos, travelled: Int = 0) {
         result[pos] = travelled
         pos.neighbors()
@@ -64,7 +63,6 @@ internal fun Map<Pos, Tile>.reachableFrom(start: Pos): Map<Pos, Int> {
             .forEach { follow(it, travelled + 1) }
     }
     follow(start)
-    return result
 }
 
 @Suppress("unused")
@@ -84,7 +82,7 @@ internal fun MutableMap<Pos, Tile>.move(pos: Pos, fighter: Tile, targets: List<P
     val reachableInRange = inRange.mapNotNull { reachable[it]?.let { distance -> it to distance } }
     if (reachableInRange.isEmpty()) return null
 
-    val shortestInRange = reachableInRange.filterByMin { it.second }
+    val shortestInRange = reachableInRange.filterByMinOf { it.second }
     val destination = shortestInRange
         .first { (shortest) -> shortest == shortestInRange.map { it.first }.toSet().minOf { it } }
         .first
@@ -92,7 +90,7 @@ internal fun MutableMap<Pos, Tile>.move(pos: Pos, fighter: Tile, targets: List<P
     val next = reachableFrom(destination)
         .filterKeys { pos.neighbors().contains(it) }
         .entries
-        .filterByMin { it.value }
+        .filterByMinOf { it.value }
         .map { it.key }.minOf { it }
 
     this[pos] = Space
@@ -101,19 +99,13 @@ internal fun MutableMap<Pos, Tile>.move(pos: Pos, fighter: Tile, targets: List<P
 }
 
 internal fun Map<Pos, Tile>.adjacentTarget(pos: Pos, tile: Tile) =
-    filterKeys { it.adjacentTo(pos) }.targets(tile).filterByMin { (this[it] as Fighter).health }.firstOrNull()
+    filterKeys { it.adjacentTo(pos) }.targets(tile).filterByMinOf { (this[it] as Fighter).health }.firstOrNull()
 
-internal fun <T> Collection<T>.filterByMin(f: (T) -> Int): Collection<T> {
-    if (isEmpty()) return this
-    val min = minOf { f(it) }
-    return filter { f(it) == min }
-}
+internal fun <T> Collection<T>.filterByMinOf(t: (T) -> Int) =
+    if (isEmpty()) this else minOf { t(it) }.let { min -> filter { t(it) == min } }
 
-internal fun MutableMap<Pos, Tile>.attack(victim: Pos, attacker: Fighter) {
-    this[victim] =
-        (this[victim] as Fighter).hitBy(attacker).let {
-            if (it.health <= 0) Space else it
-        }
+internal fun MutableMap<Pos, Tile>.attack(attacker: Fighter, victim: Pos) {
+    this[victim] = (this[victim] as Fighter).hitBy(attacker).let { if (it.health <= 0) Space else it }
 }
 
 internal fun Map<Pos, Tile>.fighters() =
