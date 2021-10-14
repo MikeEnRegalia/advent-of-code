@@ -1,27 +1,28 @@
 package aoc2018
 
-import kotlin.math.abs
-
-fun day15BeverageBandits(input: String): Int {
+fun day15BeverageBandits(input: String): Pair<Int, Int> {
     val map = input.toMap()
-
-    map.debug().also { println(it) }
+    val totalElves = map.values.count { it is Elf }
 
     var round = 0
     while (true) {
         with(map) {
-            fighters().forEach { (pos, tile) ->
+            fighters().forEach { (pos, fighter) ->
                 if (this[pos] is Space) return@forEach
-                if (adjacentTarget(pos, tile)?.let { attack(it) } == null) {
-                    val targets = targets(tile)
+                fighter as Fighter
+
+                if (adjacentTarget(pos, fighter)?.let { attack(it, fighter) } == null) {
+                    val targets = targets(fighter)
                     if (targets.isEmpty()) {
+                        val remainingElves = map.values.count { it is Elf }
+                        val elvesLost = totalElves - remainingElves
                         val health = map.values.sumOf { if (it is Fighter) it.health else 0 }
-                        println("done after $round complete rounds with $health remaining health.")
-                        return round * health
+                        println("done after $round complete rounds with $health remaining health, $elvesLost elves lost.")
+                        return elvesLost to round * health
                     }
-                    move(pos, tile, targets)
-                        ?.let { adjacentTarget(it, tile) }
-                        ?.let { attack(it) }
+                    move(pos, fighter, targets)
+                        ?.let { adjacentTarget(it, fighter) }
+                        ?.let { attack(it, fighter) }
                 }
             }
         }
@@ -36,8 +37,8 @@ internal fun Map<Pos, Tile>.reachableFrom(start: Pos): Map<Pos, Int> {
         if (curr != null && travelled > curr) return
         result[pos] = travelled
         pos.neighbors().filter {
-            val curr = result[it]
-            isSpace(it) && (curr == null || curr > travelled + 1)
+            val itKnownDistance = result[it]
+            isSpace(it) && (itKnownDistance == null || itKnownDistance > travelled + 1)
         }.forEach { follow(it, travelled + 1) }
     }
     follow(start)
@@ -60,7 +61,6 @@ internal fun Map<Pos, Tile>.debug(fighterAt: Pos? = null): String = with(keys) {
 internal inline fun Set<Pos>.minToMaxOf(f: (Pos) -> Int) = minOf(f)..maxOf(f)
 
 internal fun MutableMap<Pos, Tile>.move(pos: Pos, fighter: Tile, targets: List<Pos>): Pos? {
-    println("map for ${fighter::class.simpleName} at $pos:\n${debug()}")
     val inRange = filter { it.value is Space && targets.any { target -> it.key.adjacentTo(target) } }.keys
     if (inRange.isEmpty()) return null
 
@@ -81,7 +81,6 @@ internal fun MutableMap<Pos, Tile>.move(pos: Pos, fighter: Tile, targets: List<P
 
     this[pos] = Space
     this[next] = fighter
-    println("moved from $pos to $next")
     return next
 }
 
@@ -94,10 +93,10 @@ internal fun <T> Collection<T>.filterByMin(f: (T) -> Int): Collection<T> {
     return filter { f(it) == min }
 }
 
-internal fun MutableMap<Pos, Tile>.attack(pos: Pos) {
-    this[pos] =
-        this[pos]!!.hit().let {
-            if (it is Fighter && it.health <= 0) Space else it
+internal fun MutableMap<Pos, Tile>.attack(victim: Pos, attacker: Fighter) {
+    this[victim] =
+        (this[victim] as Fighter).hitBy(attacker).let {
+            if (it.health <= 0) Space else it
         }
 }
 
@@ -108,25 +107,20 @@ internal fun Map<Pos, Tile>.targets(tile: Tile) =
     filterValues { if (tile is Elf) (it is Goblin) else (it is Elf) }
         .keys.sorted()
 
-internal sealed class Tile {
-    abstract fun hit(): Tile
+internal sealed class Tile
+internal object Wall : Tile()
+internal object Space : Tile()
+
+internal abstract class Fighter(val health: Int, val attackPower: Int) : Tile() {
+    abstract fun hitBy(fighter: Fighter): Fighter
 }
 
-internal object Wall : Tile() {
-    override fun hit() = Wall
+internal class Elf(health: Int, attackPower: Int) : Fighter(health, attackPower) {
+    override fun hitBy(fighter: Fighter) = Elf(health - fighter.attackPower, attackPower)
 }
 
-internal object Space : Tile() {
-    override fun hit() = Space
-}
-
-internal abstract class Fighter(val health: Int) : Tile()
-internal class Elf(health: Int) : Fighter(health) {
-    override fun hit() = Elf(health - 3)
-}
-
-internal class Goblin(health: Int) : Fighter(health) {
-    override fun hit() = Goblin(health - 3)
+internal class Goblin(health: Int, attackPower: Int) : Fighter(health, attackPower) {
+    override fun hitBy(fighter: Fighter) = Goblin(health - fighter.attackPower, attackPower)
 }
 
 internal data class Pos(val x: Int, val y: Int) : Comparable<Pos> {
@@ -146,25 +140,19 @@ internal data class Pos(val x: Int, val y: Int) : Comparable<Pos> {
         y - other.y != 0 -> y - other.y
         else -> x - other.x
     }
-
-    fun distanceTo(pos: Pos) = abs(x - pos.x) + abs(y - pos.y)
 }
 
 internal fun Map<Pos, Tile>.tile(pos: Pos) = this[pos] ?: Space
 internal fun Map<Pos, Tile>.isSpace(pos: Pos) = tile(pos) is Space
 internal fun Map<Pos, Tile>.isWall(pos: Pos) = tile(pos) is Wall
-internal fun Map<Pos, Tile>.isObstacle(pos: Pos, fighter: Tile, fighterPos: Pos) =
-    pos != fighterPos && (isWall(pos) || tile(pos)::class == fighter::class)
-
-internal fun Map<Pos, Tile>.neighborSpaces(pos: Pos) = pos.neighbors().filter { this[it] is Space }
 
 internal fun String.toMap() = split("\n")
     .mapIndexed { y, row ->
         row.mapIndexed { x, c ->
             when (c) {
                 '#' -> Wall
-                'E' -> Elf(200)
-                'G' -> Goblin(200)
+                'E' -> Elf(200, 3)
+                'G' -> Goblin(200, 3)
                 '.' -> Space
                 else -> throw IllegalArgumentException(c.toString())
             }.let { Pos(x, y) to it }

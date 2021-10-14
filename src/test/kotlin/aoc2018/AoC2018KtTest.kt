@@ -14,7 +14,7 @@ internal class AoC2018KtTest {
 #...#E#
 #...E.#
 #######"""
-        ) shouldBe 36334
+        ).second shouldBe 36334
     }
 
     @Test
@@ -53,6 +53,6 @@ internal class AoC2018KtTest {
 #######.###....###.....#########
 #######.####.######.....########
 ################################"""
-        ) shouldBe 191575
+        ).second shouldBe 191575
     }
 }
