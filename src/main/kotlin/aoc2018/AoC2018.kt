@@ -1,7 +1,15 @@
 package aoc2018
 
-fun day15BeverageBandits(input: String): Pair<Int, Int> {
-    val map = input.toMap()
+fun day15BeverageBanditsPart2(input: String): Int {
+    var attackPower = 4
+    while (true) {
+        val (elvesLost, outcome) = day15BeverageBandits(input, elvesAttackPower = attackPower++)
+        if (elvesLost == 0) return outcome
+    }
+}
+
+fun day15BeverageBandits(input: String, elvesAttackPower: Int = 3): Pair<Int, Int> {
+    val map = input.toMap(elvesAttackPower)
     val totalElves = map.values.count { it is Elf }
 
     var round = 0
@@ -45,6 +53,7 @@ internal fun Map<Pos, Tile>.reachableFrom(start: Pos): Map<Pos, Int> {
     return result
 }
 
+@Suppress("unused")
 internal fun Map<Pos, Tile>.debug(fighterAt: Pos? = null): String = with(keys) {
     minToMaxOf { it.y }.joinToString("\n") { y ->
         minToMaxOf { it.x }.joinToString("") { x ->
@@ -146,12 +155,12 @@ internal fun Map<Pos, Tile>.tile(pos: Pos) = this[pos] ?: Space
 internal fun Map<Pos, Tile>.isSpace(pos: Pos) = tile(pos) is Space
 internal fun Map<Pos, Tile>.isWall(pos: Pos) = tile(pos) is Wall
 
-internal fun String.toMap() = split("\n")
+internal fun String.toMap(elvesAttackPower: Int) = split("\n")
     .mapIndexed { y, row ->
         row.mapIndexed { x, c ->
             when (c) {
                 '#' -> Wall
-                'E' -> Elf(200, 3)
+                'E' -> Elf(200, elvesAttackPower)
                 'G' -> Goblin(200, 3)
                 '.' -> Space
                 else -> throw IllegalArgumentException(c.toString())
