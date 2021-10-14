@@ -9,53 +9,54 @@ internal typealias MutableDungeon = MutableMap<Pos, Tile>
 fun day15BeverageBanditsPart2(input: String): Int {
     var attackPower = 4
     while (true) {
-        val (elvesLost, outcome) = beverageBandits(input, elvesAttackPower = attackPower++)
+        val (elvesLost, outcome) = input.toDungeon(attackPower++).beverageBandits()
         if (elvesLost == 0) return outcome
     }
 }
 
-fun day15BeverageBanditsPart1(input: String): Int = beverageBandits(input).second
+fun day15BeverageBanditsPart1(input: String): Int = input.toDungeon(3).beverageBandits().second
 
-internal fun beverageBandits(input: String, elvesAttackPower: Int = 3): Pair<Int, Int> {
-    val map = input.toMap(elvesAttackPower)
-    val totalElves = map.values.count { it.isElf() }
-
+internal fun MutableDungeon.beverageBandits(): Pair<Int, Int> {
+    val totalElves = values.count { it.isElf() }
     var round = 0
     while (true) {
-        with(map) {
-            fighters().forEach { (fighterPos, fighter) ->
-                if (this[fighterPos] is Space) return@forEach
-                fighter as Fighter
-
-                val adjacentTarget = adjacentTarget(fighterPos)
-                if (adjacentTarget != null) {
-                    attack(fighter, adjacentTarget)
-                } else {
-                    val targets = targets(fighter) ?: return wrapResult(totalElves, round)
-
-                    val nextPos = move(fighterPos, targets)
-                    if (nextPos != null) {
-                        this[fighterPos] = Space
-                        this[nextPos] = fighter
-                        adjacentTarget(nextPos)?.let { attack(fighter, it) }
-                    }
-                }
-            }
-        }
+        fight(totalElves, round)?.let { return it }
         round++
     }
 }
 
+internal fun MutableDungeon.fight(totalElves: Int, round: Int): Pair<Int, Int>? {
+    for ((fighterPos, fighter) in fighters()) {
+        if (this[fighterPos] is Space) continue
+        fighter as Fighter
+
+        val adjacentTarget = adjacentTarget(fighterPos)
+        if (adjacentTarget != null) {
+            attack(fighter, adjacentTarget)
+            continue
+        }
+
+        val targets = targets(fighter) ?: return score(totalElves, round)
+
+        val nextPos = move(fighterPos, targets) ?: continue
+
+        this[fighterPos] = Space
+        this[nextPos] = fighter
+        adjacentTarget(nextPos)?.let { attack(fighter, it) }
+    }
+    return null
+}
+
 private fun Tile.isElf() = this is Fighter && faction == ELF
 
-private fun Dungeon.wrapResult(totalElves: Int, round: Int): Pair<Int, Int> {
+private fun Dungeon.score(totalElves: Int, round: Int): Pair<Int, Int> {
     val remainingElves = values.count { it.isElf() }
     val elvesLost = totalElves - remainingElves
     val health = values.sumOf { if (it is Fighter) it.health else 0 }
     return elvesLost to round * health
 }
 
-internal fun String.toMap(elvesAttackPower: Int) = split("\n").mapIndexed { y, row ->
+internal fun String.toDungeon(elvesAttackPower: Int) = split("\n").mapIndexed { y, row ->
     row.mapIndexed { x, c -> Pos(x, y) to c.toTile(elvesAttackPower) }
 }.flatten().toMap().toMutableMap()
 
