@@ -6,26 +6,25 @@ import aoc2018.Faction.GOBLIN
 internal typealias Dungeon = Map<Pos, Tile>
 internal typealias MutableDungeon = MutableMap<Pos, Tile>
 
+internal data class Score(val elvesDied: Int, val outcome: Int)
+
 fun day15BeverageBanditsPart2(input: String): Int {
-    var attackPower = 4
-    while (true) {
-        val (elvesLost, outcome) = input.toDungeon(attackPower++).beverageBandits()
-        if (elvesLost == 0) return outcome
-    }
+    return toInfinity()
+        .map { power -> input.toDungeon(power).beverageBandits() }
+        .filter { it.elvesDied == 0 }
+        .first().outcome
 }
 
-fun day15BeverageBanditsPart1(input: String): Int = input.toDungeon(3).beverageBandits().second
+fun day15BeverageBanditsPart1(input: String): Int = input.toDungeon(3).beverageBandits().outcome
 
-internal fun MutableDungeon.beverageBandits(): Pair<Int, Int> {
-    val totalElves = values.count { it.isElf() }
-    var round = 0
-    while (true) {
-        fight(totalElves, round)?.let { return it }
-        round++
-    }
+internal fun MutableDungeon.beverageBandits(): Score {
+    val initialElves = values.count { it.isElf() }
+    return toInfinity().mapNotNull { round -> fight(initialElves, round) }.first()
 }
 
-internal fun MutableDungeon.fight(totalElves: Int, round: Int): Pair<Int, Int>? {
+internal fun toInfinity() = sequence { var i = 0; while (true) yield(i++) }
+
+internal fun MutableDungeon.fight(totalElves: Int, round: Int): Score? {
     for ((fighterPos, fighter) in fighters()) {
         if (this[fighterPos] is Space) continue
         fighter as Fighter
@@ -49,11 +48,10 @@ internal fun MutableDungeon.fight(totalElves: Int, round: Int): Pair<Int, Int>? 
 
 private fun Tile.isElf() = this is Fighter && faction == ELF
 
-private fun Dungeon.score(totalElves: Int, round: Int): Pair<Int, Int> {
-    val remainingElves = values.count { it.isElf() }
-    val elvesLost = totalElves - remainingElves
+private fun Dungeon.score(initialElves: Int, round: Int): Score {
+    val elvesDied = initialElves - values.count { it.isElf() }
     val health = values.sumOf { if (it is Fighter) it.health else 0 }
-    return elvesLost to round * health
+    return Score(elvesDied, round * health)
 }
 
 internal fun String.toDungeon(elvesAttackPower: Int) = split("\n").mapIndexed { y, row ->
