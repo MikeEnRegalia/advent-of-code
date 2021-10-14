@@ -1,5 +1,8 @@
 package aoc2018
 
+import aoc2018.Faction.ELF
+import aoc2018.Faction.GOBLIN
+
 fun day15BeverageBanditsPart2(input: String): Int {
     var attackPower = 4
     while (true) {
@@ -12,7 +15,7 @@ fun day15BeverageBanditsPart1(input: String): Int = beverageBandits(input).secon
 
 internal fun beverageBandits(input: String, elvesAttackPower: Int = 3): Pair<Int, Int> {
     val map = input.toMap(elvesAttackPower)
-    val totalElves = map.values.count { it is Elf }
+    val totalElves = map.values.count { it.isElf() }
 
     var round = 0
     while (true) {
@@ -40,8 +43,10 @@ internal fun beverageBandits(input: String, elvesAttackPower: Int = 3): Pair<Int
     }
 }
 
+private fun Tile.isElf() = this is Fighter && faction == ELF
+
 private fun Map<Pos, Tile>.wrapResult(totalElves: Int, round: Int): Pair<Int, Int> {
-    val remainingElves = values.count { it is Elf }
+    val remainingElves = values.count { it.isElf() }
     val elvesLost = totalElves - remainingElves
     val health = values.sumOf { if (it is Fighter) it.health else 0 }
     return elvesLost to round * health
@@ -53,9 +58,9 @@ internal fun String.toMap(elvesAttackPower: Int) = split("\n").mapIndexed { y, r
 
 private fun Char.toTile(elvesAttackPower: Int) = when (this) {
     '#' -> Wall
-    'E' -> Elf(200, elvesAttackPower)
-    'G' -> Goblin(200, 3)
     '.' -> Space
+    'E' -> Fighter(ELF, 200, elvesAttackPower)
+    'G' -> Fighter(GOBLIN, 200, 3)
     else -> throw IllegalArgumentException(toString())
 }
 
@@ -80,23 +85,24 @@ internal fun Map<Pos, Tile>.debug() = with(keys) {
 internal inline fun Set<Pos>.minToMaxOf(f: (Pos) -> Int) = minOf(f)..maxOf(f)
 
 internal fun MutableMap<Pos, Tile>.move(pos: Pos, targets: List<Pos>): Pos? {
-    val allInRange =
-        filter { (key, value) -> value is Space && targets.anyAdjacentTo(key) }
-            .keys.takeIf { it.isNotEmpty() } ?: return null
-
-    val allReachable = distancesFrom(pos)
-    val reachable =
-        allInRange.mapNotNull { allReachable[it]?.let { distance -> it to distance } }
-            .takeIf { it.isNotEmpty() } ?: return null
-
-    val destination = reachable.filterByMinOf { it.second }.map { it.first }.minOf { it }
-
-    return distancesFrom(destination)
+    val allInRange = allInRangeOf(targets) ?: return null
+    val reachable = onlyReachable(pos, allInRange) ?: return null
+    return distancesFrom(reachable.closest())
         .filterKeys { pos.neighbors().contains(it) }
         .entries
         .filterByMinOf { it.value }
         .map { it.key }.minOf { it }
 }
+
+internal fun Map<Pos, Tile>.allInRangeOf(targets: List<Pos>) =
+    filter { (key, value) -> value is Space && targets.anyAdjacentTo(key) }.keys.takeIf { it.isNotEmpty() }
+
+internal fun Map<Pos, Tile>.onlyReachable(pos: Pos, positions: Set<Pos>): List<Pair<Pos, Int>>? {
+    val allReachable = distancesFrom(pos)
+    return positions.mapNotNull { allReachable[it]?.let { distance -> it to distance } }.takeIf { it.isNotEmpty() }
+}
+
+internal fun List<Pair<Pos, Int>>.closest() = filterByMinOf { it.second }.map { it.first }.minOf { it }
 
 private fun List<Pos>.anyAdjacentTo(pos: Pos) = any { it.neighbors().contains(pos) }
 
@@ -115,9 +121,9 @@ internal fun Map<Pos, Tile>.fighters() = filterValues { it is Fighter }.entries.
 
 internal fun Map<Pos, Tile>.targets(tile: Fighter) = filterValues(tile::isOpponent).keys.sorted()
 
-internal fun Fighter.isOpponent(tile: Tile) = when (this) {
-    is Elf -> tile is Goblin
-    else -> tile is Elf
+internal fun Fighter.isOpponent(tile: Tile) = when (faction) {
+    ELF -> tile is Fighter && tile.faction == GOBLIN
+    GOBLIN -> tile is Fighter && tile.faction == ELF
 }
 
 internal sealed class Tile
@@ -130,18 +136,14 @@ internal object Space : Tile() {
     override fun toString() = "."
 }
 
-internal abstract class Fighter(val health: Int, val attackPower: Int) : Tile() {
-    abstract fun hitBy(fighter: Fighter): Fighter
+internal enum class Faction {
+    ELF,
+    GOBLIN
 }
 
-internal class Elf(health: Int, attackPower: Int) : Fighter(health, attackPower) {
-    override fun hitBy(fighter: Fighter) = Elf(health - fighter.attackPower, attackPower)
-    override fun toString() = "E"
-}
-
-internal class Goblin(health: Int, attackPower: Int) : Fighter(health, attackPower) {
-    override fun hitBy(fighter: Fighter) = Goblin(health - fighter.attackPower, attackPower)
-    override fun toString() = "G"
+internal data class Fighter(val faction: Faction, val health: Int, val attackPower: Int) : Tile() {
+    fun hitBy(fighter: Fighter) = copy(health = health - fighter.attackPower)
+    override fun toString() = if (faction == ELF) "E" else "G"
 }
 
 internal data class Pos(val x: Int, val y: Int) : Comparable<Pos> {
