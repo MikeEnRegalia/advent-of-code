@@ -4,7 +4,6 @@ import kotlin.math.abs
 
 fun day15BeverageBandits(input: String): Int {
     val map = input.toMap()
-    val reachableCache = mutableMapOf<Pos, Map<Pos, List<Pos>>>()
 
     map.debug().also { println(it) }
 
@@ -13,16 +12,16 @@ fun day15BeverageBandits(input: String): Int {
         with(map) {
             fighters().forEach { (pos, tile) ->
                 if (this[pos] is Space) return@forEach
-                if (adjacentTarget(pos, tile)?.let { attack(it, reachableCache) } == null) {
+                if (adjacentTarget(pos, tile)?.let { attack(it) } == null) {
                     val targets = targets(tile)
                     if (targets.isEmpty()) {
                         val health = map.values.sumOf { if (it is Fighter) it.health else 0 }
                         println("done after $round complete rounds with $health remaining health.")
                         return round * health
                     }
-                    move(pos, tile, targets, reachableCache)
+                    move(pos, tile, targets)
                         ?.let { adjacentTarget(it, tile) }
-                        ?.let { attack(it, reachableCache) }
+                        ?.let { attack(it) }
                 }
             }
         }
@@ -30,117 +29,75 @@ fun day15BeverageBandits(input: String): Int {
     }
 }
 
-internal fun Map<Pos, Tile>.debug(): String = with(keys) {
+internal fun Map<Pos, Tile>.reachableFrom(start: Pos): Map<Pos, Int> {
+    val result = mutableMapOf<Pos, Int>()
+    fun follow(pos: Pos, travelled: Int = 0) {
+        val curr = result[pos]
+        if (curr != null && travelled > curr) return
+        result[pos] = travelled
+        pos.neighbors().filter {
+            val curr = result[it]
+            isSpace(it) && (curr == null || curr > travelled + 1)
+        }.forEach { follow(it, travelled + 1) }
+    }
+    follow(start)
+    return result
+}
+
+internal fun Map<Pos, Tile>.debug(fighterAt: Pos? = null): String = with(keys) {
     minToMaxOf { it.y }.joinToString("\n") { y ->
         minToMaxOf { it.x }.joinToString("") { x ->
-            when (get(Pos(x, y))!!) {
-                is Space -> "."
-                is Wall -> "#"
-                is Elf -> "E"
-                is Goblin -> "G"
-                else -> throw IllegalStateException()
-            }
+            val pos = Pos(x, y)
+            if (isSpace(pos)) "."
+            else if (isWall(pos)) "#"
+            else if (get(pos)!! is Elf) if (fighterAt != null && fighterAt == pos) "e" else "E"
+            else if (get(pos)!! is Goblin) if (fighterAt != null && fighterAt == pos) "g" else "G"
+            else throw IllegalStateException()
         }
     }
 }
 
 internal inline fun Set<Pos>.minToMaxOf(f: (Pos) -> Int) = minOf(f)..maxOf(f)
 
-internal fun MutableMap<Pos, Tile>.move(
-    pos: Pos,
-    tile: Tile,
-    targets: List<Pos>,
-    reachableCache: MutableMap<Pos, Map<Pos, List<Pos>>>
-): Pos? {
-    val spaces = findSpaces().filter { it.contains(pos) }
-    println("spaces for $pos: ${spaces.size}")
-    val inRange = filterKeys { spaces.any { space -> space.contains(it) } }
-        .filter { it.value is Space && targets.any { target -> it.key.adjacentTo(target) } }.keys
+internal fun MutableMap<Pos, Tile>.move(pos: Pos, fighter: Tile, targets: List<Pos>): Pos? {
+    println("map for ${fighter::class.simpleName} at $pos:\n${debug()}")
+    val inRange = filter { it.value is Space && targets.any { target -> it.key.adjacentTo(target) } }.keys
     if (inRange.isEmpty()) return null
 
-    val reachable = reachableCache[pos] ?: reachableFrom(pos, stopAt = inRange).also { reachableCache[pos] = it }
-    val reachableInRange = inRange.mapNotNull { reachable[it]?.let { path -> it to path } }
+    val reachable = reachableFrom(pos)
+    val reachableInRange = inRange.mapNotNull { reachable[it]?.let { distance -> it to distance } }
     if (reachableInRange.isEmpty()) return null
 
-    val shortestInRange = reachableInRange.filterByMin { it.second.size }
-    val next = shortestInRange
+    val shortestInRange = reachableInRange.filterByMin { it.second }
+    val destination = shortestInRange
         .first { (shortest) -> shortest == shortestInRange.map { it.first }.toSet().minOf { it } }
-        .second
-        .first()
+        .first
+
+    val next = reachableFrom(destination)
+        .filterKeys { pos.neighbors().contains(it) }
+        .entries
+        .filterByMin { it.value }
+        .map { it.key }.minOf { it }
 
     this[pos] = Space
-    this[next] = tile
+    this[next] = fighter
     println("moved from $pos to $next")
-    reachableCache.clear()
-    println(debug())
     return next
-}
-
-internal fun Map<Pos, Tile>.narrow(): Map<Pos, Tile> {
-    val result = toMutableMap()
-    while (true) result
-        .filterValues { it is Space }.keys
-        .filter { it.isIrrelevantSpace(result) }
-        .also { if (it.isEmpty()) return result }
-        .forEach { result[it] = Wall }
 }
 
 internal fun Map<Pos, Tile>.adjacentTarget(pos: Pos, tile: Tile) =
     filterKeys { it.adjacentTo(pos) }.targets(tile).filterByMin { (this[it] as Fighter).health }.firstOrNull()
 
-internal fun <T> List<T>.filterByMin(f: (T) -> Int): List<T> {
+internal fun <T> Collection<T>.filterByMin(f: (T) -> Int): Collection<T> {
     if (isEmpty()) return this
     val min = minOf { f(it) }
     return filter { f(it) == min }
 }
 
-internal fun Map<Pos, Tile>.findSpaces(): Set<Set<Pos>> {
-    val result = mutableSetOf<Set<Pos>>()
-    while (true) {
-        val space =
-            entries.firstOrNull { it.value is Space && result.none { set -> set.contains(it.key) } }?.key ?: break
-        val set = mutableSetOf<Pos>()
-        fun addAccessible(space: Pos) {
-            set.add(space)
-            if (get(space) is Space) {
-                space.neighbors.filter { !set.contains(it) && this[it] !is Wall }.forEach { addAccessible(it) }
-            }
-        }
-        addAccessible(space)
-        result.add(set)
-    }
-    return result
-}
-
-internal fun Map<Pos, Tile>.reachableFrom(start: Pos, stopAt: Set<Pos>): Map<Pos, List<Pos>> {
-    val result = mutableMapOf<Pos, List<Pos>>()
-    fun addNeighborsOf(pos: Pos, fromStartToPos: List<Pos> = listOf()) {
-        for (next in neighborSpaces(pos).sortedBy { stopAt.minOf { stop -> it.distanceTo(stop) } }) {
-            val fromStartToNext = fromStartToPos.plus(next)
-            if (result[next].preferableTo(fromStartToNext)) continue
-
-            val soFar = result.filterKeys { stopAt.contains(it) }.values.minOfOrNull { it.size }
-            if (soFar != null && soFar < fromStartToNext.size) continue
-
-            result[next] = fromStartToNext
-            if (!stopAt.contains(next))
-                addNeighborsOf(next, fromStartToNext)
-        }
-    }
-    addNeighborsOf(start)
-    return result
-}
-
-internal fun List<Pos>?.preferableTo(other: List<Pos>) =
-    this != null && (size < other.size || size == other.size && this[0] < other[0])
-
-internal fun MutableMap<Pos, Tile>.attack(pos: Pos, reachableCache: MutableMap<Pos, Map<Pos, List<Pos>>>) {
+internal fun MutableMap<Pos, Tile>.attack(pos: Pos) {
     this[pos] =
         this[pos]!!.hit().let {
-            if (it is Fighter && it.health <= 0) Space.also {
-                reachableCache.clear()
-                println(debug())
-            } else it
+            if (it is Fighter && it.health <= 0) Space else it
         }
 }
 
@@ -173,21 +130,14 @@ internal class Goblin(health: Int) : Fighter(health) {
 }
 
 internal data class Pos(val x: Int, val y: Int) : Comparable<Pos> {
-    val neighbors by lazy { listOf(up, left, right, down) }
+    fun neighbors() = sequenceOf(above(), left(), right(), below())
 
-    val left by lazy { copy(x = x - 1) }
-    val right by lazy { copy(x = x + 1) }
-    val up by lazy { copy(y = y - 1) }
-    val down by lazy { copy(y = y + 1) }
+    fun below() = copy(y = y + 1)
+    fun right() = copy(x = x + 1)
+    fun left() = copy(x = x - 1)
+    fun above() = copy(y = y - 1)
 
-    fun isIrrelevantSpace(map: Map<Pos, Tile>): Boolean {
-        val neighborTiles = neighbors.map { map[it] }.groupingBy { it }.eachCount()
-        if (neighborTiles[Wall] == 4) return true
-        if (neighborTiles[Space] == 1 && neighborTiles[Wall] == 3) return true
-        return false
-    }
-
-    fun adjacentTo(target: Pos) = target.neighbors.contains(this)
+    fun adjacentTo(target: Pos) = target.neighbors().contains(this)
 
     override fun toString() = "($x,$y)"
 
@@ -200,7 +150,13 @@ internal data class Pos(val x: Int, val y: Int) : Comparable<Pos> {
     fun distanceTo(pos: Pos) = abs(x - pos.x) + abs(y - pos.y)
 }
 
-internal fun Map<Pos, Tile>.neighborSpaces(pos: Pos) = pos.neighbors.filter { this[it] is Space }
+internal fun Map<Pos, Tile>.tile(pos: Pos) = this[pos] ?: Space
+internal fun Map<Pos, Tile>.isSpace(pos: Pos) = tile(pos) is Space
+internal fun Map<Pos, Tile>.isWall(pos: Pos) = tile(pos) is Wall
+internal fun Map<Pos, Tile>.isObstacle(pos: Pos, fighter: Tile, fighterPos: Pos) =
+    pos != fighterPos && (isWall(pos) || tile(pos)::class == fighter::class)
+
+internal fun Map<Pos, Tile>.neighborSpaces(pos: Pos) = pos.neighbors().filter { this[it] is Space }
 
 internal fun String.toMap() = split("\n")
     .mapIndexed { y, row ->
