@@ -57,7 +57,6 @@ private fun Char.toTile(elvesAttackPower: Int) = when (this) {
 internal fun Map<Pos, Tile>.reachableFrom(start: Pos): Map<Pos, Int> {
     val result = mutableMapOf<Pos, Int>()
     fun follow(pos: Pos, travelled: Int = 0) {
-        result[pos]?.let { if (it < travelled) return }
         result[pos] = travelled
         pos.neighbors()
             .filter { isSpace(it) }
