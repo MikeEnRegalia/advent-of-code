@@ -3,12 +3,15 @@ package aoc2018
 fun day15BeverageBanditsPart2(input: String): Int {
     var attackPower = 4
     while (true) {
-        val (elvesLost, outcome) = day15BeverageBandits(input, elvesAttackPower = attackPower++)
+        val (elvesLost, outcome) = beverageBandits(input, elvesAttackPower = attackPower++)
         if (elvesLost == 0) return outcome
     }
 }
 
-fun day15BeverageBandits(input: String, elvesAttackPower: Int = 3): Pair<Int, Int> {
+fun day15BeverageBanditsPart1(input: String): Int =
+    beverageBandits(input).second
+
+internal fun beverageBandits(input: String, elvesAttackPower: Int = 3): Pair<Int, Int> {
     val map = input.loadInput(elvesAttackPower)
     val totalElves = map.values.count { it is Elf }
 
@@ -54,13 +57,12 @@ private fun Char.toTile(elvesAttackPower: Int) = when (this) {
 internal fun Map<Pos, Tile>.reachableFrom(start: Pos): Map<Pos, Int> {
     val result = mutableMapOf<Pos, Int>()
     fun follow(pos: Pos, travelled: Int = 0) {
-        val curr = result[pos]
-        if (curr != null && travelled > curr) return
+        result[pos]?.let { if (it < travelled) return }
         result[pos] = travelled
-        pos.neighbors().filter {
-            val itKnownDistance = result[it]
-            isSpace(it) && (itKnownDistance == null || itKnownDistance > travelled + 1)
-        }.forEach { follow(it, travelled + 1) }
+        pos.neighbors()
+            .filter { isSpace(it) }
+            .filter { neighbor -> result[neighbor]?.let { it > travelled + 1 } ?: true }
+            .forEach { follow(it, travelled + 1) }
     }
     follow(start)
     return result

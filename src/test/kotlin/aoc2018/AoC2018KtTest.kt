@@ -39,7 +39,7 @@ private const val INPUT = """################################
 internal class AoC2018KtTest {
     @Test
     fun test() {
-        day15BeverageBandits(
+        day15BeverageBanditsPart1(
             """#######
 #G..#E#
 #E#E.E#
@@ -47,12 +47,12 @@ internal class AoC2018KtTest {
 #...#E#
 #...E.#
 #######"""
-        ).second shouldBe 36334
+        ) shouldBe 36334
     }
 
     @Test
     fun part1() {
-        day15BeverageBandits(INPUT).second shouldBe 191575
+        day15BeverageBanditsPart1(INPUT) shouldBe 191575
     }
 
     @Test
