@@ -27,7 +27,7 @@ internal fun beverageBandits(input: String, elvesAttackPower: Int = 3): Pair<Int
                 if (this[fighterPos] is Space) return@forEach
                 fighter as Fighter
 
-                val adjacentTarget = adjacentTarget(fighterPos, fighter)
+                val adjacentTarget = adjacentTarget(fighterPos)
                 if (adjacentTarget != null) {
                     attack(fighter, adjacentTarget)
                 } else {
@@ -37,7 +37,7 @@ internal fun beverageBandits(input: String, elvesAttackPower: Int = 3): Pair<Int
                     if (nextPos != null) {
                         this[fighterPos] = Space
                         this[nextPos] = fighter
-                        adjacentTarget(nextPos, fighter)?.let { attack(fighter, it) }
+                        adjacentTarget(nextPos)?.let { attack(fighter, it) }
                     }
                 }
             }
@@ -113,13 +113,15 @@ internal fun List<RemotePosition>.closest() = filterByMinOf { it.distance }.map 
 
 internal fun List<Pos>.anyAdjacentTo(pos: Pos) = any { it.neighbors().contains(pos) }
 
-internal fun Dungeon.adjacentTarget(pos: Pos, fighter: Fighter) =
-    filterKeys { it.neighbors().contains(pos) }.targets(fighter)
+internal fun Dungeon.adjacentTarget(pos: Pos) =
+    adjacentTargets(pos)
         ?.filterByMinOf { (this[it] as Fighter).health }
         ?.firstOrNull()
 
-internal fun <T> Collection<T>.filterByMinOf(t: (T) -> Int) =
-    if (isEmpty()) this else minOf { t(it) }.let { min -> filter { t(it) == min } }
+internal fun Dungeon.adjacentTargets(pos: Pos) =
+    filterKeys { it.neighbors().contains(pos) }.targets(this[pos] as Fighter)
+
+internal fun <T> Collection<T>.filterByMinOf(t: (T) -> Int) = minOf { t(it) }.let { min -> filter { t(it) == min } }
 
 internal fun MutableDungeon.attack(attacker: Fighter, victim: Pos) {
     this[victim] = (this[victim] as Fighter).hitBy(attacker).let { if (it.health <= 0) Space else it }
