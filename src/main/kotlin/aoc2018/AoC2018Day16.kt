@@ -21,7 +21,7 @@ internal object AocDay16 {
     fun String.unwrapBrackets() = if (!contains("[")) this else substring(indexOf("[") + 1, indexOf("]"))
     fun String.toIntList() = split(Regex(if (contains(",")) ", " else " ")).map { it.toInt() }
 
-    data class OpCodeCandidate(val before: List<Int>, val command: List<Int>, val after: List<Int>)
+    data class OpCodeCandidate(val before: List<Int>, val cmd: List<Int>, val after: List<Int>)
 
     val opcodes = listOf<Opcode>(
         { r, a, b, c -> r[c] = r[a] + r[b] },
@@ -46,51 +46,34 @@ internal object AocDay16 {
         candidates.count { c -> opcodes.count { opcode -> test(c, opcode) } >= 3 }
 
     fun String.toProgram() = split(Regex("\n\n\n\n"))[1]
-        .split("\n").map { row ->
-            row.split(" ").map { it.toInt() }
-        }
+        .split("\n").map { row -> row.split(" ").map { it.toInt() } }
         .map { Instruction(it[0], it[1], it[2], it[3]) }
 
     data class Instruction(val opcodeNumber: Int, val a: Int, val b: Int, val c: Int)
 
-    fun List<Instruction>.eval(opcodesByNumber: Map<Int, Opcode>): Int {
-
-        println(opcodesByNumber.keys)
-
-        val r = mutableListOf(0, 0, 0, 0)
-        forEach { (opcodeNumber, a, b, c) ->
-            val opcode =
-                opcodesByNumber[opcodeNumber] ?: throw IllegalArgumentException(opcodeNumber.toString())
-            opcode(r, a, b, c)
-        }
-        return r[0]
-    }
+    fun List<Instruction>.eval(opcodes: Map<Int, Opcode>) =
+        mutableListOf(0, 0, 0, 0).let { r -> forEach { (n, a, b, c) -> (opcodes[n]!!)(r, a, b, c) }; r[0] }
 
     internal fun List<OpCodeCandidate>.identifyOpcodes(): Map<Int, Opcode> {
-        val allOpcodeNumbers = map { it.command[0] }.distinct().toSet()
+        val allNumbers = map { it.cmd[0] }.distinct().toSet()
         val result = mutableMapOf<Int, Opcode>()
         while (true) {
-            val newlyFound = allOpcodeNumbers
-                .mapNotNull { foo(result, it) }
+            val newlyFound = allNumbers.mapNotNull { n ->
+                filter { it.cmd[0] == n }.findOpcode(result.values)?.let { n to it }
+            }
             if (newlyFound.isEmpty()) return result
-            newlyFound.forEach { (n, op) -> result[n] = op }
+            result.putAll(newlyFound)
         }
     }
 
-    private fun List<OpCodeCandidate>.foo(
-        result: MutableMap<Int, Opcode>,
-        opcodeNumber: Int
-    ) =
+    private fun List<OpCodeCandidate>.findOpcode(known: Collection<Opcode>) =
         opcodes
-            .filterNot { it in result.values }
-            .filter { opcode ->
-                this.filter { it.command[0] == opcodeNumber }.all { test(it, opcode) }
-            }
+            .filterNot { it in known }
+            .filter { opcode -> all { test(it, opcode) } }
             .takeIf { it.size == 1 }
             ?.first()
-            ?.let { opcodeNumber to it }
 
 
     private fun test(c: OpCodeCandidate, opcode: Opcode) =
-        c.run { before.toMutableList().also { opcode(it, command[1], command[2], command[3]) } == after }
+        c.run { before.toMutableList().also { opcode(it, cmd[1], cmd[2], cmd[3]) } == after }
 }
