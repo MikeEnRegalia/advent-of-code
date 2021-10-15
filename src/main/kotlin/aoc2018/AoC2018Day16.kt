@@ -6,9 +6,8 @@ import aoc2018.AocDay16.solve
 import aoc2018.AocDay16.toOpcodeCandidates
 import aoc2018.AocDay16.toProgram
 
-fun day16ChronalClassificationPart1(input: String): Int = solve(input.toOpcodeCandidates())
-fun day16ChronalClassificationPart2(input: String): Int =
-    input.toProgram().eval(input.toOpcodeCandidates().identifyOpcodes())
+fun String.day16ChronalClassificationPart1(): Int = toOpcodeCandidates().solve()
+fun String.day16ChronalClassificationPart2(): Int = toProgram().eval(toOpcodeCandidates().identifyOpcodes())
 
 internal typealias Opcode = (MutableList<Int>, Int, Int, Int) -> Unit
 
@@ -42,8 +41,7 @@ internal object AocDay16 {
         { r, a, b, c -> r[c] = if (r[a] == r[b]) 1 else 0 },
     )
 
-    fun solve(candidates: List<OpCodeCandidate>) =
-        candidates.count { c -> opcodes.count { opcode -> test(c, opcode) } >= 3 }
+    fun List<OpCodeCandidate>.solve() = count { c -> opcodes.count { c.resultOf(it) } >= 3 }
 
     fun String.toProgram() = split(Regex("\n\n\n\n"))[1]
         .split("\n").map { row -> row.split(" ").map { it.toInt() } }
@@ -69,11 +67,11 @@ internal object AocDay16 {
     private fun List<OpCodeCandidate>.findOpcode(known: Collection<Opcode>) =
         opcodes
             .filterNot { it in known }
-            .filter { opcode -> all { test(it, opcode) } }
+            .filter { opcode -> all { it.resultOf(opcode) } }
             .takeIf { it.size == 1 }
             ?.first()
 
 
-    private fun test(c: OpCodeCandidate, opcode: Opcode) =
-        c.run { before.toMutableList().also { opcode(it, cmd[1], cmd[2], cmd[3]) } == after }
+    private fun OpCodeCandidate.resultOf(opcode: Opcode) =
+        before.toMutableList().also { opcode(it, cmd[1], cmd[2], cmd[3]) } == after
 }

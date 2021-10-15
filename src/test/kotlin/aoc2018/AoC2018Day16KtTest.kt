@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test
 
 internal class AoC2018Day16KtTest {
     @Test
-    fun test() = day16ChronalClassificationPart1(INPUT) shouldBe 677
+    fun test() = INPUT.day16ChronalClassificationPart1() shouldBe 677
 
     @Test
-    fun test2() = day16ChronalClassificationPart2(INPUT) shouldBe 540
+    fun test2() = INPUT.day16ChronalClassificationPart2() shouldBe 540
 }
 
 private const val INPUT = """Before: [1, 0, 2, 1]
