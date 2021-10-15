@@ -8,7 +8,7 @@ import aoc2018.AocDay16.toProgram
 
 fun day16ChronalClassificationPart1(input: String): Int = solve(input.toOpcodeCandidates())
 fun day16ChronalClassificationPart2(input: String): Int =
-    input.toProgram().eval(identifyOpcodes(input.toOpcodeCandidates()))
+    input.toProgram().eval(input.toOpcodeCandidates().identifyOpcodes())
 
 internal typealias Opcode = (MutableList<Int>, Int, Int, Int) -> Unit
 
@@ -66,14 +66,12 @@ internal object AocDay16 {
         return r[0]
     }
 
-
-    internal fun identifyOpcodes(candidates: List<OpCodeCandidate>): Map<Int, Opcode> {
-        val allOpcodeNumbers = candidates.map { it.command[0] }.distinct().toSet()
+    internal fun List<OpCodeCandidate>.identifyOpcodes(): Map<Int, Opcode> {
+        val allOpcodeNumbers = map { it.command[0] }.distinct().toSet()
         val result = mutableMapOf<Int, Opcode>()
         while (true) {
             val newlyFound = allOpcodeNumbers
-                .filterNot { it in result.keys }
-                .mapNotNull { candidates.foo(result, it) }
+                .mapNotNull { foo(result, it) }
             if (newlyFound.isEmpty()) return result
             newlyFound.forEach { (n, op) -> result[n] = op }
         }
