@@ -28,28 +28,28 @@ internal object AocDay16 {
     fun String.toOpCodeCandidate() = split(Regex(if (contains(",")) ", " else " ")).map { it.toInt() }
     fun String.bracketContents() = substring(indexOf("[") + 1, indexOf("]"))
 
-    val opcodes = mapOf<String, Opcode>(
-        "addr" to { r, a, b, c -> r[c] = r[a] + r[b] },
-        "addi" to { r, a, b, c -> r[c] = r[a] + b },
-        "mulr" to { r, a, b, c -> r[c] = r[a] * r[b] },
-        "muli" to { r, a, b, c -> r[c] = r[a] * b },
-        "banr" to { r, a, b, c -> r[c] = r[a].and(r[b]) },
-        "bani" to { r, a, b, c -> r[c] = r[a].and(b) },
-        "borr" to { r, a, b, c -> r[c] = r[a].or(r[b]) },
-        "bori" to { r, a, b, c -> r[c] = r[a].or(b) },
-        "setr" to { r, a, b, c -> r[c] = r[a] },
-        "seti" to { r, a, b, c -> r[c] = a },
-        "gtir" to { r, a, b, c -> r[c] = if (a > r[b]) 1 else 0 },
-        "gtri" to { r, a, b, c -> r[c] = if (r[a] > b) 1 else 0 },
-        "gtrr" to { r, a, b, c -> r[c] = if (r[a] > r[b]) 1 else 0 },
-        "eqir" to { r, a, b, c -> r[c] = if (a == r[b]) 1 else 0 },
-        "eqri" to { r, a, b, c -> r[c] = if (r[a] == b) 1 else 0 },
-        "eqrr" to { r, a, b, c -> r[c] = if (r[a] == r[b]) 1 else 0 },
+    val opcodes = listOf<Opcode>(
+        { r, a, b, c -> r[c] = r[a] + r[b] },
+        { r, a, b, c -> r[c] = r[a] + b },
+        { r, a, b, c -> r[c] = r[a] * r[b] },
+        { r, a, b, c -> r[c] = r[a] * b },
+        { r, a, b, c -> r[c] = r[a].and(r[b]) },
+        { r, a, b, c -> r[c] = r[a].and(b) },
+        { r, a, b, c -> r[c] = r[a].or(r[b]) },
+        { r, a, b, c -> r[c] = r[a].or(b) },
+        { r, a, _, c -> r[c] = r[a] },
+        { r, a, _, c -> r[c] = a },
+        { r, a, b, c -> r[c] = if (a > r[b]) 1 else 0 },
+        { r, a, b, c -> r[c] = if (r[a] > b) 1 else 0 },
+        { r, a, b, c -> r[c] = if (r[a] > r[b]) 1 else 0 },
+        { r, a, b, c -> r[c] = if (a == r[b]) 1 else 0 },
+        { r, a, b, c -> r[c] = if (r[a] == b) 1 else 0 },
+        { r, a, b, c -> r[c] = if (r[a] == r[b]) 1 else 0 },
     )
 
     fun solve(candidates: List<OpCodeCandidate>) = candidates.count { c ->
         c.run {
-            opcodes.values.count { opcode ->
+            opcodes.count { opcode ->
                 before.toMutableList().also { opcode(it, command[1], command[2], command[3]) } == after
             } >= 3
         }
@@ -85,7 +85,7 @@ internal object AocDay16 {
             val newlyFound = allOpcodeNumbers
                 .filterNot { it in result.keys }
                 .mapNotNull { opcodeNumber ->
-                    opcodes.values
+                    opcodes
                         .filterNot { it in result.values }
                         .filter { opcode ->
                             candidates.filter { it.command[0] == opcodeNumber }.all { test(it, opcode) }
