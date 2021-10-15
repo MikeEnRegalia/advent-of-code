@@ -62,11 +62,8 @@ internal object AocDay16 {
         }
     }
 
-    private fun Collection<Opcode>.match(candidates: List<OpCodeCandidate>) =
-        filter { opcode -> candidates.all { it.resultOf(opcode) } }
-            .takeIf { it.size == 1 }
-            ?.first()
-
+    private fun Collection<Opcode>.match(candidatesSameN: List<OpCodeCandidate>) =
+        filter { opcode -> candidatesSameN.all { it.resultOf(opcode) } }.takeIf { it.size == 1 }?.first()
 
     private fun OpCodeCandidate.resultOf(opcode: Opcode) =
         before.toMutableList().also { opcode(it, cmd[1], cmd[2], cmd[3]) } == after
