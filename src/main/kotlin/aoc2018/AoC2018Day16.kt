@@ -2,11 +2,11 @@ package aoc2018
 
 import aoc2018.AocDay16.eval
 import aoc2018.AocDay16.identifyOpcodes
-import aoc2018.AocDay16.solve
+import aoc2018.AocDay16.probe
 import aoc2018.AocDay16.toOpcodeCandidates
 import aoc2018.AocDay16.toProgram
 
-fun String.day16ChronalClassificationPart1(): Int = toOpcodeCandidates().solve()
+fun String.day16ChronalClassificationPart1(): Int = toOpcodeCandidates().probe()
 fun String.day16ChronalClassificationPart2(): Int = toProgram().eval(toOpcodeCandidates().identifyOpcodes())
 
 internal typealias Opcode = (MutableList<Int>, Int, Int, Int) -> Unit
@@ -17,7 +17,7 @@ internal object AocDay16 {
         .map { paragraph -> paragraph.split("\n").map { it.unwrapBrackets().toIntList() } }
         .map { OpCodeCandidate(it[0], it[1], it[2]) }
 
-    fun String.unwrapBrackets() = if (!contains("[")) this else substring(indexOf("[") + 1, indexOf("]"))
+    fun String.unwrapBrackets() = if (contains("[")) substring(indexOf("[") + 1, indexOf("]")) else this
     fun String.toIntList() = split(Regex(if (contains(",")) ", " else " ")).map { it.toInt() }
 
     data class OpCodeCandidate(val before: List<Int>, val cmd: List<Int>, val after: List<Int>)
@@ -41,7 +41,7 @@ internal object AocDay16 {
         { r, a, b, c -> r[c] = if (r[a] == r[b]) 1 else 0 },
     )
 
-    fun List<OpCodeCandidate>.solve() = count { c -> opcodes.count { c.resultOf(it) } >= 3 }
+    fun List<OpCodeCandidate>.probe() = count { c -> opcodes.count { c.resultOf(it) } >= 3 }
 
     fun String.toProgram() = split(Regex("\n\n\n\n"))[1]
         .split("\n").map { row -> row.split(" ").map { it.toInt() } }
@@ -56,18 +56,14 @@ internal object AocDay16 {
         val allNumbers = map { it.cmd[0] }.distinct().toSet()
         val result = mutableMapOf<Int, Opcode>()
         while (true) {
-            val newlyFound = allNumbers.mapNotNull { n ->
-                filter { it.cmd[0] == n }.findOpcode(result.values)?.let { n to it }
-            }
-            if (newlyFound.isEmpty()) return result
-            result.putAll(newlyFound)
+            val opcodes = opcodes.filterNot { it in result.values }
+            val newlyFound = allNumbers.mapNotNull { n -> opcodes.match(filter { it.cmd[0] == n })?.let { n to it } }
+            if (newlyFound.isNotEmpty()) result.putAll(newlyFound) else return result
         }
     }
 
-    private fun List<OpCodeCandidate>.findOpcode(known: Collection<Opcode>) =
-        opcodes
-            .filterNot { it in known }
-            .filter { opcode -> all { it.resultOf(opcode) } }
+    private fun Collection<Opcode>.match(candidates: List<OpCodeCandidate>) =
+        filter { opcode -> candidates.all { it.resultOf(opcode) } }
             .takeIf { it.size == 1 }
             ?.first()
 
