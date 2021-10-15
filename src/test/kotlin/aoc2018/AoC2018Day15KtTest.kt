@@ -36,7 +36,7 @@ private const val INPUT = """################################
 #######.####.######.....########
 ################################"""
 
-internal class AoC2018KtTest {
+internal class AoC2018Day15KtTest {
     @Test
     fun test() {
         day15BeverageBanditsPart1(
