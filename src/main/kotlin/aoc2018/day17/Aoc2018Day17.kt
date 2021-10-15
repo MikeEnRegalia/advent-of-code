@@ -5,9 +5,12 @@ fun day17ReservoirResearch(input: String) {
     println(map.render())
 }
 
-internal fun Set<Pos>.render(spring: Pos = Pos(500, 0)) =
-    (0..maxOf { it.y }).joinToString("\n") { y ->
-        (minOf { it.x }..maxOf { it.x }).joinToString("") { x ->
+internal fun Set<Pos>.render(spring: Pos = Pos(500, 0)): String {
+    val from = Pos(minOf { it.x }, 0)
+    val to = Pos(maxOf { it.x}, maxOf { it.y })
+
+    return (from.y..to.y).joinToString("\n") { y ->
+        (from.x..to.x).joinToString("") { x ->
             when {
                 Pos(x, y) == spring -> "+"
                 contains(Pos(x, y)) -> "#"
@@ -15,6 +18,7 @@ internal fun Set<Pos>.render(spring: Pos = Pos(500, 0)) =
             }
         }
     }
+}
 
 internal data class Pos(val x: Int, val y: Int)
 
