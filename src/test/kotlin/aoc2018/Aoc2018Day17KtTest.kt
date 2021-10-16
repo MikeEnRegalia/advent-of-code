@@ -16,12 +16,12 @@ x=506, y=1..2
 x=498, y=10..13
 x=504, y=10..13
 y=13, x=498..504"""
-        ) shouldBe 57
+        ) shouldBe (57 to 29)
     }
 
     @Test
     fun test() {
-        day17ReservoirResearch(INPUT) shouldBe 33362
+        day17ReservoirResearch(INPUT) shouldBe (33362 to 42)
     }
 
 }

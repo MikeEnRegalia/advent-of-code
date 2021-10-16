@@ -3,7 +3,7 @@ package aoc2018.day17
 import kotlin.math.max
 import kotlin.math.min
 
-fun day17ReservoirResearch(input: String): Int {
+fun day17ReservoirResearch(input: String): Pair<Int, Int> {
     val clay = input.loadMap()
     val flowingWater = mutableSetOf<Pos>()
     val stableWater = mutableSetOf<Pos>()
@@ -92,11 +92,10 @@ fun day17ReservoirResearch(input: String): Int {
         springs = springs.flatMap { fromSpring(it) }
     }
 
-    val water = flowingWater.union(stableWater).toMutableSet()
+    flowingWater.removeIf { w -> w.y !in clay.minOf { it.y }..clay.maxOf { it.y } }
+    stableWater.removeIf { w -> w.y !in clay.minOf { it.y }..clay.maxOf { it.y } }
 
-    water.removeIf { w -> w.y !in clay.minOf { it.y }..clay.maxOf { it.y } }
-
-    return water.size
+    return flowingWater.union(stableWater).size to stableWater.size
 }
 
 internal data class Pos(val x: Int, val y: Int) {
