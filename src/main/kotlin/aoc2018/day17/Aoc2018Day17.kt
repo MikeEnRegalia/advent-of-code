@@ -15,34 +15,21 @@ fun day17ReservoirResearch(input: String): Pair<Int, Int> {
     fun Pos.isFlowingWater() = this in flowingWater
     fun Pos.supportsWater() = isClay() || isStableWater()
 
-    fun Pos.bounds(): Bounds {
+    fun Pos.findBoundary(right: Boolean): Pair<Pos, Boolean> {
+        fun Pos.next(): Pos = if (right) right() else left()
         var p = this
-        var rightIsCliff = true
         while (true) {
             flowingWater.add(p)
-            if (!p.below().supportsWater()) break
-            if (p.right().isClay()) {
-                rightIsCliff = false
-                break
-            }
-            p = p.right()
+            val next = p.next()
+            if (!p.below().supportsWater()) return p to true
+            if (next.isClay()) return p to false
+            p = next
         }
-        val right = p
+    }
 
-        p = this
-        var leftIsCliff = true
-        while (true) {
-            flowingWater.add(p)
-            if (!p.below().supportsWater()) break
-            if (p.left().isClay()) {
-                leftIsCliff = false
-                break
-            }
-            p = p.left()
-        }
-
-        val left = p
-
+    fun Pos.bounds(): Bounds {
+        val (left, leftIsCliff) = findBoundary(right = false)
+        val (right, rightIsCliff) = findBoundary(right = true)
         return Bounds(left, leftIsCliff, right, rightIsCliff)
     }
 
