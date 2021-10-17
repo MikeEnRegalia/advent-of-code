@@ -62,7 +62,6 @@ fun day17ReservoirResearch(input: String): Pair<Int, Int> {
     }
 
     flowingWater.removeIf { w -> w.y !in clay.minOf { it.y }..clay.maxOf { it.y } }
-    stableWater.removeIf { w -> w.y !in clay.minOf { it.y }..clay.maxOf { it.y } }
 
     return flowingWater.union(stableWater).size to stableWater.size
 }
@@ -100,9 +99,7 @@ internal fun String.toClay(): List<Pos> = split(Regex(", "))
         val (axis, n) = tokens[0]
         val (_, rangeToken) = tokens[1]
         val (from, to) = rangeToken.split(Regex("""\.\.""")).map { it.toInt() }
-        val range = from..to
-        return if (axis == "x") range.map { Pos(n.toInt(), it) }
-        else range.map { Pos(it, n.toInt()) }
+        return (from..to).map { if (axis == "x") Pos(n.toInt(), it) else Pos(it, n.toInt()) }
     }
 
 internal fun String.loadMap() = split("\n").flatMap { it.toClay() }.toSet()
