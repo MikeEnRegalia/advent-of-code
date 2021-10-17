@@ -8,11 +8,12 @@ fun day17ReservoirResearch(input: String): Pair<Int, Int> {
     val flowingWater = mutableSetOf<Pos>()
     val stableWater = mutableSetOf<Pos>()
 
+    val minY = clay.minOf { it.y }
     val maxY = clay.maxOf { it.y }
 
     fun Pos.supportsWater() = this in clay || this in stableWater
 
-    fun Pos.findBoundary(right: Boolean): Pair<Pos, Boolean> {
+    fun Pos.flowHorizontally(right: Boolean): Pair<Pos, Boolean> {
         var p = this
         while (true) {
             flowingWater.add(p)
@@ -26,14 +27,14 @@ fun day17ReservoirResearch(input: String): Pair<Int, Int> {
     }
 
     fun Pos.bounds(): Bounds {
-        val (left, leftIsCliff) = findBoundary(right = false)
-        val (right, rightIsCliff) = findBoundary(right = true)
+        val (left, leftIsCliff) = flowHorizontally(right = false)
+        val (right, rightIsCliff) = flowHorizontally(right = true)
         return Bounds(left, leftIsCliff, right, rightIsCliff)
     }
 
-    fun fromSpring(spring: Pos): List<Pos> {
-        if (spring.below() in flowingWater) return listOf()
-        var p = spring
+    fun Pos.flowVertically(): List<Pos> {
+        if (below() in flowingWater) return listOf()
+        var p = this
 
         while (true) {
             flowingWater.add(p)
@@ -56,9 +57,9 @@ fun day17ReservoirResearch(input: String): Pair<Int, Int> {
         }
     }
 
-    with(mutableListOf(Pos(500, 0))) { while (isNotEmpty()) addAll(fromSpring(removeFirst())) }
+    with(mutableListOf(Pos(500, 0))) { while (isNotEmpty()) addAll(removeFirst().flowVertically()) }
 
-    flowingWater.removeIf { w -> w.y !in clay.minOf { it.y }..clay.maxOf { it.y } }
+    flowingWater.removeIf { it.y < minY || it.y > maxY }
 
     return flowingWater.union(stableWater).size to stableWater.size
 }
