@@ -10,20 +10,18 @@ fun day17ReservoirResearch(input: String): Pair<Int, Int> {
 
     val maxY = clay.maxOf { it.y }
 
-    fun Pos.isClay() = this in clay
-    fun Pos.isStableWater() = this in stableWater
-    fun Pos.isFlowingWater() = this in flowingWater
-    fun Pos.supportsWater() = isClay() || isStableWater()
+    fun Pos.supportsWater() = this in clay || this in stableWater
 
     fun Pos.findBoundary(right: Boolean): Pair<Pos, Boolean> {
-        fun Pos.next(): Pos = if (right) right() else left()
         var p = this
         while (true) {
             flowingWater.add(p)
-            val next = p.next()
-            if (!p.below().supportsWater()) return p to true
-            if (next.isClay()) return p to false
-            p = next
+            val next = if (right) p.right() else p.left()
+            when {
+                !p.below().supportsWater() -> return p to true
+                next in clay -> return p to false
+                else -> p = next
+            }
         }
     }
 
@@ -34,27 +32,25 @@ fun day17ReservoirResearch(input: String): Pair<Int, Int> {
     }
 
     fun fromSpring(spring: Pos): List<Pos> {
-        if (spring.below().isFlowingWater()) return listOf()
+        if (spring.below() in flowingWater) return listOf()
         var p = spring
+
         while (true) {
-            p = p.below()
-            if (p.y > maxY) return listOf()
-            if (p.supportsWater()) {
-                p = p.above()
-                break
-            }
             flowingWater.add(p)
+            val below = p.below()
+            when {
+                below.y > maxY -> return listOf()
+                below.supportsWater() -> break
+                else -> p = below
+            }
         }
 
         while (true) {
-            val bounds = p.bounds()
-            if (!bounds.isBasin()) {
-                return listOf(bounds.left, bounds.right)
-            }
-            val (left, _, right, _) = bounds
-
-            for (x in left.x..right.x) {
-                stableWater.add(Pos(x, p.y))
+            with(p.bounds()) {
+                when {
+                    leftIsCliff || rightIsCliff -> return listOf(left, right)
+                    else -> for (x in left.x..right.x) stableWater.add(Pos(x, p.y))
+                }
             }
             p = p.above()
         }
@@ -78,9 +74,7 @@ internal data class Pos(val x: Int, val y: Int) {
     fun above() = copy(y = y - 1)
 }
 
-internal data class Bounds(val left: Pos, val leftIsCliff: Boolean, val right: Pos, val rightIsCliff: Boolean) {
-    fun isBasin() = !leftIsCliff && !rightIsCliff
-}
+internal data class Bounds(val left: Pos, val leftIsCliff: Boolean, val right: Pos, val rightIsCliff: Boolean)
 
 @Suppress("unused")
 internal fun Set<Pos>.render(flowingWater: Set<Pos>, stableWater: Set<Pos>, spring: Pos = Pos(500, 0)): String {
