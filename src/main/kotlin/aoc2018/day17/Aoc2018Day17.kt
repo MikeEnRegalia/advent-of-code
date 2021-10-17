@@ -56,10 +56,7 @@ fun day17ReservoirResearch(input: String): Pair<Int, Int> {
         }
     }
 
-    val springs = mutableListOf(Pos(500, 0))
-    while (springs.isNotEmpty()) {
-        springs.addAll(fromSpring(springs.removeFirst()))
-    }
+    with(mutableListOf(Pos(500, 0))) { while (isNotEmpty()) addAll(fromSpring(removeFirst())) }
 
     flowingWater.removeIf { w -> w.y !in clay.minOf { it.y }..clay.maxOf { it.y } }
 
