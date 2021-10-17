@@ -16,31 +16,34 @@ fun day17ReservoirResearch(input: String): Pair<Int, Int> {
     fun Pos.supportsWater() = isClay() || isStableWater()
 
     fun Pos.bounds(): Bounds {
-        var right = x
+        var p = this
         var rightIsCliff = true
         while (true) {
-            flowingWater.add(Pos(right, y))
-            if (!Pos(right, y + 1).supportsWater()) break
-            if (Pos(right + 1, y).isClay()) {
+            flowingWater.add(p)
+            if (!p.below().supportsWater()) break
+            if (p.right().isClay()) {
                 rightIsCliff = false
                 break
             }
-            right++
+            p = p.right()
         }
+        val right = p
 
-        var left = x
+        p = this
         var leftIsCliff = true
         while (true) {
-            flowingWater.add(Pos(left, y))
-            if (!Pos(left, y + 1).supportsWater()) break
-            if (Pos(left - 1, y).isClay()) {
+            flowingWater.add(p)
+            if (!p.below().supportsWater()) break
+            if (p.left().isClay()) {
                 leftIsCliff = false
                 break
             }
-            left--
+            p = p.left()
         }
 
-        return Bounds(Pos(left, y), leftIsCliff, Pos(right, y), rightIsCliff)
+        val left = p
+
+        return Bounds(left, leftIsCliff, right, rightIsCliff)
     }
 
     fun fromSpring(spring: Pos): List<Pos> {
@@ -82,6 +85,8 @@ fun day17ReservoirResearch(input: String): Pair<Int, Int> {
 }
 
 internal data class Pos(val x: Int, val y: Int) {
+    fun left() = copy(x = x - 1)
+    fun right() = copy(x = x + 1)
     fun below() = copy(y = y + 1)
     fun above() = copy(y = y - 1)
 }
