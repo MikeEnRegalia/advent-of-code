@@ -21,7 +21,7 @@ y=13, x=498..504"""
 
     @Test
     fun test() {
-        day17ReservoirResearch(INPUT) shouldBe (33362 to 42)
+        day17ReservoirResearch(INPUT) shouldBe (33362 to 27801)
     }
 
 }

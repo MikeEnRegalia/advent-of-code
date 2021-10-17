@@ -15,25 +15,7 @@ fun day17ReservoirResearch(input: String): Pair<Int, Int> {
     fun Pos.isFlowingWater() = this in flowingWater
     fun Pos.supportsWater() = isClay() || isStableWater()
 
-    fun Pos.boundsIfBasin(): Pair<Int, Int>? {
-        var right = x
-        while (true) {
-            if (!Pos(right, y + 1).supportsWater()) return null
-            if (Pos(right + 1, y).isClay()) break
-            right++
-        }
-
-        var left = x
-        while (true) {
-            if (!Pos(left, y + 1).supportsWater()) return null
-            if (Pos(left - 1, y).isClay()) break
-            left--
-        }
-
-        return left to right
-    }
-
-    fun Pos.cliffs(): List<Pos> {
+    fun Pos.bounds(): Bounds {
         var right = x
         var rightIsCliff = true
         while (true) {
@@ -58,10 +40,7 @@ fun day17ReservoirResearch(input: String): Pair<Int, Int> {
             left--
         }
 
-        return listOfNotNull(
-            if (leftIsCliff) Pos(left, y) else null,
-            if (rightIsCliff) Pos(right, y) else null
-        )
+        return Bounds(Pos(left, y), leftIsCliff, Pos(right, y), rightIsCliff)
     }
 
     fun fromSpring(spring: Pos): List<Pos> {
@@ -78,9 +57,13 @@ fun day17ReservoirResearch(input: String): Pair<Int, Int> {
         }
 
         while (true) {
-            val (left, right) = p.boundsIfBasin() ?: return p.cliffs()
+            val bounds = p.bounds()
+            if (!bounds.isBasin()) {
+                return listOf(bounds.left, bounds.right)
+            }
+            val (left, _, right, _) = bounds
 
-            for (x in left..right) {
+            for (x in left.x..right.x) {
                 stableWater.add(Pos(x, p.y))
             }
             p = p.above()
@@ -101,6 +84,10 @@ fun day17ReservoirResearch(input: String): Pair<Int, Int> {
 internal data class Pos(val x: Int, val y: Int) {
     fun below() = copy(y = y + 1)
     fun above() = copy(y = y - 1)
+}
+
+internal data class Bounds(val left: Pos, val leftIsCliff: Boolean, val right: Pos, val rightIsCliff: Boolean) {
+    fun isBasin() = !leftIsCliff && !rightIsCliff
 }
 
 @Suppress("unused")
