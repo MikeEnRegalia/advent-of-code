@@ -8,9 +8,6 @@ fun day17ReservoirResearch(input: String): Pair<Int, Int> {
     val flowingWater = mutableSetOf<Pos>()
     val stableWater = mutableSetOf<Pos>()
 
-    val minY = clay.minOf { it.y }
-    val maxY = clay.maxOf { it.y }
-
     fun Pos.supportsWater() = this in clay || this in stableWater
 
     fun Pos.flowHorizontally(right: Boolean): Pair<Pos, Boolean> {
@@ -32,12 +29,15 @@ fun day17ReservoirResearch(input: String): Pair<Int, Int> {
         return Bounds(left, leftIsCliff, right, rightIsCliff)
     }
 
+    val minY = clay.minOf { it.y }
+    val maxY = clay.maxOf { it.y }
+
     fun Pos.flowVertically(): List<Pos> {
         if (below() in flowingWater) return listOf()
         var p = this
 
         while (true) {
-            flowingWater.add(p)
+            if (p.y in minY..maxY) flowingWater.add(p)
             val below = p.below()
             when {
                 below.y > maxY -> return listOf()
@@ -58,8 +58,6 @@ fun day17ReservoirResearch(input: String): Pair<Int, Int> {
     }
 
     with(mutableListOf(Pos(500, 0))) { while (isNotEmpty()) addAll(removeFirst().flowVertically()) }
-
-    flowingWater.removeIf { it.y < minY || it.y > maxY }
 
     return flowingWater.union(stableWater).size to stableWater.size
 }
