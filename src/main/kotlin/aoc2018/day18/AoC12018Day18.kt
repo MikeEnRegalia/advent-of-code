@@ -10,13 +10,13 @@ fun day18Settlers(input: String, rounds: Long = 10): Int {
 
     for (round in 1..rounds) {
         val newMap: Map<Pos, String> = map.entries.fold(mutableMapOf()) { newMap, e ->
-            val adjacent = e.key.adjacent().mapNotNull { map[it] }.groupingBy { it }.eachCount()
-            val adjacentTrees = adjacent.getOrDefault("|", 0)
-            val adjacentLumberyards = adjacent.getOrDefault("#", 0)
+            val (trees, lumberyards) = with(e.key.adjacent().mapNotNull { map[it] }.groupingBy { it }.eachCount()) {
+                getOrDefault("|", 0) to getOrDefault("#", 0)
+            }
             newMap[e.key] = when (e.value) {
-                "." -> if (adjacentTrees >= 3) "|" else "."
-                "|" -> if (adjacentLumberyards >= 3) "#" else "|"
-                "#" -> if (adjacentLumberyards >= 1 && adjacentTrees >= 1) "#" else "."
+                "." -> if (trees >= 3) "|" else "."
+                "|" -> if (lumberyards >= 3) "#" else "|"
+                "#" -> if (lumberyards >= 1 && trees >= 1) "#" else "."
                 else -> e.value
             }
             newMap
