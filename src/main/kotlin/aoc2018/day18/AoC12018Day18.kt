@@ -15,7 +15,7 @@ private fun Map<Pos, String>.evolve(rounds: Long): Map<Pos, String> {
     for (round in 1..rounds) {
         map = map.entries.fold(mutableMapOf()) { newMap, (pos, value) ->
             newMap.apply {
-                val (trees, lumberyards) = with(map.neighbors(pos)) { getOrDefault("|", 0) to getOrDefault("#", 0) }
+                val (trees, lumberyards) = with(map.neighbors(pos)) { count { it == "|" } to count { it == "#" } }
                 this[pos] = when (value) {
                     "." -> if (trees >= 3) "|" else "."
                     "|" -> if (lumberyards >= 3) "#" else "|"
@@ -41,4 +41,4 @@ internal fun Map<Pos, String>.neighbors(p: Pos) = sequence {
     for (dx in -1..1)
         for (dy in -1..1)
             if (dx != 0 || dy != 0) yield(Pos(p.x + dx, p.y + dy))
-}.mapNotNull { this[it] }.groupingBy { it }.eachCount()
+}.mapNotNull { this[it] }.toList()
