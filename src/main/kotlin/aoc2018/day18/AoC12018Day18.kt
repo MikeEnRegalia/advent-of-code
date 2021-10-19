@@ -15,32 +15,35 @@ private fun Map<Pos, String>.evolve(rounds: Long): Map<Pos, String> {
     val history = mutableListOf(map)
 
     for (round in 1..rounds) {
-        map = map.entries.fold(mutableMapOf()) { newMap, (pos, value) ->
-            newMap.apply {
-                val (trees, lumberyards) = with(map.neighbors(pos)) { countTrees() to countLumberyards() }
-                this[pos] = when (value) {
-                    "." -> if (trees >= 3) "|" else "."
-                    "|" -> if (lumberyards >= 3) "#" else "|"
-                    "#" -> if (lumberyards >= 1 && trees >= 1) "#" else "."
-                    else -> value
-                }
-            }
-        }
-
-        val prevRound = history.indexOf(map)
-        if (prevRound > -1) {
-            val toGo = rounds - round
-            val cycleLength = history.size - prevRound
-            return history[(prevRound + toGo % cycleLength).toInt()]
-        }
-
-        history += map
+        map = map.evolveOneRound()
+        history.shortcut(rounds, round, map)?.let { return it } ?: history += map
     }
     return map
 }
 
-internal fun Map<Pos, String>.neighbors(p: Pos) = sequence {
-    for (dx in -1..1)
-        for (dy in -1..1)
-            if (dx != 0 || dy != 0) yield(Pos(p.x + dx, p.y + dy))
-}.mapNotNull { this[it] }.toList()
+private fun Map<Pos, String>.evolveOneRound() = entries.fold(mutableMapOf<Pos, String>()) { newMap, (pos, value) ->
+    newMap.apply {
+        val (trees, lumberyards) = with(pos.neighbors(this@evolveOneRound)) { countTrees() to countLumberyards() }
+        this[pos] = when (value) {
+            "." -> if (trees >= 3) "|" else "."
+            "|" -> if (lumberyards >= 3) "#" else "|"
+            "#" -> if (lumberyards >= 1 && trees >= 1) "#" else "."
+            else -> value
+        }
+    }
+}
+
+private fun List<Map<Pos, String>>.shortcut(rounds: Long, round: Long, map: Map<Pos, String>): Map<Pos, String>? {
+    val prevRound = indexOf(map)
+    if (prevRound == -1) return null
+
+    val toGo = rounds - round
+    val cycleLength = size - prevRound
+    return this[(prevRound + toGo % cycleLength).toInt()]
+}
+
+internal fun Pos.neighbors(map: Map<Pos, String>) = neighborPositions().mapNotNull { map[it] }.toList()
+
+private fun Pos.neighborPositions() = sequence {
+    for (dx in -1..1) for (dy in -1..1) if (dx != 0 || dy != 0) yield(Pos(x + dx, y + dy))
+}
