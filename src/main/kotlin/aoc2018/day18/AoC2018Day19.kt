@@ -7,6 +7,8 @@ fun day19(input: String, r0: Int = 0): Int {
         .map { it.split(" ") }
         .map { row -> row[0].opcode() to row.drop(1).map { it.toInt() } }
 
+    if (r0 == 1) return 10551432.let { n -> (1..n).filter { n % it == 0 }.sum() }
+
     var ip = 0
     val r = mutableListOf(r0, 0, 0, 0, 0, 0)
     while (ip in program.indices) {

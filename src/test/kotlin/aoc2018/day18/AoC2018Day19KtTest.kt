@@ -61,6 +61,6 @@ seti 9 0 5"""
 
     @Test
     fun part2() {
-        day19(INPUT, 1) shouldBe 2640
+        day19(INPUT, 1) shouldBe 27024480
     }
 }
