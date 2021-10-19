@@ -3,10 +3,12 @@ package aoc2018.day18
 internal data class Pos(val x: Int, val y: Int)
 
 fun day18Settlers(input: String, rounds: Long = 10): Int =
-    input.split("\n")
-        .mapIndexed { y, row -> row.mapIndexed { x, c -> Pos(x, y) to c.toString() } }
+    input.split("\n").mapIndexed { y, row -> row.mapIndexed { x, c -> Pos(x, y) to c.toString() } }
         .flatten().toMap()
-        .evolve(rounds).values.let { values -> values.count { it == "|" } * values.count { it == "#" } }
+        .evolve(rounds).values.let { it.countTrees() * it.countLumberyards() }
+
+private fun Iterable<String>.countTrees() = count { it == "|" }
+private fun Iterable<String>.countLumberyards() = count { it == "#" }
 
 private fun Map<Pos, String>.evolve(rounds: Long): Map<Pos, String> {
     var map = this
@@ -15,7 +17,7 @@ private fun Map<Pos, String>.evolve(rounds: Long): Map<Pos, String> {
     for (round in 1..rounds) {
         map = map.entries.fold(mutableMapOf()) { newMap, (pos, value) ->
             newMap.apply {
-                val (trees, lumberyards) = with(map.neighbors(pos)) { count { it == "|" } to count { it == "#" } }
+                val (trees, lumberyards) = with(map.neighbors(pos)) { countTrees() to countLumberyards() }
                 this[pos] = when (value) {
                     "." -> if (trees >= 3) "|" else "."
                     "|" -> if (lumberyards >= 3) "#" else "|"
