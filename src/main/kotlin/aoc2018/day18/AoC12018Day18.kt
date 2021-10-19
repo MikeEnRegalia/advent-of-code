@@ -1,13 +1,13 @@
 package aoc2018.day18
 
-fun day18Settlers(input: String): Int {
+fun day18Settlers(input: String, rounds: Long = 10): Int {
     val initialMap = input.split("\n").mapIndexed { y, row -> row.mapIndexed { x, c -> Pos(x, y) to c.toString() } }
         .flatten()
         .toMap()
 
     var map = initialMap
-    for (round in 1..10) {
-        map = map.entries.fold(mutableMapOf()) { newMap, e ->
+    for (round in 1..rounds) {
+        val newMap: Map<Pos, String> = map.entries.fold(mutableMapOf()) { newMap, e ->
             val adjacent = e.key.adjacent().mapNotNull { map[it] }.groupingBy { it }.eachCount()
             val adjacentTrees = adjacent.getOrDefault("|", 0)
             val adjacentLumberyards = adjacent.getOrDefault("#", 0)
@@ -19,6 +19,8 @@ fun day18Settlers(input: String): Int {
             }
             newMap
         }
+        if (newMap == map) break
+        map = newMap
     }
 
     return with(map.values) { count { it == "|" } * count { it == "#" } }
