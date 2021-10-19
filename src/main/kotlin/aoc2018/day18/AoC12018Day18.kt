@@ -1,29 +1,27 @@
 package aoc2018.day18
 
 internal data class Pos(val x: Int, val y: Int)
+internal typealias Area = Map<Pos, String>
 
 fun day18Settlers(input: String, rounds: Long = 10): Int =
-    input.split("\n").mapIndexed { y, row -> row.mapIndexed { x, c -> Pos(x, y) to c.toString() } }
-        .flatten().toMap()
-        .evolve(rounds).values.let { it.countTrees() * it.countLumberyards() }
+    input.toArea().evolve(rounds).values.let { it.trees() * it.lumberyards() }
 
-private fun Iterable<String>.countTrees() = count { it == "|" }
-private fun Iterable<String>.countLumberyards() = count { it == "#" }
+private fun String.toArea() =
+    split("\n").flatMapIndexed { y, r -> r.mapIndexed { x, c -> Pos(x, y) to c.toString() } }.toMap()
 
-private fun Map<Pos, String>.evolve(rounds: Long): Map<Pos, String> {
-    var map = this
-    val history = mutableListOf(map)
+private fun Iterable<String>.trees() = count { it == "|" }
+private fun Iterable<String>.lumberyards() = count { it == "#" }
 
-    for (round in 1..rounds) {
-        map = map.evolveOneRound()
-        history.shortcut(rounds, round, map)?.let { return it } ?: history += map
+private fun Area.evolve(rounds: Long) = with(mutableListOf(this)) {
+    for (round in 1..rounds) last().evolveOnce().let { next ->
+        shortcut(rounds, round, next)?.let { return it } ?: add(next)
     }
-    return map
+    last()
 }
 
-private fun Map<Pos, String>.evolveOneRound() = entries.fold(mutableMapOf<Pos, String>()) { newMap, (pos, value) ->
-    newMap.apply {
-        val (trees, lumberyards) = with(pos.neighbors(this@evolveOneRound)) { countTrees() to countLumberyards() }
+private fun Area.evolveOnce() = entries.fold(mutableMapOf<Pos, String>()) { area, (pos, value) ->
+    area.apply {
+        val (trees, lumberyards) = with(pos.neighbors(this@evolveOnce)) { trees() to lumberyards() }
         this[pos] = when (value) {
             "." -> if (trees >= 3) "|" else "."
             "|" -> if (lumberyards >= 3) "#" else "|"
@@ -33,16 +31,11 @@ private fun Map<Pos, String>.evolveOneRound() = entries.fold(mutableMapOf<Pos, S
     }
 }
 
-private fun List<Map<Pos, String>>.shortcut(rounds: Long, round: Long, map: Map<Pos, String>): Map<Pos, String>? {
-    val prevRound = indexOf(map)
-    if (prevRound == -1) return null
+private fun MutableList<Area>.shortcut(rounds: Long, round: Long, area: Area) =
+    indexOf(area).takeIf { it != -1 }
+        ?.let { this[(it + (rounds - round) % (size - it)).toInt()] }
 
-    val toGo = rounds - round
-    val cycleLength = size - prevRound
-    return this[(prevRound + toGo % cycleLength).toInt()]
-}
-
-internal fun Pos.neighbors(map: Map<Pos, String>) = neighborPositions().mapNotNull { map[it] }.toList()
+internal fun Pos.neighbors(area: Area) = neighborPositions().mapNotNull { area[it] }.toList()
 
 private fun Pos.neighborPositions() = sequence {
     for (dx in -1..1) for (dy in -1..1) if (dx != 0 || dy != 0) yield(Pos(x + dx, y + dy))
