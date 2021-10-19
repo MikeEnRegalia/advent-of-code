@@ -80,6 +80,6 @@ internal class AoC12018Day18KtTest {
 
     @Test
     fun testPart2() {
-        day18Settlers(INPUT, 1000000000L) shouldBe 646437
+        day18Settlers(INPUT, 1000000000L) shouldBe 208080
     }
 }

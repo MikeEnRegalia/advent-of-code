@@ -5,7 +5,11 @@ fun day18Settlers(input: String, rounds: Long = 10): Int {
         .flatten()
         .toMap()
 
+    fun Map<Pos, String>.result() = with(values) { count { it == "|" } * count { it == "#" } }
+
     var map = initialMap
+    val prevMaps = mutableListOf(map)
+
     for (round in 1..rounds) {
         val newMap: Map<Pos, String> = map.entries.fold(mutableMapOf()) { newMap, e ->
             val adjacent = e.key.adjacent().mapNotNull { map[it] }.groupingBy { it }.eachCount()
@@ -19,11 +23,17 @@ fun day18Settlers(input: String, rounds: Long = 10): Int {
             }
             newMap
         }
-        if (newMap == map) break
         map = newMap
+        val prevRound = prevMaps.indexOf(map)
+        if (prevRound > -1) {
+            println("cycle detected in round $round (from $prevRound)")
+            val cycle = prevMaps.drop(prevRound)
+            return cycle[((rounds - round) % cycle.size).toInt()].result()
+        }
+        prevMaps += map
     }
 
-    return with(map.values) { count { it == "|" } * count { it == "#" } }
+    return map.result()
 }
 
 internal data class Pos(val x: Int, val y: Int) {
