@@ -12,7 +12,7 @@ fun day19(input: String, r0: Int = 0): Int {
     val r = mutableListOf(r0, 0, 0, 0, 0, 0)
     while (ip in program.indices) {
         r[ipReg] = ip
-        with(program[ip]) { r[c] = r.opcode(a, b) }
+        with(program[ip]) { r[c] = opcode(r, a, b) }
         ip = r[ipReg] + 1
         if (r0 == 1 && r[0] != 1) return r[2].divisors().sum()
     }
@@ -23,24 +23,24 @@ private fun Int.divisors() = (1..this).filter { this % it == 0 }
 
 internal data class Instruction(val opcode: Opcode, val a: Int, val b: Int, val c: Int)
 
-internal typealias Opcode = MutableList<Int>.(Int, Int) -> Int
+internal typealias Opcode = (MutableList<Int>, Int, Int) -> Int
 
 internal fun String.opcode(): Opcode = when (this) {
-    "addr" -> { a, b -> this[a] + this[b] }
-    "addi" -> { a, b -> this[a] + b }
-    "mulr" -> { a, b -> this[a] * this[b] }
-    "muli" -> { a, b -> this[a] * b }
-    "banr" -> { a, b -> this[a].and(this[b]) }
-    "bani" -> { a, b -> this[a].and(b) }
-    "borr" -> { a, b -> this[a].or(this[b]) }
-    "bori" -> { a, b -> this[a].or(b) }
-    "setr" -> { a, _ -> this[a] }
-    "seti" -> { a, _ -> a }
-    "gtir" -> { a, b -> if (a > this[b]) 1 else 0 }
-    "gtri" -> { a, b -> if (this[a] > b) 1 else 0 }
-    "gtrr" -> { a, b -> if (this[a] > this[b]) 1 else 0 }
-    "eqir" -> { a, b -> if (a == this[b]) 1 else 0 }
-    "eqri" -> { a, b -> if (this[a] == b) 1 else 0 }
-    "eqrr" -> { a, b -> if (this[a] == this[b]) 1 else 0 }
+    "addr" -> { r, a, b -> r[a] + r[b] }
+    "addi" -> { r, a, b -> r[a] + b }
+    "mulr" -> { r, a, b -> r[a] * r[b] }
+    "muli" -> { r, a, b -> r[a] * b }
+    "banr" -> { r, a, b -> r[a].and(r[b]) }
+    "bani" -> { r, a, b -> r[a].and(b) }
+    "borr" -> { r, a, b -> r[a].or(r[b]) }
+    "bori" -> { r, a, b -> r[a].or(b) }
+    "setr" -> { r, a, _ -> r[a] }
+    "seti" -> { _, a, _ -> a }
+    "gtir" -> { r, a, b -> if (a > r[b]) 1 else 0 }
+    "gtri" -> { r, a, b -> if (r[a] > b) 1 else 0 }
+    "gtrr" -> { r, a, b -> if (r[a] > r[b]) 1 else 0 }
+    "eqir" -> { r, a, b -> if (a == r[b]) 1 else 0 }
+    "eqri" -> { r, a, b -> if (r[a] == b) 1 else 0 }
+    "eqrr" -> { r, a, b -> if (r[a] == r[b]) 1 else 0 }
     else -> throw IllegalStateException(this)
 }
