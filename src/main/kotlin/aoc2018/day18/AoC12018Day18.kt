@@ -1,11 +1,9 @@
 package aoc2018.day18
 
 fun day18Settlers(input: String, rounds: Long = 10): Int {
-    val initialMap = input.split("\n").mapIndexed { y, row -> row.mapIndexed { x, c -> Pos(x, y) to c.toString() } }
-        .flatten()
-        .toMap()
-
-    fun Map<Pos, String>.result() = with(values) { count { it == "|" } * count { it == "#" } }
+    val initialMap = input.split("\n")
+        .mapIndexed { y, row -> row.mapIndexed { x, c -> Pos(x, y) to c.toString() } }
+        .flatten().toMap()
 
     var map = initialMap
     val prevMaps = mutableListOf(map)
@@ -28,12 +26,13 @@ fun day18Settlers(input: String, rounds: Long = 10): Int {
         if (prevRound > -1) {
             println("cycle detected in round $round (from $prevRound)")
             val cycle = prevMaps.drop(prevRound)
-            return cycle[((rounds - round) % cycle.size).toInt()].result()
+            map = cycle[((rounds - round) % cycle.size).toInt()]
+            break
         }
         prevMaps += map
     }
 
-    return map.result()
+    return with(map.values) { count { it == "|" } * count { it == "#" } }
 }
 
 internal data class Pos(val x: Int, val y: Int) {
