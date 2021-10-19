@@ -2,26 +2,26 @@ package aoc2018.day18
 
 
 fun day19(input: String, r0: Int = 0): Int {
-    val ipRegister = input.substring("#ip ".length, input.indexOf("\n")).toInt()
+    val ipReg = input.substring("#ip ".length, input.indexOf("\n")).toInt()
     val program = input.substring(input.indexOf("\n") + 1).split("\n")
         .map { it.split(" ") }
         .map { row -> row[0].opcode() to row.drop(1).map { it.toInt() } }
-
-    if (r0 == 1) return 10551432.let { n -> (1..n).filter { n % it == 0 }.sum() }
 
     var ip = 0
     val r = mutableListOf(r0, 0, 0, 0, 0, 0)
     while (ip in program.indices) {
         val (opcode, data) = program[ip]
-        r[ipRegister] = ip
+        r[ipReg] = ip
         r[data[2]] = r.opcode(data[0], data[1])
-        ip = r[ipRegister] + 1
+        ip = r[ipReg] + 1
+        if (r0 == 1 && r[0] != 1) return r[2].divisors().sum()
     }
     return r[0]
 }
 
-internal typealias Opcode = MutableList<Int>.(Int, Int) -> Int
+private fun Int.divisors() = (1..this).filter { this % it == 0 }
 
+internal typealias Opcode = MutableList<Int>.(Int, Int) -> Int
 internal fun String.opcode(): Opcode = when (this) {
     "addr" -> { a, b -> this[a] + this[b] }
     "addi" -> { a, b -> this[a] + b }
