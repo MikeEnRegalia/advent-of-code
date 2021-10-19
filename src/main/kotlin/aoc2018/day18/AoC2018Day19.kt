@@ -6,13 +6,13 @@ fun day19(input: String, r0: Int = 0): Int {
     val program = input.substring(input.indexOf("\n") + 1).split("\n")
         .map { it.split(" ") }
         .map { row -> row[0].opcode() to row.drop(1).map { it.toInt() } }
+        .map { (opcode, args) -> Instruction(opcode, args[0], args[1], args[2]) }
 
     var ip = 0
     val r = mutableListOf(r0, 0, 0, 0, 0, 0)
     while (ip in program.indices) {
-        val (opcode, data) = program[ip]
         r[ipReg] = ip
-        r[data[2]] = r.opcode(data[0], data[1])
+        with(program[ip]) { r[c] = r.opcode(a, b) }
         ip = r[ipReg] + 1
         if (r0 == 1 && r[0] != 1) return r[2].divisors().sum()
     }
@@ -21,7 +21,10 @@ fun day19(input: String, r0: Int = 0): Int {
 
 private fun Int.divisors() = (1..this).filter { this % it == 0 }
 
+internal data class Instruction(val opcode: Opcode, val a: Int, val b: Int, val c: Int)
+
 internal typealias Opcode = MutableList<Int>.(Int, Int) -> Int
+
 internal fun String.opcode(): Opcode = when (this) {
     "addr" -> { a, b -> this[a] + this[b] }
     "addi" -> { a, b -> this[a] + b }
