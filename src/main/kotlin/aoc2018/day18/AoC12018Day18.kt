@@ -1,12 +1,12 @@
 package aoc2018.day18
 
-fun day18Settlers(input: String, rounds: Long = 10): Int {
-    val initialMap = input.split("\n")
+internal data class Pos(val x: Int, val y: Int)
+
+fun day18Settlers(input: String, rounds: Long = 10): Int =
+    input.split("\n")
         .mapIndexed { y, row -> row.mapIndexed { x, c -> Pos(x, y) to c.toString() } }
         .flatten().toMap()
-
-    return with(initialMap.evolve(rounds)) { values.count { it == "|" } * values.count { it == "#" } }
-}
+        .evolve(rounds).values.let { values -> values.count { it == "|" } * values.count { it == "#" } }
 
 private fun Map<Pos, String>.evolve(rounds: Long): Map<Pos, String> {
     var map = this
@@ -14,7 +14,13 @@ private fun Map<Pos, String>.evolve(rounds: Long): Map<Pos, String> {
 
     for (round in 1..rounds) {
         val newMap: Map<Pos, String> = map.entries.fold(mutableMapOf()) { newMap, e ->
-            val (trees, lumberyards) = with(e.key.adjacent().mapNotNull { map[it] }.groupingBy { it }.eachCount()) {
+            val (trees, lumberyards) = with(sequence {
+                for (dx in -1..1) {
+                    for (dy in -1..1) {
+                        if (dx != 0 || dy != 0) yield(Pos(e.key.x + dx, e.key.y + dy))
+                    }
+                }
+            }.mapNotNull { map[it] }.groupingBy { it }.eachCount()) {
                 getOrDefault("|", 0) to getOrDefault("#", 0)
             }
             newMap[e.key] = when (e.value) {
@@ -26,23 +32,15 @@ private fun Map<Pos, String>.evolve(rounds: Long): Map<Pos, String> {
             newMap
         }
         map = newMap
+
         val prevRound = history.indexOf(map)
         if (prevRound > -1) {
-            val cycle = history.drop(prevRound)
-            map = cycle[((rounds - round) % cycle.size).toInt()]
-            break
+            val toGo = rounds - round
+            val cycleLength = history.size - prevRound
+            return history[(prevRound + toGo % cycleLength).toInt()]
         }
+
         history += map
     }
     return map
-}
-
-internal data class Pos(val x: Int, val y: Int) {
-    fun adjacent() = sequence {
-        for (dx in -1..1) {
-            for (dy in -1..1) {
-                if (dx != 0 || dy != 0) yield(Pos(x + dx, y + dy))
-            }
-        }
-    }
 }
