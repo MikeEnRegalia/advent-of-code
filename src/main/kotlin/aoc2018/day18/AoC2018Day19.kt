@@ -5,7 +5,7 @@ fun day19(input: String, r0: Int = 0): Int {
     val ipRegister = input.substring("#ip ".length, input.indexOf("\n")).toInt()
     val program = input.substring(input.indexOf("\n") + 1).split("\n")
         .map { it.split(" ") }
-        .map { it[0].opcode() to it.drop(1).map { it.toInt() } }
+        .map { row -> row[0].opcode() to row.drop(1).map { it.toInt() } }
 
     var ip = 0
     val r = mutableListOf(r0, 0, 0, 0, 0, 0)
