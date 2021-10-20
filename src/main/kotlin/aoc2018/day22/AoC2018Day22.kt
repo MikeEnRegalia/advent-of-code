@@ -16,8 +16,7 @@ data class Problem(val depth: Int, val targetX: Int, val targetY: Int) {
         else -> erosionLevel(x - 1, y) * erosionLevel(x, y - 1)
     }
 
-    fun erosionLevel(x: Int, y: Int) =
-        erosionCache[x to y] ?: calculateErosionLevel(x, y).also { erosionCache[x to y] = it }
+    fun erosionLevel(x: Int, y: Int) = erosionCache.computeIfAbsent(x to y) { calculateErosionLevel(x, y) }
 
     private fun calculateErosionLevel(x: Int, y: Int) = (geologicalIndex(x, y) + depth) % 20183
 }
