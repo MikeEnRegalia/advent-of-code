@@ -1,4 +1,4 @@
-package aoc2018.day18
+package aoc2018.day19
 
 fun day19(input: String, r0: Int = 0): Int {
     val ipReg = input.substring("#ip ".length, input.indexOf("\n")).toInt()

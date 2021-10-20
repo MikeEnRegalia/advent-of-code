@@ -1,4 +1,4 @@
-package aoc2018.day18
+package aoc2018.day19
 
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test

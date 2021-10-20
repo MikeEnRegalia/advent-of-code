@@ -1,6 +1,6 @@
 package aoc2018.day21
 
-import aoc2018.day18.opcode
+import aoc2018.day19.opcode
 
 fun day21(input: String, part2: Boolean = false) = with(input.parseProgram()) {
     if (!part2) eval { it } else {
