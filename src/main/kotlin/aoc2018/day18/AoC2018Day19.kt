@@ -1,6 +1,5 @@
 package aoc2018.day18
 
-
 fun day19(input: String, r0: Int = 0): Int {
     val ipReg = input.substring("#ip ".length, input.indexOf("\n")).toInt()
     val program = input.substring(input.indexOf("\n") + 1).split("\n")
@@ -25,7 +24,7 @@ internal data class Instruction(val opcode: Opcode, val a: Int, val b: Int, val 
 
 internal typealias Opcode = (MutableList<Int>, Int, Int) -> Int
 
-internal fun String.opcode(): Opcode = when (this) {
+fun String.opcode(): Opcode = when (this) {
     "addr" -> { r, a, b -> r[a] + r[b] }
     "addi" -> { r, a, b -> r[a] + b }
     "mulr" -> { r, a, b -> r[a] * r[b] }

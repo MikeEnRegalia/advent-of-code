@@ -3,11 +3,7 @@ package aoc2018.day21
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 
-internal class AoC2018Day21KtTest {
-    @Test
-    fun test() {
-        day21(
-            """#ip 2
+private const val INPUT = """#ip 2
 seti 123 0 5
 bani 5 456 5
 eqri 5 72 5
@@ -39,7 +35,16 @@ seti 7 8 2
 eqrr 5 0 1
 addr 1 2 2
 seti 5 0 2"""
-        ) shouldBe 11050031
+
+internal class AoC2018Day21KtTest {
+    @Test
+    fun part1() {
+        day21(INPUT) shouldBe 11050031
+    }
+
+    @Test
+    fun part2() {
+        day21(INPUT, part2 = true) shouldBe 11341721
     }
 
 }
