@@ -2,8 +2,17 @@ package aoc2018.day21
 
 import aoc2018.day18.opcode
 
-fun day21(input: String, part2: Boolean = false) =
-    with(input.parseProgram()) { if (!part2) day21Part1() else day21Part2() }
+fun day21(input: String, part2: Boolean = false) = with(input.parseProgram()) {
+    if (!part2) eval { it } else {
+        val history = mutableSetOf<Int>()
+        var last: Int? = null
+        eval {
+            if (!history.add(it)) last else {
+                last = it; null
+            }
+        }
+    }
+}
 
 private fun String.parseProgram() =
     substring(indexOf("\n") + 1).split("\n").map { it.split(" ") }
@@ -15,32 +24,14 @@ internal data class Instruction(val opcode: Opcode, val a: Int, val b: Int, val 
 internal data class Program(val instructions: List<Instruction>, val ipReg: Int)
 internal typealias Opcode = (MutableList<Int>, Int, Int) -> Int
 
-private fun Program.day21Part1(): Int? {
+private fun Program.eval(t: (Int) -> Int?): Int? {
     var ip = 0
     val r = mutableListOf(0, 0, 0, 0, 0, 0)
     while (ip in instructions.indices) {
         r[ipReg] = ip
-        if (ip == 28) return r[5]
+        if (ip == 28) t(r[5])?.let { return it }
         with(instructions[ip]) { r[c] = opcode(r, a, b) }
         ip = r[ipReg] + 1
     }
     return null
-}
-
-private fun Program.day21Part2(): Int {
-    var last = 0
-    val seenBefore = mutableSetOf<Int>()
-    var ip = 0
-    val r = mutableListOf(0, 0, 0, 0, 0, 0)
-    while (ip in instructions.indices) {
-        r[ipReg] = ip
-        if (ip == 28) {
-            if (!seenBefore.add(r[5])) {
-                return last
-            } else last = r[5]
-        }
-        with(instructions[ip]) { r[c] = opcode(r, a, b) }
-        ip = r[ipReg] + 1
-    }
-    return last
 }
