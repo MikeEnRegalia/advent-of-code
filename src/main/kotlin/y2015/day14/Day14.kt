@@ -12,7 +12,7 @@ fun main() {
 
     (1..2503)
         .fold(mutableMapOf<String, Int>()) { acc, time ->
-            val race = deer.associate { Pair(it.name, it.travelled(time)) }
+            val race = deer.associate { it.name to it.travelled(time) }
             val maxDistance = race.values.maxOrNull()
             race
                 .filterValues { it == maxDistance }.keys

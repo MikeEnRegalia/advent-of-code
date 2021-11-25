@@ -1,8 +1,12 @@
 package aoc2018.day22
 
+import aoc2018.day22.Tool.TORCH
+
 fun day22(depth: Int, targetX: Int, targetY: Int): Int = with(Cave(depth, targetX, targetY)) {
-    zeroToTarget().sumOf { (x, y) -> erosionLevel(x, y) % 3 }
+    zeroToTarget().sumOf { (x, y) -> type(x, y) }
 }
+
+internal fun Cave.type(x: Int, y: Int) = erosionLevel(x, y) % 3
 
 internal data class Cave(val depth: Int, val targetX: Int, val targetY: Int) {
     val erosionCache: MutableMap<Pair<Int, Int>, Int> = mutableMapOf()
@@ -20,3 +24,18 @@ internal fun Cave.geologicalIndex(x: Int, y: Int): Int = when {
 }
 
 internal fun Cave.zeroToTarget() = (0..targetX).flatMap { x -> (0..targetY).map { y -> x to y } }
+
+fun day22Part2(depth: Int, targetX: Int, targetY: Int): Int {
+    val cave = Cave(depth, targetX, targetY)
+
+    var tool = TORCH
+
+
+    return 42
+}
+
+internal enum class Tool {
+    TORCH,
+    CLIMBING_GEAR,
+    NEITHER
+}

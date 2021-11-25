@@ -10,15 +10,17 @@ enum class Direction {
     WEST,
     ;
 
-    fun turn(right: Boolean) = if (right) values().nextWrapping(this) else values().prevWrapping(this)
+    fun turn(right: Boolean) = values().getModulo(this, if (right) 1 else -1)
 }
 
-fun <T> Array<T>.nextWrapping(t: T) = getModulo(indexOf(t) + 1)
-fun <T> Array<T>.prevWrapping(t: T) = getModulo(indexOf(t) - 1)
-fun <T> Array<T>.getModulo(index: Int) = this[(index + size) % size]
+fun <T> Array<T>.getModulo(t: T, offset: Int) = this[(indexOf(t) + size + offset) % size]
 
 data class Pos(val x: Int, val y: Int, val facing: Direction) {
-    fun execute(s: String) = turn(s.substring(0, 1) == "R").move(s.substring(1).toInt())
+    fun execute(s: String): Pos {
+        val right = s.substring(0, 1) == "R"
+        val steps = s.substring(1).toInt()
+        return turn(right).move(steps)
+    }
 
     fun move(steps: Int) = when (facing) {
         NORTH -> copy(y = y - steps)
@@ -28,9 +30,12 @@ data class Pos(val x: Int, val y: Int, val facing: Direction) {
     }
 
     fun turn(right: Boolean) = copy(facing = facing.turn(right))
+
 }
+
+fun Pos.distance() = abs(x) + abs(y)
 
 fun aoc2016day01Part1(input: String) =
     input.split(", ".toRegex())
         .fold(Pos(0, 0, NORTH), Pos::execute)
-        .let { (x, y) -> abs(x) + abs(y) }
+        .distance()

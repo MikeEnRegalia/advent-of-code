@@ -1,8 +1,7 @@
 package y2018.day01
 
 fun main(): Unit = with(loadInput()) {
-    sum().also { println(it) }
-    firstDuplicateSum().also { println(it) }
+    println("part 1: ${sum()}, part 2: ${firstDuplicateSum()})")
 }
 
 private fun loadInput() = generateSequence(::readLine).map { it.toInt() }.toList()

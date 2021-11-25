@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "1.5.31"
+    kotlin("jvm") version "1.6.0"
     java
 }
 
@@ -12,7 +12,7 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.5.31")
-    implementation ("com.google.code.gson:gson:2.8.8")
+    implementation ("com.google.code.gson:gson:2.8.9")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
     testImplementation("io.kotest:kotest-assertions-core:4.6.3")
 
