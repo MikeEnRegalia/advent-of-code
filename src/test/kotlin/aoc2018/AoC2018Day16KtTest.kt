@@ -1,5 +1,7 @@
 package aoc2018
 
+import aoc2018.day16.day16ChronalClassificationPart1
+import aoc2018.day16.day16ChronalClassificationPart2
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 

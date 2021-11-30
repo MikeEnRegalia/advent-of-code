@@ -1,5 +1,7 @@
 package aoc2018
 
+import aoc2018.day15.day15BeverageBanditsPart1
+import aoc2018.day15.day15BeverageBanditsPart2
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 

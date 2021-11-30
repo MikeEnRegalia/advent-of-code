@@ -19,17 +19,19 @@ private fun Area.evolve(rounds: Long) = with(mutableListOf(this)) {
     last()
 }
 
-private fun Area.evolveOnce() = entries.fold(mutableMapOf<Pos, String>()) { area, (pos, value) ->
-    area.apply {
-        val (trees, lumberyards) = with(pos.neighbors(this@evolveOnce)) { trees() to lumberyards() }
-        this[pos] = when (value) {
-            "." -> if (trees >= 3) "|" else "."
-            "|" -> if (lumberyards >= 3) "#" else "|"
-            "#" -> if (lumberyards >= 1 && trees >= 1) "#" else "."
-            else -> value
+private fun Area.evolveOnce() =
+    entries
+        .fold(mutableMapOf<Pos, String>()) { area, (pos, value) ->
+            area.apply {
+                val (trees, lumberyards) = with(pos.neighbors(this@evolveOnce)) { trees() to lumberyards() }
+                this[pos] = when (value) {
+                    "." -> if (trees >= 3) "|" else "."
+                    "|" -> if (lumberyards >= 3) "#" else "|"
+                    "#" -> if (lumberyards >= 1 && trees >= 1) "#" else "."
+                    else -> value
+                }
+            }
         }
-    }
-}
 
 private fun MutableList<Area>.shortcut(rounds: Long, round: Long, area: Area) =
     indexOf(area).takeIf { it != -1 }
