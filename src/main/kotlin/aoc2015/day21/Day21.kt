@@ -6,19 +6,13 @@ fun main() {
     val boss = Player(100, listOf(Item(0, 8, 2)))
     equipments()
         .partition { play(it, boss) }
-        .let { (won, lost) ->
-            println(won.minOf { it.cost })
-            println(lost.maxOf { it.cost })
-        }
+        .let { (won, lost) -> listOf(won.minOf { it.cost }, lost.maxOf { it.cost }) }
+        .forEach(::println)
 }
 
 fun play(player: Player, boss: Player): Boolean {
-    sequence {
-        while (true) {
-            yield(0 to 1)
-            yield(1 to 0)
-        }
-    }.fold(mutableListOf(player, boss)) { players, (player, opponent) ->
+    var i = 0
+    generateSequence { (i % 2 to (i + 1) % 2).also { i++ } }.fold(mutableListOf(player, boss)) { players, (player, opponent) ->
         players[opponent] = players[opponent].hitBy(players[player])
         if (players[opponent].hitPoints <= 0) return opponent == 1
         players
