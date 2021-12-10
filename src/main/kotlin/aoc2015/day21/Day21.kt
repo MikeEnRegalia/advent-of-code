@@ -3,16 +3,16 @@ package aoc2015.day21
 import kotlin.math.max
 
 fun main() {
-    val boss = Stats(100, listOf(Item(0, 8, 2)))
+    val boss = Player(100, listOf(Item(0, 8, 2)))
     equipments()
         .partition { play(it, boss) }
         .let { (won, lost) ->
-            won.minOf { it.cost }.also { println(it) }
-            lost.maxOf { it.cost }.also { println(it) }
+            println(won.minOf { it.cost })
+            println(lost.maxOf { it.cost })
         }
 }
 
-fun play(player: Stats, boss: Stats): Boolean {
+fun play(player: Player, boss: Player): Boolean {
     sequence {
         while (true) {
             yield(0 to 1)
@@ -26,27 +26,27 @@ fun play(player: Stats, boss: Stats): Boolean {
     return false
 }
 
-data class Item(val cost: Int, val damage: Int, val armor: Int)
 
-data class Stats(val hitPoints: Int, val items: List<Item>) {
+data class Player(val hitPoints: Int, val items: List<Item>) {
     val cost = items.sumOf { it.cost }
     val damage = items.sumOf { it.damage }
     val armor = items.sumOf { it.armor }
-    fun hitBy(o: Stats) = copy(hitPoints = hitPoints - damageDoneBy(o))
+    fun hitBy(o: Player) = copy(hitPoints = hitPoints - damageDoneBy(o))
     fun with(i: Item) = copy(items = items + i)
+    fun damageDoneBy(o: Player) = max(1, o.damage - armor)
 }
 
-fun Stats.damageDoneBy(o: Stats) = max(1, o.damage - armor)
+data class Item(val cost: Int, val damage: Int = 0, val armor: Int = 0)
 
 private fun equipments() = sequence {
-    fun weapons(vararg data: Pair<Int, Int>) = data.map { (cost, dmg) -> Item(cost, dmg, 0) }
-    fun armors(vararg data: Pair<Int, Int>) = data.map { Item(it.first, 0, it.second) }
+    fun weapons(vararg data: Pair<Int, Int>) = data.map { (cost, damage) -> Item(cost, damage = damage) }
+    fun armors(vararg data: Pair<Int, Int>) = data.map { (cost, armor) -> Item(cost, armor = armor) }
 
     val weapons = weapons(8 to 4, 10 to 5, 25 to 6, 40 to 7, 74 to 8)
     val armor = armors(13 to 1, 31 to 2, 53 to 3, 75 to 4, 102 to 5)
     val rings = weapons(25 to 1, 50 to 2, 100 to 3) + armors(20 to 1, 40 to 2, 80 to 3)
 
-    fun equip(vararg items: Item) = Stats(100, items.toList())
+    fun equip(vararg items: Item) = Player(100, items.toList())
 
     for (w in weapons) {
         yield(equip(w))
