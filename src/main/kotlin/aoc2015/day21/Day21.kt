@@ -4,22 +4,21 @@ import kotlin.math.max
 
 fun main() {
     val boss = Player(100, listOf(Item(0, 8, 2)))
-    equipments()
-        .partition { play(it, boss) }
+    equipments().partition { play(it, boss) }
         .let { (won, lost) -> listOf(won.minOf { it.cost }, lost.maxOf { it.cost }) }
         .forEach(::println)
 }
 
 fun play(player: Player, boss: Player): Boolean {
     var i = 0
-    generateSequence { (i % 2 to (i + 1) % 2).also { i++ } }.fold(mutableListOf(player, boss)) { players, (player, opponent) ->
-        players[opponent] = players[opponent].hitBy(players[player])
-        if (players[opponent].hitPoints <= 0) return opponent == 1
-        players
-    }
+    generateSequence { (i % 2 to (i + 1) % 2).also { i++ } }
+        .fold(mutableListOf(player, boss)) { fighters, (playerIndex, bossIndex) ->
+            fighters[bossIndex] = fighters[bossIndex].hitBy(fighters[playerIndex])
+            if (fighters[bossIndex].hitPoints <= 0) return bossIndex == 1
+            fighters
+        }
     return false
 }
-
 
 data class Player(val hitPoints: Int, val items: List<Item>) {
     val cost = items.sumOf { it.cost }
