@@ -9,16 +9,10 @@ fun main() {
         .forEach(::println)
 }
 
-fun play(player: Player, boss: Player): Boolean {
-    var i = 0
-    generateSequence { (i % 2 to (i + 1) % 2).also { i++ } }
-        .fold(mutableListOf(player, boss)) { fighters, (playerIndex, bossIndex) ->
-            fighters[bossIndex] = fighters[bossIndex].hitBy(fighters[playerIndex])
-            if (fighters[bossIndex].hitPoints <= 0) return bossIndex == 1
-            fighters
-        }
-    return false
-}
+fun play(player: Player, boss: Player) =
+    generateSequence(boss to player) { (opponent, player) -> player to opponent.hitBy(player) }
+        .mapIndexedNotNull { i, (_, opponent) -> if (opponent.hitPoints <= 0) i % 2 == 1 else null }
+        .first()
 
 data class Player(val hitPoints: Int, val items: List<Item>) {
     val cost = items.sumOf { it.cost }
