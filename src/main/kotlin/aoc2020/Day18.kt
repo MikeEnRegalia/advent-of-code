@@ -1,38 +1,49 @@
 package aoc2020
 
+import aoc2020.AoC2020Day18.Parser
+
 fun main() {
-    generateSequence(::readLine).map { AoC2020Day18.Parser(it).expression() }.sum().also { println(it) }
+    Parser("((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2", proper = true).expression().also { println(it) }
+    with(generateSequence(::readLine).toList()) {
+        sumOf { Parser(it, proper = false).expression() }.also { println(it) }
+        sumOf { Parser(it, proper = true).expression() }.also { println(it) }
+    }
 }
 
 object AoC2020Day18 {
-    class Parser(val line: String, var pos: Int = 0) {
+    class Parser(val line: String, var pos: Int = 0, val proper: Boolean) {
 
         fun expression(parentheses: Boolean = false): Long {
             if (parentheses) read()
-            var result = 0L
+            val r = mutableListOf<Long>()
             while (pos != line.length) {
                 val c = peek() ?: break
                 when {
-                    c.isDigit() -> result = literal()
-                    c == '(' -> result = expression(true)
+                    c.isDigit() -> r += literal()
+                    c == '(' -> r += expression(true)
                     c == '+' -> {
                         read()
                         if (peek() == ' ') read()
-                        result += if (peek()!!.isDigit()) literal() else expression(true)
+                        r[r.size - 1] =
+                            r.last() + if (peek()!!.isDigit()) literal() else expression(true)
                     }
                     c == '*' -> {
                         read()
                         if (peek() == ' ') read()
-                        result *= if (peek()!!.isDigit()) literal() else expression(true)
+                        if (proper) {
+                            r += if (peek()!!.isDigit()) literal() else expression(true)
+                        } else {
+                            r[r.size - 1] = r.last() * if (peek()!!.isDigit()) literal() else expression(true)
+                        }
                     }
                     c == ')' -> {
-                        read()
-                        return result
+                        if (parentheses) read()
+                        return r.reduce(Long::times)
                     }
                 }
                 if (peek() == ' ') read()
             }
-            return result
+            return r.reduce(Long::times)
         }
 
         fun literal() = buildString {
