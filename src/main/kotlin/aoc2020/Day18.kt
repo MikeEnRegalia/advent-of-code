@@ -2,16 +2,12 @@ package aoc2020
 
 import aoc2020.AoC2020Day18.Parser
 
-fun main() {
-    Parser("((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2", proper = true).expression().also { println(it) }
-    with(generateSequence(::readLine).toList()) {
-        sumOf { Parser(it, proper = false).expression() }.also { println(it) }
-        sumOf { Parser(it, proper = true).expression() }.also { println(it) }
-    }
+fun main() = with(generateSequence(::readLine).toList()) {
+    sequenceOf(false, true).forEach { proper -> sumOf { Parser(it, proper).expression() }.also { println(it) } }
 }
 
 object AoC2020Day18 {
-    class Parser(val line: String, var pos: Int = 0, val proper: Boolean) {
+    class Parser(val line: String, val proper: Boolean, var pos: Int = 0) {
 
         fun expression(parentheses: Boolean = false): Long {
             if (parentheses) read()
@@ -46,16 +42,10 @@ object AoC2020Day18 {
             return r.reduce(Long::times)
         }
 
-        fun literal() = buildString {
-            while (peek()?.isDigit() == true) append(read())
-        }.toLong()
+        fun literal() = buildString { while (peek()?.isDigit() == true) append(read()) }.toLong()
 
         fun peek() = line.getOrNull(pos)
-        fun read(): Char {
-            val result = peek()
-            pos++
-            return result!!
-        }
-    }
 
+        fun read(): Char = peek().also { pos++ }!!
+    }
 }
