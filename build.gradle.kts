@@ -11,12 +11,12 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.5.31")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.0")
     implementation ("com.google.code.gson:gson:2.8.9")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
-    testImplementation("io.kotest:kotest-assertions-core:4.6.3")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
+    testImplementation("io.kotest:kotest-assertions-core:5.0.3")
 
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.1")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
 }
 
 tasks.getByName<Test>("test") {
