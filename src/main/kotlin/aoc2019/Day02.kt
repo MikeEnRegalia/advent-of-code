@@ -41,6 +41,16 @@ fun runIntCode(
                 output(p0())
                 pos += 2
             }
+            5 -> pos = if (p0() != 0) p1() else pos + 3
+            6 -> pos = if (p0() == 0) p1() else pos + 3
+            7 -> {
+                code[code[pos + 3]!!] = if (p0() < p1()) 1 else 0
+                pos += 4
+            }
+            8 -> {
+                code[code[pos + 3]!!] = if (p0() == p1()) 1 else 0
+                pos += 4
+            }
             99 -> return code[0]
         }
     }

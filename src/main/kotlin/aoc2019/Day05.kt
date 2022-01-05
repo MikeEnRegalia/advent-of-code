@@ -1,5 +1,7 @@
 package aoc2019
 
 fun main() {
-    runIntCode(readln().split(",").map(String::toInt), { 1 }, ::println)
+    val program = readln().split(",")
+    runIntCode(program.map(String::toInt), { 1 }, ::println)
+    runIntCode(program.map(String::toInt), { 5 }, ::println)
 }
