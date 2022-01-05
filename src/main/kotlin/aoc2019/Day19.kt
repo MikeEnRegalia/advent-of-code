@@ -1,15 +1,17 @@
 package aoc2019
 
+import kotlin.math.ceil
 import kotlin.math.min
 
 fun main() {
     fun String.toReactant() = split(" ").let { Reactant(it[0].toLong(), it[1]) }
+    fun String.toReaction() = split(Regex(" => ")).let { (left, right) ->
+        Reaction(left.split(Regex(", ")).map(String::toReactant), right.toReactant())
+    }
 
-    val reactions = generateSequence { readLine() }.map { it.split(Regex(" => ")) }.map { (left, right) ->
-        Reaction(left.split(Regex(", ")).map { it.toReactant() }, right.toReactant())
-    }.toSet()
+    val reactions = generateSequence(::readLine).map(String::toReaction).toSet()
 
-    fun factor(wanted: Long, provided: Long) = (wanted / provided) + if (wanted % provided == 0L) 0 else 1
+    fun factor(wanted: Long, provided: Long) = ceil(wanted / provided.toDouble()).toLong()
 
     fun Set<Reaction>.resolve(reaction: Reaction): Long {
         val extraProduced = mutableMapOf<String, Long>()
@@ -56,14 +58,11 @@ fun main() {
     val oreSpentForOneFuel = reactions.resolve(reactionOneFuel)
     println(oreSpentForOneFuel)
 
-    var x = generateSequence(1_000_000_000_000) { (it / 1.005).toLong() }.first {
-        reactions.resolve(reactionOneFuel.times(it)) < 1_000_000_000_000
-    }
+    var x = generateSequence(1_000_000_000_000) { (it / 1.005).toLong() }
+        .first { reactions.resolve(reactionOneFuel.times(it)) < 1_000_000_000_000 }
 
     while (true) {
-        val oreSpent = reactions.resolve(reactionOneFuel.times(x))
-        println("$oreSpent ORE for $x FUEL")
-        if (oreSpent >= 1_000_000_000_000) {
+        if (reactions.resolve(reactionOneFuel.times(x)) >= 1_000_000_000_000) {
             println(x - 1)
             break
         }
