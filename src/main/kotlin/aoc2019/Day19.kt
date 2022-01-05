@@ -13,56 +13,49 @@ fun main() {
 
     fun factor(wanted: Long, provided: Long) = ceil(wanted / provided.toDouble()).toLong()
 
-    fun Set<Reaction>.resolve(reaction: Reaction): Long {
-        val extraProduced = mutableMapOf<String, Long>()
-        fun takeFromExtra(r: Reactant): Long? {
-            val takeFromExtra = min(r.q, extraProduced.getOrDefault(r.name, 0))
-            extraProduced.compute(r.name) { _, q -> (q ?: 0) - takeFromExtra }
+    fun resolve(target: Reaction): Long {
+        val surplus = mutableMapOf<String, Long>()
+
+        fun takeFromSurplus(r: Reactant): Long? {
+            val takeFromExtra = min(r.q, surplus.getOrDefault(r.name, 0))
+            surplus.compute(r.name) { _, q -> (q ?: 0) - takeFromExtra }
             return (r.q - takeFromExtra).takeUnless { it == 0L }
         }
 
-        fun Iterable<Reaction>.bar(input: Reactant, needed: Long): Pair<Long, Reaction> {
-            val next = single { it.output.name == input.name }
+        fun addToSurplus(input: Reactant, needed: Long): List<Reactant> {
+            val next = reactions.single { it.output.name == input.name }
             val factor = factor(needed, next.output.q)
-            val extra = next.output.q * factor - needed
-            if (extra > 0) {
-                extraProduced.compute(next.output.name) { _, v -> (v ?: 0) + extra }
-            }
-            return factor to next
+            surplus.compute(next.output.name) { _, v -> (v ?: 0) + (next.output.q * factor - needed) }
+            return next.input.map { it.copy(q = it.q * factor) }
         }
 
-        var r = reaction
-        while (r.input.any { !it.elementary(this) }) {
-            r = r.input.flatMap { input ->
-                if (input.elementary(this)) listOf(input) else {
-                    val needed = takeFromExtra(input) ?: return@flatMap listOf()
-                    val (factor, next) = bar(input, needed)
-                    next.input.map { it.copy(q = it.q * factor) }
+        var reaction = target
+        while (reaction.input.any { !it.elementary(reactions) }) {
+            reaction = reaction.input.flatMap { input ->
+                if (input.elementary(reactions)) listOf(input) else {
+                    val needed = takeFromSurplus(input) ?: return@flatMap listOf()
+                    addToSurplus(input, needed)
                 }
             }.run {
                 distinctBy { it.name }.map { e -> Reactant(filter { it.name == e.name }.sumOf { it.q }, e.name) }
-            }.let { inputs -> Reaction(inputs, r.output) }
+            }.let { inputs -> Reaction(inputs, reaction.output) }
         }
 
-        return r.input.distinctBy { it.name }.sumOf { input ->
-            r.input.filter { it.name == input.name }.sumOf { it.q }.let { neededTotalQ ->
-                val sumInput = Reactant(neededTotalQ, input.name)
-                val needed = takeFromExtra(sumInput) ?: return@let 0
-                val (factor, next) = bar(sumInput, needed)
-                next.input.single().q * factor
-            }
+        return reaction.input.sumOf { input ->
+            val needed = takeFromSurplus(input) ?: return@sumOf 0
+            addToSurplus(input, needed).sumOf { it.q }
         }
     }
 
     val reactionOneFuel = reactions.single { it.output.name == "FUEL" }
-    val oreSpentForOneFuel = reactions.resolve(reactionOneFuel)
+    val oreSpentForOneFuel = resolve(reactionOneFuel)
     println(oreSpentForOneFuel)
 
     var x = generateSequence(1_000_000_000_000) { (it / 1.005).toLong() }
-        .first { reactions.resolve(reactionOneFuel.times(it)) < 1_000_000_000_000 }
+        .first { resolve(reactionOneFuel.times(it)) < 1_000_000_000_000 }
 
     while (true) {
-        if (reactions.resolve(reactionOneFuel.times(x)) >= 1_000_000_000_000) {
+        if (resolve(reactionOneFuel.times(x)) >= 1_000_000_000_000) {
             println(x - 1)
             break
         }
