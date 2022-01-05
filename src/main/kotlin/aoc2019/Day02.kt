@@ -22,10 +22,14 @@ fun runIntCode(
     val code = program.mapIndexed { i, x -> i to x }.toMap().toMutableMap()
     var pos = 0
     while (true) {
-        when (val opcode = code[pos]) {
+        val instruction = code[pos].toString().padStart(5, '0')
+        val opcode = instruction.takeLast(2).toInt()
+        fun p0() = code[pos + 1]!!.let { if (instruction[2].digitToInt() == 1) it else code.getOrDefault(it, 0) }
+        fun p1() = code[pos + 2]!!.let { if (instruction[1].digitToInt() == 1) it else code.getOrDefault(it, 0) }
+        when (opcode) {
             1, 2 -> {
-                val a = code.getOrDefault(code[pos + 1]!!, 0)
-                val b = code.getOrDefault(code[pos + 2]!!, 0)
+                val a = p0()
+                val b = p1()
                 code[code[pos + 3]!!] = if (opcode == 1) a.plus(b) else a.times(b)
                 pos += 4
             }
@@ -34,7 +38,7 @@ fun runIntCode(
                 pos += 2
             }
             4 -> {
-                output(code[pos + 1]!!)
+                output(p0())
                 pos += 2
             }
             99 -> return code[0]
