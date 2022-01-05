@@ -30,13 +30,12 @@ fun main() {
         }
 
         var reaction = target
-        while (reaction.input.any { !it.elementary(reactions) }) {
-            reaction = reaction.input.flatMap { input ->
-                if (input.elementary(reactions)) listOf(input) else {
-                    val needed = takeFromSurplus(input) ?: return@flatMap listOf()
-                    addToSurplus(input, needed)
-                }
-            }.run {
+        while (true) {
+            val (elementary, complex) = reaction.input.partition { it.elementary(reactions) }
+            if (complex.isEmpty()) break
+            reaction = elementary.plus(complex.flatMap { input ->
+                takeFromSurplus(input)?.let { addToSurplus(input, it) } ?: return@flatMap listOf()
+            }).run {
                 distinctBy { it.name }.map { e -> Reactant(filter { it.name == e.name }.sumOf { it.q }, e.name) }
             }.let { inputs -> Reaction(inputs, reaction.output) }
         }
