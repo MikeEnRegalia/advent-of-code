@@ -2,6 +2,7 @@ package aoc2016
 
 fun main() {
     val lines = generateSequence { readLine() }.toList()
+
     val part1 = lines.count { line ->
         val abbas = (0..line.length - 4).filter {
             val abba = line.substring(it, it + 4)
@@ -10,6 +11,7 @@ fun main() {
         abbas.none { line.inBrackets(it) } && abbas.any { !line.inBrackets(it) }
     }
     println(part1)
+
     val part2 = lines.count { line ->
         val abas = (0..line.length - 3).filter {
             val aba = line.substring(it, it + 3)
@@ -23,5 +25,8 @@ fun main() {
     println(part2)
 }
 
-fun String.inBrackets(pos: Int) =
-    (indexOf('[', pos) to indexOf(']', pos)).let { (open, close) -> close != -1 && (open == -1 || close < open) }
+fun String.inBrackets(pos: Int): Boolean {
+    val open = indexOf('[', pos)
+    val close = indexOf(']', pos)
+    return close != -1 && (open == -1 || close < open)
+}
