@@ -25,7 +25,7 @@ fun main() {
         return decompressed
     }
 
-    val input = generateSequence(::readLine).joinToString("")
-    println(input.decompress().sumOf { (x, data) -> x * data.length })
-    println(input.decompress(rec = true).sumOf { (x, data) -> x * data.length })
+    with(generateSequence(::readLine).joinToString("")) {
+        sequenceOf(decompress(), decompress(true)).map { it.sumOf { (x, data) -> x * data.length } }.also(::println)
+    }
 }
