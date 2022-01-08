@@ -26,6 +26,6 @@ fun main() {
     }
 
     with(generateSequence(::readLine).joinToString("")) {
-        sequenceOf(decompress(), decompress(true)).map { it.sumOf { (x, data) -> x * data.length } }.also(::println)
+        sequenceOf(decompress(), decompress(true)).map { it.sumOf { (x, data) -> x * data.length } }.forEach(::println)
     }
 }
