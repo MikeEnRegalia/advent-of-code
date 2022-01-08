@@ -1,24 +1,31 @@
 package aoc2016
 
 fun main() {
-    val input = generateSequence(::readLine).joinToString("")
-    val decompressed = mutableListOf<Pair<Int, String>>()
-    var pos = 0
-    while (pos < input.length) {
-        val next = input.indexOf('(', pos)
-        if (next == -1) {
-            decompressed += 1 to input.substring(pos)
-            pos = input.length
-            continue
+    fun String.decompress(rec: Boolean = false): List<Pair<Long, String>> {
+        val decompressed = mutableListOf<Pair<Long, String>>()
+        var pos = 0
+        while (pos < length) {
+            val next = indexOf('(', pos)
+            if (next == -1) {
+                decompressed += 1L to substring(pos)
+                pos = length
+                continue
+            }
+
+            val data = substring(pos, next)
+            decompressed += 1L to data
+
+            val end = indexOf(')', next)
+            val (l, x) = substring(next + 1, end).split("x").map(String::toInt)
+            val block = substring(end + 1, end + 1 + l)
+            if (rec) decompressed += block.decompress(rec = true).map { (x2, data) -> x.toLong() * x2 to data }
+            else decompressed += x.toLong() to block
+            pos = end + 1 + l
         }
-
-        val data = input.substring(pos, next)
-        decompressed += 1 to data
-
-        val end = input.indexOf(')', next)
-        val (l, x) = input.substring(next + 1, end).split("x").map(String::toInt)
-        decompressed += x to input.substring(end + 1, end + 1 + l)
-        pos = end + 1 + l
+        return decompressed
     }
-    println(decompressed.sumOf { (x, data) -> x * data.length })
+
+    val input = generateSequence(::readLine).joinToString("")
+    println(input.decompress().sumOf { (x, data) -> x * data.length })
+    println(input.decompress(rec = true).sumOf { (x, data) -> x * data.length })
 }
