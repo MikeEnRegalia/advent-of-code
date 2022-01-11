@@ -19,7 +19,6 @@ def part1():
             sum_twice += 1
         if 3 in f:
             sum_thrice += 1
-
     return sum_twice * sum_thrice
 
 
