@@ -27,8 +27,8 @@ internal fun Cave.geologicalIndex(x: Int, y: Int): Int = when {
 
 internal fun Cave.matrix() = (0..targetX).flatMap { x -> (0..targetY).map { y -> x to y } }
 
-fun day22Part2(depth: Int, targetX: Int, targetY: Int): Int {
-    val cave = with(Cave(depth, targetX * 3, targetY * 3)) {
+fun day22Part2(depth: Int, targetX: Int, targetY: Int): Int? {
+    val tools = with(Cave(depth, targetX + 25, targetY + 25)) {
         matrix().map { (x, y) ->
             (x to y) to when (type(x, y)) {
                 0 -> listOf(CLIMBING_GEAR, TORCH)
@@ -38,36 +38,43 @@ fun day22Part2(depth: Int, targetX: Int, targetY: Int): Int {
         }
     }.toMap()
 
-    data class Node(val x: Int, val y: Int, val tool: Tool) {
-    }
+    data class Node(val x: Int, val y: Int, val tool: Tool)
 
+    val target = Node(targetX, targetY, TORCH)
     var curr = Node(0, 0, TORCH)
     val distances = mutableMapOf(curr to 0)
     val visited = mutableSetOf<Node>()
 
-    val target = Node(targetX, targetY, TORCH)
+    fun tools(x: Int, y: Int) = if (x == target.x && y == target.y) listOf(CLIMBING_GEAR, TORCH) else tools[x to y]!!
 
-    fun Node.adj() = cave[x to y]!!.filter { it != tool }.map { Node(x, y, it) }
-        .plus(with(this) { sequenceOf(x to y + 1, x to y - 1, x + 1 to y, x - 1 to y) }
-            .filter { (x, y) -> x in 0..targetX * 3 && y in 0..targetY * 3 }
-            .flatMap { (x, y) -> cave[x to y]!!.filter { it == tool }.map { Node(x, y, it) } })
+    fun Node.adj() = tools(x, y).filter { it != tool }.map { Node(x, y, it) }
+        .plus(sequenceOf(x to y + 1, x to y - 1, x + 1 to y, x - 1 to y)
+            .filter { (x, y) -> x in 0..targetX + 25 && y in 0..targetY + 25 }
+            .flatMap { (x, y) -> tools(x, y).filter { it == tool }.map { Node(x, y, it) } })
         .filter { it !in visited && it != this }
 
-    fun Node.distanceBetween(n: Node) = (if (n.x == x && n.y == y) 0 else 1) + (if (n.tool != tool) 7 else 0)
+    fun Node.distanceBetween(n: Node): Int {
+        val differentPlace = n.x != x || n.y != y
+        val differentTool = n.tool != tool
+        if (differentPlace && differentTool) throw IllegalStateException()
+        return if (differentPlace) 1 else 7
+    }
 
+    val currAdj = mutableSetOf<Node>()
     while (true) {
-        val adj = curr.adj()
-
         visited.add(curr)
-        adj.forEach { node ->
+        currAdj -= curr
+        if (curr == target) break
+
+        curr.adj().forEach { node ->
+            currAdj += node
             val distance = distances[curr]!! + curr.distanceBetween(node)
             distances[node] = min(distance, distances.getOrDefault(node, MAX_VALUE))
         }
-        if (curr == target) break
-        curr = visited.flatMap(Node::adj).minByOrNull { distances[it]!! }!!
+        curr = currAdj.minByOrNull { distances[it]!! } ?: break
     }
 
-    return distances[target]!!
+    return distances[target]
 }
 
 internal enum class Tool {
