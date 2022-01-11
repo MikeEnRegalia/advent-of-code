@@ -25,11 +25,13 @@ internal fun Cave.geologicalIndex(x: Int, y: Int): Int = when {
     else -> erosionLevel(x - 1, y) * erosionLevel(x, y - 1)
 }
 
-internal fun Cave.matrix() = (0..targetX).flatMap { x -> (0..targetY).map { y -> x to y } }
+internal fun Cave.matrix(extra: Int = 0) =
+    (0..targetX + extra).flatMap { x -> (0..targetY + extra).map { y -> x to y } }
 
 fun day22Part2(depth: Int, targetX: Int, targetY: Int): Int? {
-    val tools = with(Cave(depth, targetX + 25, targetY + 25)) {
-        matrix().map { (x, y) ->
+    val extra = 50
+    val tools = with(Cave(depth, targetX, targetY)) {
+        matrix(extra).map { (x, y) ->
             (x to y) to when (type(x, y)) {
                 0 -> listOf(CLIMBING_GEAR, TORCH)
                 1 -> listOf(CLIMBING_GEAR, NEITHER)
@@ -45,13 +47,11 @@ fun day22Part2(depth: Int, targetX: Int, targetY: Int): Int? {
     val distances = mutableMapOf(curr to 0)
     val visited = mutableSetOf<Node>()
 
-    fun tools(x: Int, y: Int) = if (x == target.x && y == target.y) listOf(CLIMBING_GEAR, TORCH) else tools[x to y]!!
-
-    fun Node.adj() = tools(x, y).filter { it != tool }.map { Node(x, y, it) }
+    fun Node.adj() = tools[x to y]!!.filter { it != tool }.map { Node(x, y, it) }
         .plus(sequenceOf(x to y + 1, x to y - 1, x + 1 to y, x - 1 to y)
-            .filter { (x, y) -> x in 0..targetX + 25 && y in 0..targetY + 25 }
-            .flatMap { (x, y) -> tools(x, y).filter { it == tool }.map { Node(x, y, it) } })
-        .filter { it !in visited && it != this }
+            .filter { (x, y) -> x in 0..targetX + extra && y in 0..targetY + extra }
+            .flatMap { (x, y) -> tools[x to y]!!.filter { it == tool }.map { Node(x, y, it) } })
+        .filter { it !in visited }
 
     fun Node.distanceBetween(n: Node): Int {
         val differentPlace = n.x != x || n.y != y
