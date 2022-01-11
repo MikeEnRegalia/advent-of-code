@@ -1,6 +1,7 @@
 import fileinput
 
-data = map(lambda x: x.removesuffix('\n'), fileinput.input())
+
+data = list(map(lambda x: x.removesuffix('\n'), fileinput.input()))
 
 
 def freq(line):
@@ -22,4 +23,17 @@ def part1():
     return sum_twice * sum_thrice
 
 
+def part2():
+    for a in data:
+        for b in data:
+            r = ''
+            for i in range(0, len(a)):
+                if a[i] == b[i]:
+                    r += a[i]
+            if len(r) == len(a) - 1:
+                return r
+    return None
+
+
 print(part1())
+print(part2())
