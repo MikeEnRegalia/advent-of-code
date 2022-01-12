@@ -7,7 +7,7 @@ data = list(map(lambda x: x.removesuffix('\n'), fileinput.input()))
 def freq(line):
     x = dict()
     for c in line:
-        x[c] = 1 if c not in x else x[c] + 1
+        x[c] = x.setdefault(c, 0) + 1
     return set(x.values())
 
 
