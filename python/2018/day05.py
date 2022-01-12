@@ -1,7 +1,7 @@
 import fileinput
 
 
-polymer = list(fileinput.input())[0]
+polymer = fileinput.input().readline()
 
 reacted = [char for char in polymer]
 pos = 0
