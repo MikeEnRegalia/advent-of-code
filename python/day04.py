@@ -29,6 +29,16 @@ for g in data:
         asleep_since = int(g[1])
         print(f"{guard_number} falls asleep")
 
-most_asleep = sorted(ASLEEP.keys(), key=lambda _: len(ASLEEP[_]), reverse=True)[0]
-most_asleep_minute = Counter(ASLEEP[most_asleep]).most_common(1)[0][0]
-print(most_asleep * most_asleep_minute)
+most_asleep_guard = sorted(ASLEEP.keys(), key=lambda _: len(ASLEEP[_]), reverse=True)[0]
+most_asleep_minutes = ASLEEP[most_asleep_guard]
+most_asleep_minute = Counter(most_asleep_minutes).most_common(1)[0][0]
+
+print(most_asleep_guard * most_asleep_minute)
+
+top_guard_minute = (None, None, None)
+for (guard, minutes_asleep) in ASLEEP.items():
+    (max_minute, times) = Counter(minutes_asleep).most_common(1)[0]
+    if top_guard_minute[2] is None or top_guard_minute[2] < times:
+        top_guard_minute = (guard, max_minute, times)
+
+print(top_guard_minute[0] * top_guard_minute[1])
