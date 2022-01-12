@@ -4,8 +4,7 @@ from collections import Counter
 
 
 def guard(line):
-    return list(re.match(r"^\[\d+-\d+-\d+ (\d+):(\d+)] ((Guard #(\d+) begins shift)|(wakes up)|(falls asleep))$",
-                         line).groups())
+    return list(re.match(r"^\[.* (\d+):(\d+)] ((Guard #(\d+) begins shift)|(wakes up)|(falls asleep))$", line).groups())
 
 
 guard_number = None
@@ -29,10 +28,10 @@ most_asleep_minute = Counter(most_asleep_minutes).most_common(1)[0][0]
 
 print(most_asleep_guard * most_asleep_minute)
 
-top_guard_minute = (None, None, None)
+top_guard_minute = None
 for (guard, minutes_asleep) in ASLEEP.items():
     (max_minute, times) = Counter(minutes_asleep).most_common(1)[0]
-    if top_guard_minute[2] is None or top_guard_minute[2] < times:
+    if top_guard_minute is None or top_guard_minute[2] < times:
         top_guard_minute = (guard, max_minute, times)
 
 print(top_guard_minute[0] * top_guard_minute[1])
