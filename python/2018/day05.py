@@ -1,18 +1,34 @@
 import fileinput as fi
+from string import ascii_lowercase
+
+POLYMER = fi.input().readline()
 
 
-polymer = fi.input().readline()
+def react(skip=None):
+    r = [c for c in POLYMER if skip is None or c != skip and c != skip.upper()]
+    i = 0
+    while i < len(r):
+        if i < len(r) - 1:
+            a, b = r[i], r[i + 1]
+            if a.lower() == b.lower() and a != b:
+                del r[i:i + 2]
+                if i > 0:
+                    i = i - 1
+                continue
+        i = i + 1
+    return len(r)
 
-reacted = [char for char in polymer]
-pos = 0
-while pos < len(reacted):
-    if pos < len(reacted) - 1:
-        (a, b) = reacted[pos], reacted[pos + 1]
-        if a.lower() == b.lower() and a != b:
-            del reacted[pos:pos+2]
-            if pos > 0:
-                pos = pos - 1
-            continue
-    pos = pos + 1
 
-print(len(reacted))
+print(react(POLYMER))
+
+
+def improve():
+    min_r = None
+    for c in ascii_lowercase:
+        r = react(skip=c)
+        if min_r is None or r < min_r:
+            min_r = r
+    print(min_r)
+
+
+improve()
