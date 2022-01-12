@@ -8,26 +8,20 @@ def guard(line):
                          line).groups())
 
 
-data = list(map(guard, sorted(fileinput.input())))
-
 guard_number = None
 asleep_since = None
 ASLEEP = dict()
-for g in data:
-    # TODO use match?
-    if g[4] is not None:
-        guard_number = int(g[4])
+for (_, m, _, _, n, wakes, sleeps) in list(map(guard, sorted(fileinput.input()))):
+    if n:
+        guard_number = int(n)
         asleep_since = None
-        print(f"{guard_number} begins shift")
-    if g[5] is not None:
-        if asleep_since is not None:
-            for minute in range(asleep_since, int(g[1])):
+    elif wakes:
+        if asleep_since:
+            for minute in range(asleep_since, int(m)):
                 ASLEEP.setdefault(guard_number, list()).append(minute)
         asleep_since = None
-        print(f"{guard_number} wakes up")
-    if g[6] is not None:
-        asleep_since = int(g[1])
-        print(f"{guard_number} falls asleep")
+    elif sleeps:
+        asleep_since = int(m)
 
 most_asleep_guard = sorted(ASLEEP.keys(), key=lambda _: len(ASLEEP[_]), reverse=True)[0]
 most_asleep_minutes = ASLEEP[most_asleep_guard]
