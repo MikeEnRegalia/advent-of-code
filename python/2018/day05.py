@@ -1,7 +1,6 @@
 import fileinput as fi
-from string import ascii_lowercase
 
-POLYMER = fi.input().readline()
+POLYMER = [c for c in fi.input().readline()]
 
 
 def react(skip=None):
@@ -13,22 +12,22 @@ def react(skip=None):
             if a.lower() == b.lower() and a != b:
                 del r[i:i + 2]
                 if i > 0:
-                    i = i - 1
+                    i -= 1
                 continue
-        i = i + 1
+        i += 1
     return len(r)
 
 
-print(react(POLYMER))
+print(react())
 
 
 def improve():
     min_r = None
-    for c in ascii_lowercase:
+    for c in set(map(str.lower, POLYMER)):
         r = react(skip=c)
         if min_r is None or r < min_r:
             min_r = r
-    print(min_r)
+    return min_r
 
 
-improve()
+print(improve())
