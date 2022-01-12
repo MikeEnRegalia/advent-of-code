@@ -10,19 +10,23 @@ def rect(line):
 
 
 data = list(map(rect, fileinput.input()))
-
 M = dict()
-for (n, points) in data:
-    for p in points:
-        M[p] = M.setdefault(p, 0) + 1
 
-part1 = reduce(lambda acc, v: acc + (1 if v > 1 else 0), M.values(), 0)
-print(part1)
 
-for (n, points) in data:
-    overlaps = False
-    for p in points:
-        if M[p] > 1:
-            overlaps = True
-    if not overlaps:
-        print(n)
+def part1():
+    for (n, points) in data:
+        for p in points:
+            M[p] = M.setdefault(p, 0) + 1
+    print(reduce(lambda acc, v: acc + (1 if v > 1 else 0), M.values(), 0))
+
+
+part1()
+
+
+def part2():
+    for (n, points) in data:
+        if reduce(lambda acc, p: acc and M[p] == 1, points, True):
+            print(n)
+
+
+part2()
