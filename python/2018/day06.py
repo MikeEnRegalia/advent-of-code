@@ -10,30 +10,37 @@ class Point:
     y: int
 
 
-coordinates = list(map(lambda _: Point(int(_[0]), int(_[1])), map(lambda _: _.split(",").fileinput.input())))
-coordinates_x, coordinates_y = list(map(lambda _: _.x, coordinates)), list(map(lambda _: _.y, coordinates))
-min_p = Point(min(coordinates_x), min(coordinates_y))
-max_p = Point(max(coordinates_x), max(coordinates_y))
-area = list(itertools.product(range(min_p.x, max_p.x + 1), range(min_p.y, max_p.y + 1)))
+C = list()
+X = list()
+Y = list()
+for line in fileinput.input():
+    tokens = line.split(",")
+    p = Point(int(tokens[0]), int(tokens[1]))
+    C.append(p)
+    X.append(p.x)
+    Y.append(p.y)
+MIN = Point(min(X), min(Y))
+MAX = Point(max(X), max(Y))
+A = list(map(lambda _: Point(_[0], _[1]), itertools.product(range(MIN.x, MAX.x + 1), range(MIN.y, MAX.y + 1))))
+
+
+def dist(a, c):
+    return abs(c.x - a.x) + abs(c.y - a.y)
 
 
 def part1():
     points = list()
-    for (x, y) in area:
-        best_c = None
-        best = None
-        tied = False
-        infinite = None
-        for c in coordinates:
-            dist = abs(c.x - x) + abs(c.y - y)
-            if best is None or dist < best:
-                best = dist
-                best_c = c
-                tied = False
-                infinite = c.x in (min_p.x, max_p.x) or c.y in (min_p.y, max_p.y)
-            elif dist == best:
-                tied = True
-        if best is not None and not tied and not infinite:
+    for a in A:
+        best_c = best = None
+        for c in C:
+            d = dist(a, c)
+            if best is None or d < best:
+                best = d
+                infinite = c.x in (MIN.x, MAX.x) or c.y in (MIN.y, MAX.y)
+                best_c = None if infinite else c
+            elif d == best:
+                best_c = None
+        if best_c is not None:
             points.append(best_c)
 
     return Counter(points).most_common(1)[0][1]
@@ -42,13 +49,8 @@ def part1():
 print(part1())
 
 
-def part2():
-    count = 0
-    for (x, y) in area:
-        sum_d = sum(map(lambda c: abs(c.x - x) + abs(c.y - y), coordinates))
-        if sum_d < 10000:
-            count += 1
-    return count
+def sum_dist(a):
+    return sum(map(lambda c: dist(a, c), C))
 
 
-print(part2())
+print(len(list(filter(lambda s: s < 10000, map(sum_dist, A)))))
