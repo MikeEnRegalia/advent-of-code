@@ -1,20 +1,19 @@
 import fileinput
 
-
-regex = fileinput.input().readline()
+REGEX = fileinput.input().readline()
 
 
 class Maze:
-    pos = 0
+    regex_pos = 0
     point = (0, 0)
     doors = dict()
 
     def peek(self):
-        return regex[self.pos]
+        return REGEX[self.regex_pos]
 
     def read(self):
         r = self.peek()
-        self.pos += 1
+        self.regex_pos += 1
         return r
 
     def parse_group(self):
@@ -36,21 +35,22 @@ class Maze:
 
     def move(self):
         c = self.read()
-        next_point = None
-        if c == "N":
-            next_point = (self.point[0], self.point[1] - 1)
-        elif c == "S":
-            next_point = (self.point[0], self.point[1] + 1)
-        elif c == "W":
-            next_point = (self.point[0] - 1, self.point[1])
-        elif c == "E":
-            next_point = (self.point[0] + 1, self.point[1])
-        self.doors.setdefault(self.point, set()).add(next_point)
-        self.doors.setdefault(next_point, set()).add(self.point)
-        self.point = next_point
 
-    def points(self):
-        return self.doors.keys()
+        (x, y) = (nx, ny) = self.point
+        if c == "N":
+            ny -= 1
+        elif c == "S":
+            ny += 1
+        elif c == "W":
+            nx -= 1
+        elif c == "E":
+            nx += 1
+        else:
+            raise c
+
+        self.doors.setdefault((x, y), set()).add((nx, ny))
+        self.doors.setdefault((nx, ny), set()).add((x, y))
+        self.point = (nx, ny)
 
     def neighbors(self, a):
         return self.doors[a]
