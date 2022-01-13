@@ -3,40 +3,43 @@ import fileinput
 REGEX = fileinput.input().readline()
 
 
-class Maze:
+def find_doors():
     regex_pos = 0
     point = (0, 0)
     doors = dict()
 
-    def peek(self):
-        return REGEX[self.regex_pos]
+    def peek():
+        return REGEX[regex_pos]
 
-    def read(self):
-        r = self.peek()
-        self.regex_pos += 1
+    def read():
+        nonlocal regex_pos
+        r = peek()
+        regex_pos += 1
         return r
 
-    def parse_group(self):
-        initial_point = self.point
-        assert self.read() in "^("
+    def parse_group():
+        nonlocal point
+        initial_point = point
+        assert read() in "^("
         while True:
-            c = self.peek()
+            c = peek()
             if c in "NSEW":
-                self.move()
+                move()
             elif c == "|":
-                self.point = initial_point
-                self.read()
+                point = initial_point
+                read()
             elif c == "(":
-                self.parse_group()
+                parse_group()
             else:
                 assert c in ")$"
-                self.read()
+                read()
                 break
 
-    def move(self):
-        c = self.read()
+    def move():
+        nonlocal point
+        c = read()
 
-        (x, y) = (nx, ny) = self.point
+        (x, y) = (nx, ny) = point
         if c == "N":
             ny -= 1
         elif c == "S":
@@ -48,26 +51,22 @@ class Maze:
         else:
             raise c
 
-        self.doors.setdefault((x, y), set()).add((nx, ny))
-        self.doors.setdefault((nx, ny), set()).add((x, y))
-        self.point = (nx, ny)
+        doors.setdefault((x, y), set()).add((nx, ny))
+        doors.setdefault((nx, ny), set()).add((x, y))
+        point = (nx, ny)
 
-    def neighbors(self, a):
-        return self.doors[a]
+    parse_group()
+    return doors
 
 
-m = Maze()
-m.parse_group()
+DOORS = find_doors()
 
 curr = (0, 0)
 D = {curr: 0}
-Q = set()
-Q.add(curr)
+Q = {curr}
 V = set()
 while True:
-    for n in m.neighbors(curr):
-        if n in V:
-            continue
+    for n in [n for n in DOORS[curr] if n not in V]:
         Q.add(n)
         d = D[curr] + 1
         if n not in D or D[n] > d:
