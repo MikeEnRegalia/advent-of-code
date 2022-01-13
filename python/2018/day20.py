@@ -8,12 +8,9 @@ def find_doors():
     point = (0, 0)
     doors = dict()
 
-    def peek():
-        return REGEX[regex_pos]
-
     def read():
         nonlocal regex_pos
-        r = peek()
+        r = REGEX[regex_pos]
         regex_pos += 1
         return r
 
@@ -22,7 +19,7 @@ def find_doors():
         initial_point = point
         assert read() in "^("
         while True:
-            c = peek()
+            c = REGEX[regex_pos]
             if c in "NSEW":
                 move()
             elif c == "|":
