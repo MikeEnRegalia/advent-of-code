@@ -1,3 +1,4 @@
+import dataclasses
 import fileinput
 import re
 from dataclasses import dataclass
@@ -34,13 +35,14 @@ class Group:
 PATTERN = re.compile(r"^(\d+) .* (\d+) hit points "
                      r"(\((.*)\) )?"
                      r"with .* (\d+) (\w+) .* (\d+)$")
+INPUT = list(fileinput.input())
 
 
 def parse():
     army = None
     result = list()
     gid = 1
-    for line in [line.strip() for line in fileinput.input()]:
+    for line in [line.strip() for line in INPUT]:
         if ":" in line:
             army = 'immune system' if line == 'Immune System:' else 'infection'
             continue
@@ -57,20 +59,21 @@ def parse():
     return result
 
 
-G = parse()
+INITIAL = parse()
+G = [dataclasses.replace(g) for g in INITIAL]
 
 
 def fight():
     def select_target(attacker, already_selected):
-        targets = sorted([target for target in G if target not in already_selected
-                          and target.army != attacker.army and attacker.damage_to(target) > 0],
+        targets = sorted([g for g in G if g not in already_selected
+                          and g.army != attacker.army and attacker.damage_to(g) > 0],
                          key=lambda g: (-attacker.damage_to(g), -g.effective_power(), -g.initiative))
         r = None if len(targets) == 0 else targets[0]
         return r
 
     def turns():
         while True:
-            units_before = sum([g.units for g in G])
+            units_before = [(g.id, g.units) for g in G]
 
             targets = dict()
             for attacker in sorted(G, key=lambda g: (-g.effective_power(), -g.initiative)):
@@ -79,12 +82,12 @@ def fight():
 
             for attacker in sorted(G, key=lambda g: -g.initiative):
                 target = targets[attacker.id]
-                if target is not None:
+                if target is not None and attacker in G:
                     attacker.attack(target)
                     if target.units == 0:
                         G.remove(target)
 
-            units_after = sum([g.units for g in G])
+            units_after = [(g.id, g.units) for g in G]
             if units_before == units_after:
                 return
     turns()
@@ -92,3 +95,17 @@ def fight():
 
 fight()
 print(sum([g.units for g in G]))
+
+boost = 1
+while True:
+    boost += 1
+    G = [dataclasses.replace(g) for g in INITIAL]
+    for g in G:
+        if g.army == 'immune system':
+            g.damage += boost
+
+    fight()
+    remaining = sum([g.units for g in G])
+    if {'immune system'} == set([g.army for g in G]):
+        print(sum([g.units for g in G]))
+        break
