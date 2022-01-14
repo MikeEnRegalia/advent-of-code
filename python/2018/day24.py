@@ -63,7 +63,7 @@ G = parse()
 def fight():
     def select_target(attacker, already_selected):
         targets = sorted([target for target in G if target not in already_selected
-                          and target.army != attacker.army],
+                          and target.army != attacker.army and attacker.damage_to(target) > 0],
                          key=lambda g: (-attacker.damage_to(g), -g.effective_power(), -g.initiative))
         r = None if len(targets) == 0 else targets[0]
         return r
