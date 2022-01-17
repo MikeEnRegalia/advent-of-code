@@ -20,18 +20,11 @@ def part1():
 
 part1()
 
-bots_x = [b[0] for b in bots]
-bots_y = [b[1] for b in bots]
-bots_z = [b[2] for b in bots]
-
 
 def part2():
     r = dict()
 
-    def drill(precision,
-              min_x=min(bots_x), max_x=max(bots_x),
-              min_y=min(bots_y), max_y=max(bots_y),
-              min_z=min(bots_z), max_z=max(bots_z)):
+    def drill(precision, min_x, max_x, min_y, max_y, min_z, max_z):
         max_n = None
         points = set()
         for x in range(min_x // precision, max_x // precision + 1):
@@ -60,12 +53,19 @@ def part2():
             (px3, py3, pz3) = ((x + 1) * precision, (y + 1) * precision, (z + 1) * precision)
             drill(precision // 2, min_x=px2, max_x=px3, min_y=py2, max_y=py3, min_z=pz2, max_z=pz3)
 
-    seq = list()
-    seq.append(1)
-    while seq[len(seq) - 1] < min(max(bots_x), max(bots_y), max(bots_z)):
-        seq.append(seq[len(seq) - 1] * 2)
+    bots_x = [b[0] for b in bots]
+    bots_y = [b[1] for b in bots]
+    bots_z = [b[2] for b in bots]
+    max_all = max(max(bots_x), max(bots_y), max(bots_z))
 
-    drill(seq[len(seq) - 1])
+    lowest_precision = 1
+    while max_all // lowest_precision > 0:
+        lowest_precision *= 2
+
+    drill(lowest_precision,
+          min_x=min(bots_x), max_x=max(bots_x),
+          min_y=min(bots_y), max_y=max(bots_y),
+          min_z=min(bots_z), max_z=max(bots_z))
 
     total_max_n = max(r.keys())
     closest_points = sorted([abs(m[0]) + abs(m[1]) + abs(m[2]) for m in r[total_max_n]])
