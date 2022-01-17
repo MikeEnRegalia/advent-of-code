@@ -17,22 +17,23 @@ def neighbors(x, y):
 
 def walk(target, start=(1, 1)):
     pos = start
-    visited = set()
-    distances: dict = {pos: 0}
+    v = set()
+    d: dict = {pos: 0}
     while True:
         (x, y) = pos
-        for neighbor in [p for p in neighbors(x, y) if not is_wall(p) and p not in visited]:
-            distance = distances[pos] + 1
-            if neighbor not in distances or distance < distances[neighbor]:
-                distances[neighbor] = distance
-        visited.add(pos)
-        next_nodes = sorted([i for i in distances.keys() if i not in visited], key=lambda p: distances[p])
+        for n in neighbors(x, y):
+            if not is_wall(n) and n not in v:
+                distance = d[pos] + 1
+                if n not in d or distance < d[n]:
+                    d[n] = distance
+        v.add(pos)
+        next_nodes = sorted([n for n in d.keys() if n not in v], key=lambda p: d[p])
         if len(next_nodes) == 0:
             break
         pos = next_nodes[0]
 
-    print(distances[target])
-    print(len([k for (k, visited) in distances.items() if visited <= 50]))
+    print(d[target])
+    print(len([i for i in d.values() if i <= 50]))
 
 
 walk((31, 39))
