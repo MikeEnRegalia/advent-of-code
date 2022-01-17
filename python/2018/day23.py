@@ -1,4 +1,5 @@
 import fileinput
+import itertools
 
 import re
 
@@ -26,55 +27,55 @@ part1()
 
 
 def part2():
-    r = dict()
+    total_max_n: int | None = None
+    best_p = set()
 
     def drill(f, min_x, max_x, min_y, max_y, min_z, max_z):
+        nonlocal total_max_n
         max_n = None
         points = set()
-        for x in range(min_x, max_x + 1):
-            for y in range(min_y, max_y + 1):
-                for z in range(min_z, max_z + 1):
-                    n = 0
-                    for (bx, by, bz, br) in bots:
-                        d = manhattan((bx / f, by / f, bz / f), (x, y, z))
-                        if d <= (round((br / f) + 1) if f > 1 else br):
-                            n += 1
-                    if max_n == n:
-                        points.add((x, y, z))
-                    elif n > 0 and (max_n is None or max_n < n):
-                        max_n = n
-                        points.clear()
-                        points.add((x, y, z))
+        for (x, y, z) in itertools.product(range(min_x, max_x + 1), range(min_y, max_y + 1), range(min_z, max_z + 1)):
+            n = 0
+            for (bx, by, bz, br) in bots:
+                d = manhattan((bx / f, by / f, bz / f), (x, y, z))
+                if d <= (round((br / f) + 1) if f > 1 else br):
+                    n += 1
+            if max_n == n:
+                points.add((x, y, z))
+            elif n > 0 and (max_n is None or max_n < n):
+                max_n = n
+                points.clear()
+                points.add((x, y, z))
 
         if f == 1:
-            s = r.setdefault(max_n, set())
-            for p in points:
-                s.add(p)
+            if total_max_n is None or max_n > total_max_n:
+                total_max_n = max_n
+                best_p.clear()
+            if max_n == total_max_n:
+                for p in points:
+                    best_p.add(p)
             return
 
-        for (x, y, z) in sorted(points, key=lambda m: manhattan(m)):
+        for (x, y, z) in points:
             drill(f // 2,
                   min_x=(x - 1) * 2, max_x=(x + 1) * 2,
                   min_y=(y - 1) * 2, max_y=(y + 1) * 2,
                   min_z=(z - 1) * 2, max_z=(z + 1) * 2)
 
-    bots_x = [b[0] for b in bots]
-    bots_y = [b[1] for b in bots]
-    bots_z = [b[2] for b in bots]
-    max_all = max(max(bots_x), max(bots_y), max(bots_z))
+    (min_bx, max_bx) = (min([b[0] for b in bots]), max([b[0] for b in bots]))
+    (min_by, max_by) = (min([b[1] for b in bots]), max([b[1] for b in bots]))
+    (min_bz, max_bz) = (min([b[2] for b in bots]), max([b[2] for b in bots]))
 
     max_f = 1
-    while max_all // max_f > 0:
+    while max(max_bx, max_by, max_bz) // max_f > 0:
         max_f *= 2
 
     drill(max_f,
-          min_x=min(bots_x) // max_f, max_x=max(bots_x) // max_f,
-          min_y=min(bots_y) // max_f, max_y=max(bots_y) // max_f,
-          min_z=min(bots_z) // max_f, max_z=max(bots_z) // max_f)
+          min_x=min_bx // max_f, max_x=max_bx // max_f,
+          min_y=min_by // max_f, max_y=max_by // max_f,
+          min_z=min_bz // max_f, max_z=max_bz // max_f)
 
-    total_max_n = max(r.keys())
-    closest_points = sorted([manhattan(m) for m in r[total_max_n]])
-    print(closest_points[0])
+    print(sorted([manhattan(m) for m in best_p])[0])
 
 
 part2()
