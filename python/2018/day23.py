@@ -31,9 +31,9 @@ def part2():
     def drill(f, min_x, max_x, min_y, max_y, min_z, max_z):
         max_n = None
         points = set()
-        for x in range(min_x // f, max_x // f + 1):
-            for y in range(min_y // f, max_y // f + 1):
-                for z in range(min_z // f, max_z // f + 1):
+        for x in range(min_x, max_x + 1):
+            for y in range(min_y, max_y + 1):
+                for z in range(min_z, max_z + 1):
                     n = 0
                     for (bx, by, bz, br) in bots:
                         d = manhattan((bx / f, by / f, bz / f), (x, y, z))
@@ -53,23 +53,24 @@ def part2():
             return
 
         for (x, y, z) in sorted(points, key=lambda m: manhattan(m)):
-            (px2, py2, pz2) = ((x - 1) * f, (y - 1) * f, (z - 1) * f)
-            (px3, py3, pz3) = ((x + 1) * f, (y + 1) * f, (z + 1) * f)
-            drill(f // 2, min_x=px2, max_x=px3, min_y=py2, max_y=py3, min_z=pz2, max_z=pz3)
+            drill(f // 2,
+                  min_x=(x - 1) * 2, max_x=(x + 1) * 2,
+                  min_y=(y - 1) * 2, max_y=(y + 1) * 2,
+                  min_z=(z - 1) * 2, max_z=(z + 1) * 2)
 
     bots_x = [b[0] for b in bots]
     bots_y = [b[1] for b in bots]
     bots_z = [b[2] for b in bots]
     max_all = max(max(bots_x), max(bots_y), max(bots_z))
 
-    lowest_f = 1
-    while max_all // lowest_f > 0:
-        lowest_f *= 2
+    max_f = 1
+    while max_all // max_f > 0:
+        max_f *= 2
 
-    drill(lowest_f,
-          min_x=min(bots_x), max_x=max(bots_x),
-          min_y=min(bots_y), max_y=max(bots_y),
-          min_z=min(bots_z), max_z=max(bots_z))
+    drill(max_f,
+          min_x=min(bots_x) // max_f, max_x=max(bots_x) // max_f,
+          min_y=min(bots_y) // max_f, max_y=max(bots_y) // max_f,
+          min_z=min(bots_z) // max_f, max_z=max(bots_z) // max_f)
 
     total_max_n = max(r.keys())
     closest_points = sorted([manhattan(m) for m in r[total_max_n]])
