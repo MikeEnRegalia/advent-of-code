@@ -25,22 +25,15 @@ def solve(stretch=0):
         i2 = 0
         while True:
             h = data[0]
-            triplet = None
             for t in range(0, len(h) - 2):
                 if h[t] == h[t + 1] == h[t + 2]:
-                    triplet = h[t:t + 3]
+                    for n in range(1, 1001):
+                        h2 = data[n]
+                        for t2 in range(0, len(h2) - 4):
+                            if h2[t2] == h2[t2 + 1] == h2[t2 + 2] == h2[t2 + 3] == h2[t2 + 4] == h[t]:
+                                s += 1
+                                break
                     break
-            if triplet is not None:
-                for n in range(1, 1001):
-                    h2 = data[n]
-                    found = False
-                    for t in range(0, len(h2) - 4):
-                        if h2[t] == h2[t + 1] == h2[t + 2] == h2[t + 3] == h2[t + 4] == triplet[0]:
-                            s += 1
-                            found = True
-                            break
-                    if found:
-                        break
             if s == 64:
                 print(i2)
                 break
