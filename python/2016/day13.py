@@ -15,22 +15,18 @@ def neighbors(x, y):
     return [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]
 
 
-def walk():
-    pos = (1, 1)
-    target = (31, 39)
+def walk(target, start=(1, 1)):
+    pos = start
     visited = set()
     distances: dict = {pos: 0}
-    pending: set = {pos}
     while True:
         (x, y) = pos
         for neighbor in [p for p in neighbors(x, y) if not is_wall(p) and p not in visited]:
-            pending.add(neighbor)
             distance = distances[pos] + 1
             if neighbor not in distances or distance < distances[neighbor]:
                 distances[neighbor] = distance
         visited.add(pos)
-        pending.remove(pos)
-        next_nodes = sorted(pending, key=lambda p: distances[p])
+        next_nodes = sorted([i for i in distances.keys() if i not in visited], key=lambda p: distances[p])
         if len(next_nodes) == 0:
             break
         pos = next_nodes[0]
@@ -39,4 +35,4 @@ def walk():
     print(len([k for (k, visited) in distances.items() if visited <= 50]))
 
 
-walk()
+walk((31, 39))
