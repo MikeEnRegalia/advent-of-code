@@ -6,12 +6,16 @@ parsed = [re.match(r"pos=<([-]?\d+),([-]?\d+),([-]?\d+)>, r=(\d+)", line).groups
 bots = [list(map(int, g)) for g in parsed]
 
 
+def manhattan(a, b=(0, 0, 0)):
+    return abs(a[0] - b[0]) + abs(a[1] - b[1]) + abs(a[2] - b[2])
+
+
 def part1():
     (sx, sy, sz, sr) = sorted(bots, key=lambda a: a[3], reverse=True)[0]
 
     in_range = 0
     for (x, y, z, _) in bots:
-        d = abs(sx - x) + abs(sy - y) + abs(sz - z)
+        d = manhattan((sx, sy, sz), (x, y, z))
         if d <= sr:
             in_range += 1
 
@@ -24,16 +28,16 @@ part1()
 def part2():
     r = dict()
 
-    def drill(precision, min_x, max_x, min_y, max_y, min_z, max_z):
+    def drill(f, min_x, max_x, min_y, max_y, min_z, max_z):
         max_n = None
         points = set()
-        for x in range(min_x // precision, max_x // precision + 1):
-            for y in range(min_y // precision, max_y // precision + 1):
-                for z in range(min_z // precision, max_z // precision + 1):
+        for x in range(min_x // f, max_x // f + 1):
+            for y in range(min_y // f, max_y // f + 1):
+                for z in range(min_z // f, max_z // f + 1):
                     n = 0
                     for (bx, by, bz, br) in bots:
-                        d = abs(bx / precision - x) + abs(by / precision - y) + abs(bz / precision - z)
-                        if d <= (round((br / precision) + 1) if precision > 1 else br):
+                        d = manhattan((bx / f, by / f, bz / f), (x, y, z))
+                        if d <= (round((br / f) + 1) if f > 1 else br):
                             n += 1
                     if max_n == n:
                         points.add((x, y, z))
@@ -42,33 +46,33 @@ def part2():
                         points.clear()
                         points.add((x, y, z))
 
-        if precision == 1:
+        if f == 1:
             s = r.setdefault(max_n, set())
             for p in points:
                 s.add(p)
             return
 
-        for (x, y, z) in sorted(points, key=lambda m: abs(m[0]) + abs(m[1]) + abs(m[2])):
-            (px2, py2, pz2) = ((x - 1) * precision, (y - 1) * precision, (z - 1) * precision)
-            (px3, py3, pz3) = ((x + 1) * precision, (y + 1) * precision, (z + 1) * precision)
-            drill(precision // 2, min_x=px2, max_x=px3, min_y=py2, max_y=py3, min_z=pz2, max_z=pz3)
+        for (x, y, z) in sorted(points, key=lambda m: manhattan(m)):
+            (px2, py2, pz2) = ((x - 1) * f, (y - 1) * f, (z - 1) * f)
+            (px3, py3, pz3) = ((x + 1) * f, (y + 1) * f, (z + 1) * f)
+            drill(f // 2, min_x=px2, max_x=px3, min_y=py2, max_y=py3, min_z=pz2, max_z=pz3)
 
     bots_x = [b[0] for b in bots]
     bots_y = [b[1] for b in bots]
     bots_z = [b[2] for b in bots]
     max_all = max(max(bots_x), max(bots_y), max(bots_z))
 
-    lowest_precision = 1
-    while max_all // lowest_precision > 0:
-        lowest_precision *= 2
+    lowest_f = 1
+    while max_all // lowest_f > 0:
+        lowest_f *= 2
 
-    drill(lowest_precision,
+    drill(lowest_f,
           min_x=min(bots_x), max_x=max(bots_x),
           min_y=min(bots_y), max_y=max(bots_y),
           min_z=min(bots_z), max_z=max(bots_z))
 
     total_max_n = max(r.keys())
-    closest_points = sorted([abs(m[0]) + abs(m[1]) + abs(m[2]) for m in r[total_max_n]])
+    closest_points = sorted([manhattan(m) for m in r[total_max_n]])
     print(closest_points[0])
 
 
