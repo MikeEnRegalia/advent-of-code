@@ -27,7 +27,6 @@ bots_z = [b[2] for b in bots]
 
 def part2():
     r = dict()
-    cache = set()
 
     def drill(precision,
               min_x=min(bots_x), max_x=max(bots_x),
@@ -57,12 +56,9 @@ def part2():
             return
 
         for (x, y, z) in sorted(points, key=lambda m: abs(m[0]) + abs(m[1]) + abs(m[2])):
-            k = (precision, x, y, z)
-            if k not in cache:
-                cache.add(k)
-                (px2, py2, pz2) = ((x - 1) * precision, (y - 1) * precision, (z - 1) * precision)
-                (px3, py3, pz3) = ((x + 1) * precision, (y + 1) * precision, (z + 1) * precision)
-                drill(precision // 2, min_x=px2, max_x=px3, min_y=py2, max_y=py3, min_z=pz2, max_z=pz3)
+            (px2, py2, pz2) = ((x - 1) * precision, (y - 1) * precision, (z - 1) * precision)
+            (px3, py3, pz3) = ((x + 1) * precision, (y + 1) * precision, (z + 1) * precision)
+            drill(precision // 2, min_x=px2, max_x=px3, min_y=py2, max_y=py3, min_z=pz2, max_z=pz3)
 
     seq = list()
     seq.append(1)
