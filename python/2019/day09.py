@@ -10,10 +10,10 @@ def run(m, pos, rel, i):
         opcode = int(instruction[3:])
 
         def loc(p):
-            return m[pos + p] if modes[p-1] == "0" else rel + m[pos + p]
+            return m[pos + p] if modes[p - 1] == "0" else rel + m[pos + p]
 
         def read(p):
-            return m[pos + p] if modes[p-1] == "1" else m.setdefault(loc(p), 0)
+            return m[pos + p] if modes[p - 1] == "1" else m.setdefault(loc(p), 0)
 
         def write(p, v):
             m[loc(p)] = v
@@ -49,8 +49,6 @@ def run(m, pos, rel, i):
             raise ValueError(instruction)
 
 
-PROGRAM = dict()
-for (q, n) in enumerate(fileinput.input().readline().strip().split(",")):
-    PROGRAM[q] = int(n)
-print(run(PROGRAM.copy(), 0, 0, 1)[3])
-print(run(PROGRAM.copy(), 0, 0, 2)[3])
+PROGRAM = {int(q): int(n) for (q, n) in enumerate(fileinput.input().readline().split(","))}
+for x in [1, 2]:
+    print(run(PROGRAM.copy(), 0, 0, x)[3][0])
