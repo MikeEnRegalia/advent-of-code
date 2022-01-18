@@ -1,7 +1,5 @@
 import fileinput
 
-PROGRAM = [int(x) for x in fileinput.input().readline().strip().split(",")]
-
 
 def run(m, pos, i):
     o = list()
@@ -47,5 +45,6 @@ def run(m, pos, i):
     return m, pos, o
 
 
-print(run(PROGRAM.copy(), 0, 1)[2])
-print(run(PROGRAM.copy(), 0, 5)[2])
+PROGRAM = [int(x) for x in fileinput.input().readline().strip().split(",")]
+for x in [1, 5]:
+    print(run(PROGRAM.copy(), 0, x)[2])
