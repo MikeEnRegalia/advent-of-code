@@ -55,12 +55,14 @@ def run(state, i: list):
 
 
 s = 0
-y = 0
+y = -1
 h = deque()
 while True:
+    y += 1
     x = h[-1][0] if len(h) > 0 else 0
     started = None
     stopped = None
+
     while True:
         t = run((DRONE.copy(), 0, 0), [x, y])[1][0]
         if t == 1 and started is None:
@@ -74,15 +76,15 @@ while True:
         x += 1
         if x > max(1, y * 4) or stopped is not None:
             break
-    assert not (started is not None and stopped is None)
+
     if started is not None and stopped is not None:
         s += stopped - started
+        if y == 49:
+            print(s)
         h.append((started, stopped, y))
         if len(h) == 100:
-            (h_started, h_stopped, h_y) = h.popleft()
+            (_, h_stopped, h_y) = h.popleft()
             if started + 100 <= h_stopped:
                 print(started * 10000 + h_y)
                 break
-    y += 1
-    if y == 50:
-        print(s)
+
