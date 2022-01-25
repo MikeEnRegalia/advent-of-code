@@ -58,25 +58,28 @@ s = 0
 y = 0
 h = deque()
 while True:
-    x = 0
+    x = h[-1][0] if len(h) > 0 else 0
     started = None
     stopped = None
     while True:
         t = run((DRONE.copy(), 0, 0), [x, y])[1][0]
         if t == 1 and started is None:
             started = x
+            if len(h) > 0:
+                p_stopped = max(x + 1, h[-1][1])
+                x = p_stopped - 1
+                continue
         elif t == 0 and started is not None and stopped is None:
             stopped = x
-        s += t
         x += 1
         if x > max(1, y * 4) or stopped is not None:
             break
     assert not (started is not None and stopped is None)
     if started is not None and stopped is not None:
+        s += stopped - started
         h.append((started, stopped, y))
         if len(h) == 100:
             (h_started, h_stopped, h_y) = h.popleft()
-            print(f"{h_stopped}, {started}")
             if started + 100 <= h_stopped:
                 print(started * 10000 + h_y)
                 break
