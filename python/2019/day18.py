@@ -22,7 +22,7 @@ KEYS = tuple(sorted(KEYS))
 
 def solve(part1):
     if part1:
-        start = ENTRANCE, None, None, None, tuple()
+        start = tuple([ENTRANCE]), tuple()
     else:
         (ex, ey) = ENTRANCE
         MAZE[ey - 1][ex - 1] = '@'
@@ -34,7 +34,7 @@ def solve(part1):
         MAZE[ey - 1][ex] = '#'
         MAZE[ey + 1][ex] = '#'
         MAZE[ey][ex] = '#'
-        start = (ex - 1, ey - 1), (ex + 1, ey - 1), (ex - 1, ey + 1), (ex + 1, ey + 1), tuple()
+        start = tuple([(ex - 1, ey - 1), (ex + 1, ey - 1), (ex - 1, ey + 1), (ex + 1, ey + 1)]), tuple()
 
     v = set()
     v3 = set()
@@ -49,7 +49,7 @@ def solve(part1):
             return None
         if c in string.ascii_lowercase and c not in keys:
             return x, y, tuple(sorted([*keys, c])), 1
-        if part1 or not rec:
+        if not rec:
             return x, y, keys, 1
         v3.clear()
         return follow_dead_end((x, y), prev, keys, positions, 1)
@@ -70,8 +70,6 @@ def solve(part1):
         return rx, ry, rkeys, ndist + rdist
 
     def neighbors1(positions, pos, keys, skip, rec):
-        if pos is None:
-            return []
         (x, y) = pos
         n = list()
         for (x2, y2) in [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]:
@@ -80,18 +78,15 @@ def solve(part1):
         return list(filter(lambda ne: ne is not None, n))
 
     def neighbors(state):
-        (r1, r2, r3, r4, keys) = state
-        positions = (r1, r2, r3, r4)
-        n = list()
-        for (x1n, y1n, nkeys, dist) in neighbors1(positions, r1, keys, None, True):
-            n.append((((x1n, y1n), r2, r3, r4, nkeys), dist))
-        for (x2n, y2n, nkeys, dist) in neighbors1(positions, r2, keys, None, True):
-            n.append(((r1, (x2n, y2n), r3, r4, nkeys), dist))
-        for (x3n, y3n, nkeys, dist) in neighbors1(positions, r3, keys, None, True):
-            n.append(((r1, r2, (x3n, y3n), r4, nkeys), dist))
-        for (x4n, y4n, nkeys, dist) in neighbors1(positions, r4, keys, None, True):
-            n.append(((r1, r2, r3, (x4n, y4n), nkeys), dist))
-        return n
+        (rs, keys) = state
+        all_neighbors = list()
+        for (ri, r) in enumerate(rs):
+            for (xn, yn, nkeys, dist) in neighbors1(rs, r, keys, None, True):
+                rl = list()
+                for i in range(len(rs)):
+                    rl.append((xn, yn) if i == ri else rs[i])
+                all_neighbors.append(((tuple(rl), nkeys), dist))
+        return all_neighbors
 
     def walk():
         pos = start
@@ -105,7 +100,7 @@ def solve(part1):
                 dn = d[pos] + dist
                 d[n] = dn if n not in d else min(d[n], dn)
             v.add(pos)
-            keys = pos[4]
+            keys = pos[1]
             if len(keys) > max_keys:
                 print(len(keys))
                 max_keys = len(keys)
