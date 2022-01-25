@@ -24,10 +24,12 @@ ENTRANCE = init()
 KEYS = tuple(sorted(KEYS))
 
 
-def optimize_for(keys):
-    if keys in MAZE_CACHE:
-        return MAZE_CACHE[keys]
+def optimize_for(keys, positions):
+    k = (keys, positions)
+    if k in MAZE_CACHE:
+        return MAZE_CACHE[k]
 
+    open_doors = set(map(str.upper, set(KEYS)))
     blocked_doors = set(map(str.upper, set(KEYS).difference(keys)))
     walls = {*tuple(sorted(blocked_doors)), '#'}
     # print(walls)
@@ -38,10 +40,19 @@ def optimize_for(keys):
         changed = 0
         for y in range(0, len(maze)):
             for x in range(0, len(maze[0])):
-                if maze[y][x] in blocked_doors:
-                    maze[y][x] = '#'
+                if (x, y) in positions:
+                    continue
+                c = maze[y][x]
+
+                if c == '@' or c in open_doors:
+                    maze[y][x] = c = '.'
                     changed += 1
-                elif maze[y][x] == '.':
+
+                if c in blocked_doors:
+                    maze[y][x] = c = '#'
+                    changed += 1
+
+                if c == '.':
                     s = 0
                     s += 1 if maze[y - 1][x] in walls else 0
                     s += 1 if maze[y + 1][x] in walls else 0
@@ -52,16 +63,16 @@ def optimize_for(keys):
                         changed += 1
         if changed == 0:
             break
-    MAZE_CACHE[keys] = maze
-    for m in maze:
-        print("".join(m))
-    print(f"c: {len(MAZE_CACHE)}")
+    MAZE_CACHE[k] = maze
+    # for m in maze:
+    #     print("".join(m))
+    # print(f"c: {len(MAZE_CACHE)}")
     return maze
 
 
 def collect_keys():
-    def at(x, y, keys: tuple[str]):
-        c: str = optimize_for(keys)[y][x]
+    def at(x, y, keys: tuple[str], positions):
+        c: str = MAZE[y][x]
         if c == '#':
             return None
         if c in string.ascii_uppercase and c.lower() not in keys:
@@ -72,13 +83,13 @@ def collect_keys():
             return x, y, tuple(sorted(new_keys))
         return x, y, keys
 
-    def neighbors(state):
+    def neighbors(state, positions):
         (x, y, keys) = state
         n = list()
-        n.append(at(x + 1, y, keys))
-        n.append(at(x - 1, y, keys))
-        n.append(at(x, y + 1, keys))
-        n.append(at(x, y - 1, keys))
+        n.append(at(x + 1, y, keys, positions))
+        n.append(at(x - 1, y, keys, positions))
+        n.append(at(x, y + 1, keys, positions))
+        n.append(at(x, y - 1, keys, positions))
         return list(filter(lambda ne: ne is not None, n))
 
     def walk():
@@ -91,7 +102,7 @@ def collect_keys():
         d: dict = {pos: 0}
 
         while True:
-            for n in [n for n in neighbors(pos) if n not in v]:
+            for n in [n for n in neighbors(pos, tuple(pos)) if n not in v]:
                 q.add(n)
                 dn = d[pos] + 1
                 d[n] = dn if n not in d else min(d[n], dn)
@@ -128,54 +139,56 @@ def part2():
     MAZE[ey][ex] = '#'
     MAZE_CACHE.clear()
 
-    def at(x, y, keys: tuple[str]):
-        c: str = optimize_for(keys)[y][x]
+    v = set()
+    v2 = set()
+
+    def at(positions, x, y, keys: tuple[str], prev, v3, rec=False):
+        c: str = MAZE[y][x]
         if c == '#':
             return None
         if c in string.ascii_uppercase and c.lower() not in keys:
             return None
         if c in string.ascii_lowercase and c not in keys:
-            new_keys = tuple(sorted([*keys, c]))
-            # print(new_keys)
-            return x, y, new_keys
-        return x, y, keys
+            return x, y, tuple(sorted([*keys, c])), 1
+
+        return x, y, keys, 1
+
+    def neighbors1(positions, pos, keys, skip, v3, rec=True):
+        (x, y) = pos
+        n = list()
+        for (x2, y2) in [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]:
+            if skip is None or skip != (x2, y2):
+                n.append(at(positions, x2, y2, keys, pos, v3, rec))
+        return list(filter(lambda ne: ne is not None, n))
 
     def neighbors(state):
         (r1, r2, r3, r4, keys) = state
+        positions = (r1, r2, r3, r4)
         n = list()
-        for (x1n, y1n, nkeys) in neighbors1(r1, keys):
-            n.append(((x1n, y1n), r2, r3, r4, nkeys))
-        for (x2n, y2n, nkeys) in neighbors1(r2, keys):
-            n.append((r1, (x2n, y2n), r3, r4, nkeys))
-        for (x3n, y3n, nkeys) in neighbors1(r3, keys):
-            n.append((r1, r2, (x3n, y3n), r4, nkeys))
-        for (x4n, y4n, nkeys) in neighbors1(r4, keys):
-            n.append((r1, r2, r3, (x4n, y4n), nkeys))
+        for (x1n, y1n, nkeys, dist) in neighbors1(positions, r1, keys, None, set()):
+            n.append((((x1n, y1n), r2, r3, r4, nkeys), dist))
+        for (x2n, y2n, nkeys, dist) in neighbors1(positions, r2, keys, None, set()):
+            n.append(((r1, (x2n, y2n), r3, r4, nkeys), dist))
+        for (x3n, y3n, nkeys, dist) in neighbors1(positions, r3, keys, None, set()):
+            n.append(((r1, r2, (x3n, y3n), r4, nkeys), dist))
+        for (x4n, y4n, nkeys, dist) in neighbors1(positions, r4, keys, None, set()):
+            n.append(((r1, r2, r3, (x4n, y4n), nkeys), dist))
         return n
-
-    def neighbors1(r, keys):
-        (x, y) = r
-        n = list()
-        n.append(at(x + 1, y, keys))
-        n.append(at(x - 1, y, keys))
-        n.append(at(x, y + 1, keys))
-        n.append(at(x, y - 1, keys))
-        return list(filter(lambda ne: ne is not None, n))
 
     def walk():
         pos = (ex - 1, ey - 1), (ex + 1, ey - 1), (ex - 1, ey + 1), (ex + 1, ey + 1), tuple()
-        v = set()
         q = {pos}
         d: dict = {pos: 0}
 
         max_keys = 0
         while True:
-            # print(f"v: {len(v)}")
-            for n in [n for n in neighbors(pos) if n not in v]:
+            for (n, dist) in [(n, dist) for (n, dist) in neighbors(pos) if n not in v]:
                 q.add(n)
-                dn = d[pos] + 1
+                dn = d[pos] + dist
                 d[n] = dn if n not in d else min(d[n], dn)
             v.add(pos)
+            for r in range(4):
+                v2.add(pos[r])
             if pos[4] == KEYS:
                 print(d[pos])
                 break
@@ -185,9 +198,6 @@ def part2():
             q.remove(pos)
             if len(q) == 0:
                 break
-            q_min_keys = len(sorted(q, key=lambda fe: len(fe[4]))[0][4])
-            if q_min_keys > 0:
-                v = {x for x in v if len(x[4]) >= q_min_keys}
             pos = sorted(q, key=lambda fe: d[fe])[0]
 
     walk()
