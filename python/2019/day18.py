@@ -43,9 +43,7 @@ def solve(part1):
         if (x, y) in v3:
             return None
         c: str = MAZE[y][x]
-        if c == '#':
-            return None
-        if c in string.ascii_uppercase and c.lower() not in keys:
+        if c == '#' or c in string.ascii_uppercase and c.lower() not in keys:
             return None
         if c in string.ascii_lowercase and c not in keys:
             return x, y, tuple(sorted([*keys, c])), 1
@@ -54,20 +52,20 @@ def solve(part1):
         v3.clear()
         return follow_dead_end((x, y), prev, keys, positions, 1)
 
-    def follow_dead_end(n, prev, keys, positions, ndist):
+    def follow_dead_end(n, prev, keys, positions, n_dist):
         v3.add(n)
         f: list = neighbors1(positions, n, keys, prev, False)
-        if part1 and ndist == 1 and len(f) > 1:
-            return n[0], n[1], keys, ndist
+        if part1 and n_dist == 1 and len(f) > 1:
+            return n[0], n[1], keys, n_dist
 
-        f = [j if j[2] != keys else follow_dead_end((j[0], j[1]), n, j[2], positions, ndist) for j in f]
-        f = list(filter(lambda ne: ne is not None, f))
+        f = [j if j[2] != keys else follow_dead_end((j[0], j[1]), n, j[2], positions, n_dist) for j in f]
+        f = [j for j in f if j is not None]
         if len(f) == 0:
             return None
         if len(f) > 1:
-            return n[0], n[1], keys, ndist
-        (rx, ry, rkeys, rdist) = f[0]
-        return rx, ry, rkeys, ndist + rdist
+            return n[0], n[1], keys, n_dist
+        (rx, ry, r_keys, r_dist) = f[0]
+        return rx, ry, r_keys, n_dist + r_dist
 
     def neighbors1(positions, pos, keys, skip, rec):
         (x, y) = pos
