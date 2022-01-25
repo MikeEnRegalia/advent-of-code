@@ -1,11 +1,7 @@
 import fileinput
 import string
 
-ORIGINAL_MAZE = [list(row.strip()) for row in fileinput.input()]
-MAZE: list[list[str]] = ORIGINAL_MAZE
-for i in range(0, len(MAZE)):
-    MAZE[i] = MAZE[i].copy()
-MAZE_CACHE = dict()
+MAZE: list[list[str]] = [list(row.strip()) for row in fileinput.input()]
 KEYS = set()
 
 
@@ -24,26 +20,23 @@ ENTRANCE = init()
 KEYS = tuple(sorted(KEYS))
 
 
-MAZE = ORIGINAL_MAZE
-for i in range(0, len(MAZE)):
-    MAZE[i] = MAZE[i].copy()
-
-
-def part2():
-    (ex, ey) = ENTRANCE
-    MAZE[ey - 1][ex - 1] = '@'
-    MAZE[ey - 1][ex + 1] = '@'
-    MAZE[ey + 1][ex - 1] = '@'
-    MAZE[ey + 1][ex + 1] = '@'
-    MAZE[ey][ex - 1] = '#'
-    MAZE[ey][ex + 1] = '#'
-    MAZE[ey - 1][ex] = '#'
-    MAZE[ey + 1][ex] = '#'
-    MAZE[ey][ex] = '#'
-    MAZE_CACHE.clear()
+def solve(part1):
+    if part1:
+        start = ENTRANCE, None, None, None, tuple()
+    else:
+        (ex, ey) = ENTRANCE
+        MAZE[ey - 1][ex - 1] = '@'
+        MAZE[ey - 1][ex + 1] = '@'
+        MAZE[ey + 1][ex - 1] = '@'
+        MAZE[ey + 1][ex + 1] = '@'
+        MAZE[ey][ex - 1] = '#'
+        MAZE[ey][ex + 1] = '#'
+        MAZE[ey - 1][ex] = '#'
+        MAZE[ey + 1][ex] = '#'
+        MAZE[ey][ex] = '#'
+        start = (ex - 1, ey - 1), (ex + 1, ey - 1), (ex - 1, ey + 1), (ex + 1, ey + 1), tuple()
 
     v = set()
-    v2 = set()
     v3 = set()
 
     def at(positions, x, y, keys: tuple[str], prev, rec):
@@ -56,14 +49,17 @@ def part2():
             return None
         if c in string.ascii_lowercase and c not in keys:
             return x, y, tuple(sorted([*keys, c])), 1
-        if not rec:
+        if part1 or not rec:
             return x, y, keys, 1
         v3.clear()
         return follow_dead_end((x, y), prev, keys, positions, 1)
 
     def follow_dead_end(n, prev, keys, positions, ndist):
         v3.add(n)
-        f = neighbors1(positions, n, keys, prev, False)
+        f: list = neighbors1(positions, n, keys, prev, False)
+        if part1 and ndist == 1 and len(f) > 1:
+            return n[0], n[1], keys, ndist
+
         f = [j if j[2] != keys else follow_dead_end((j[0], j[1]), n, j[2], positions, ndist) for j in f]
         f = list(filter(lambda ne: ne is not None, f))
         if len(f) == 0:
@@ -74,6 +70,8 @@ def part2():
         return rx, ry, rkeys, ndist + rdist
 
     def neighbors1(positions, pos, keys, skip, rec):
+        if pos is None:
+            return []
         (x, y) = pos
         n = list()
         for (x2, y2) in [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]:
@@ -96,7 +94,7 @@ def part2():
         return n
 
     def walk():
-        pos = (ex - 1, ey - 1), (ex + 1, ey - 1), (ex - 1, ey + 1), (ex + 1, ey + 1), tuple()
+        pos = start
         q = {pos}
         d: dict = {pos: 0}
 
@@ -107,14 +105,13 @@ def part2():
                 dn = d[pos] + dist
                 d[n] = dn if n not in d else min(d[n], dn)
             v.add(pos)
-            for r in range(4):
-                v2.add((pos[r], pos[4]))
-            if pos[4] == KEYS:
+            keys = pos[4]
+            if len(keys) > max_keys:
+                print(len(keys))
+                max_keys = len(keys)
+            if keys == KEYS:
                 print(d[pos])
                 break
-            if len(pos[4]) > max_keys:
-                print(len(pos[4]))
-                max_keys = len(pos[4])
             q.remove(pos)
             if len(q) == 0:
                 break
@@ -123,4 +120,5 @@ def part2():
     walk()
 
 
-part2()
+solve(part1=True)
+solve(part1=False)
