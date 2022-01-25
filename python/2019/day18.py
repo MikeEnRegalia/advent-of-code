@@ -44,7 +44,7 @@ def optimize_for(keys, positions):
                     continue
                 c = maze[y][x]
 
-                if c == '@' or c in open_doors:
+                if c == '@' or c in open_doors or c in keys:
                     maze[y][x] = c = '.'
                     changed += 1
 
@@ -64,9 +64,9 @@ def optimize_for(keys, positions):
         if changed == 0:
             break
     MAZE_CACHE[k] = maze
-    # for m in maze:
-    #     print("".join(m))
-    # print(f"c: {len(MAZE_CACHE)}")
+    #for m in maze:
+    #    print("".join(m))
+    #print(f"c: {len(MAZE_CACHE)}")
     return maze
 
 
@@ -142,7 +142,8 @@ def part2():
     v = set()
     v2 = set()
 
-    def at(positions, x, y, keys: tuple[str], prev, v3, rec=False):
+    def at(positions, x, y, keys: tuple[str], prev, v3, rec):
+
         c: str = MAZE[y][x]
         if c == '#':
             return None
@@ -150,10 +151,20 @@ def part2():
             return None
         if c in string.ascii_lowercase and c not in keys:
             return x, y, tuple(sorted([*keys, c])), 1
+        if not rec:
+            return x, y, keys, 1
+        r = follow_dead_end((x, y), prev, keys, v3, positions)
+        return r
 
-        return x, y, keys, 1
+    def follow_dead_end(n, prev, keys, v3, positions):
+        f = neighbors1(positions, n, keys, prev, v3, False)
+        if len(f) == 0:
+            return None
+        if len(f) == 1:
+            return follow_dead_end((n[0], n[1]), n, keys, v3, positions)
+        return n[0], n[1], keys, 1
 
-    def neighbors1(positions, pos, keys, skip, v3, rec=True):
+    def neighbors1(positions, pos, keys, skip, v3, rec):
         (x, y) = pos
         n = list()
         for (x2, y2) in [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]:
@@ -165,13 +176,13 @@ def part2():
         (r1, r2, r3, r4, keys) = state
         positions = (r1, r2, r3, r4)
         n = list()
-        for (x1n, y1n, nkeys, dist) in neighbors1(positions, r1, keys, None, set()):
+        for (x1n, y1n, nkeys, dist) in neighbors1(positions, r1, keys, None, set(), True):
             n.append((((x1n, y1n), r2, r3, r4, nkeys), dist))
-        for (x2n, y2n, nkeys, dist) in neighbors1(positions, r2, keys, None, set()):
+        for (x2n, y2n, nkeys, dist) in neighbors1(positions, r2, keys, None, set(), True):
             n.append(((r1, (x2n, y2n), r3, r4, nkeys), dist))
-        for (x3n, y3n, nkeys, dist) in neighbors1(positions, r3, keys, None, set()):
+        for (x3n, y3n, nkeys, dist) in neighbors1(positions, r3, keys, None, set(), True):
             n.append(((r1, r2, (x3n, y3n), r4, nkeys), dist))
-        for (x4n, y4n, nkeys, dist) in neighbors1(positions, r4, keys, None, set()):
+        for (x4n, y4n, nkeys, dist) in neighbors1(positions, r4, keys, None, set(), True):
             n.append(((r1, r2, r3, (x4n, y4n), nkeys), dist))
         return n
 
