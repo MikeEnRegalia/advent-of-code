@@ -24,103 +24,6 @@ ENTRANCE = init()
 KEYS = tuple(sorted(KEYS))
 
 
-def optimize_for(keys, positions):
-    k = (keys, positions)
-    if k in MAZE_CACHE:
-        return MAZE_CACHE[k]
-
-    open_doors = set(map(str.upper, set(KEYS)))
-    blocked_doors = set(map(str.upper, set(KEYS).difference(keys)))
-    walls = {*tuple(sorted(blocked_doors)), '#'}
-    # print(walls)
-    maze = MAZE.copy()
-    for m in range(0, len(maze)):
-        maze[m] = maze[m].copy()
-    while True:
-        changed = 0
-        for y in range(0, len(maze)):
-            for x in range(0, len(maze[0])):
-                if (x, y) in positions:
-                    continue
-                c = maze[y][x]
-
-                if c == '@' or c in open_doors or c in keys:
-                    maze[y][x] = c = '.'
-                    changed += 1
-
-                if c in blocked_doors:
-                    maze[y][x] = c = '#'
-                    changed += 1
-
-                if c == '.':
-                    s = 0
-                    s += 1 if maze[y - 1][x] in walls else 0
-                    s += 1 if maze[y + 1][x] in walls else 0
-                    s += 1 if maze[y][x - 1] in walls else 0
-                    s += 1 if maze[y][x + 1] in walls else 0
-                    if s >= 3:
-                        maze[y][x] = '#'
-                        changed += 1
-        if changed == 0:
-            break
-    MAZE_CACHE[k] = maze
-    #for m in maze:
-    #    print("".join(m))
-    #print(f"c: {len(MAZE_CACHE)}")
-    return maze
-
-
-def collect_keys():
-    def at(x, y, keys: tuple[str], positions):
-        c: str = MAZE[y][x]
-        if c == '#':
-            return None
-        if c in string.ascii_uppercase and c.lower() not in keys:
-            return None
-        if c in string.ascii_lowercase and c not in keys:
-            new_keys = list(keys)
-            new_keys.append(c)
-            return x, y, tuple(sorted(new_keys))
-        return x, y, keys
-
-    def neighbors(state, positions):
-        (x, y, keys) = state
-        n = list()
-        n.append(at(x + 1, y, keys, positions))
-        n.append(at(x - 1, y, keys, positions))
-        n.append(at(x, y + 1, keys, positions))
-        n.append(at(x, y - 1, keys, positions))
-        return list(filter(lambda ne: ne is not None, n))
-
-    def walk():
-        (ex, ey) = ENTRANCE
-
-        pos = ex, ey, tuple()
-        v = set()
-        q = set()
-        q.add(pos)
-        d: dict = {pos: 0}
-
-        while True:
-            for n in [n for n in neighbors(pos, tuple(pos)) if n not in v]:
-                q.add(n)
-                dn = d[pos] + 1
-                d[n] = dn if n not in d else min(d[n], dn)
-            v.add(pos)
-            if pos[2] == KEYS:
-                print(d[pos])
-                break
-            q.remove(pos)
-            if len(q) == 0:
-                break
-            f = sorted(q, key=lambda fe: d[fe])
-            pos = f[0]
-
-    walk()
-
-
-# collect_keys()
-
 MAZE = ORIGINAL_MAZE
 for i in range(0, len(MAZE)):
     MAZE[i] = MAZE[i].copy()
@@ -141,9 +44,11 @@ def part2():
 
     v = set()
     v2 = set()
+    v3 = set()
 
-    def at(positions, x, y, keys: tuple[str], prev, v3, rec):
-
+    def at(positions, x, y, keys: tuple[str], prev, rec):
+        if (x, y) in v3:
+            return None
         c: str = MAZE[y][x]
         if c == '#':
             return None
@@ -153,36 +58,40 @@ def part2():
             return x, y, tuple(sorted([*keys, c])), 1
         if not rec:
             return x, y, keys, 1
-        r = follow_dead_end((x, y), prev, keys, v3, positions)
-        return r
+        v3.clear()
+        return follow_dead_end((x, y), prev, keys, positions, 1)
 
-    def follow_dead_end(n, prev, keys, v3, positions):
-        f = neighbors1(positions, n, keys, prev, v3, False)
+    def follow_dead_end(n, prev, keys, positions, ndist):
+        v3.add(n)
+        f = neighbors1(positions, n, keys, prev, False)
+        f = [j if j[2] != keys else follow_dead_end((j[0], j[1]), n, j[2], positions, ndist) for j in f]
+        f = list(filter(lambda ne: ne is not None, f))
         if len(f) == 0:
             return None
-        if len(f) == 1:
-            return follow_dead_end((n[0], n[1]), n, keys, v3, positions)
-        return n[0], n[1], keys, 1
+        if len(f) > 1:
+            return n[0], n[1], keys, ndist
+        (rx, ry, rkeys, rdist) = f[0]
+        return rx, ry, rkeys, ndist + rdist
 
-    def neighbors1(positions, pos, keys, skip, v3, rec):
+    def neighbors1(positions, pos, keys, skip, rec):
         (x, y) = pos
         n = list()
         for (x2, y2) in [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]:
             if skip is None or skip != (x2, y2):
-                n.append(at(positions, x2, y2, keys, pos, v3, rec))
+                n.append(at(positions, x2, y2, keys, pos, rec))
         return list(filter(lambda ne: ne is not None, n))
 
     def neighbors(state):
         (r1, r2, r3, r4, keys) = state
         positions = (r1, r2, r3, r4)
         n = list()
-        for (x1n, y1n, nkeys, dist) in neighbors1(positions, r1, keys, None, set(), True):
+        for (x1n, y1n, nkeys, dist) in neighbors1(positions, r1, keys, None, True):
             n.append((((x1n, y1n), r2, r3, r4, nkeys), dist))
-        for (x2n, y2n, nkeys, dist) in neighbors1(positions, r2, keys, None, set(), True):
+        for (x2n, y2n, nkeys, dist) in neighbors1(positions, r2, keys, None, True):
             n.append(((r1, (x2n, y2n), r3, r4, nkeys), dist))
-        for (x3n, y3n, nkeys, dist) in neighbors1(positions, r3, keys, None, set(), True):
+        for (x3n, y3n, nkeys, dist) in neighbors1(positions, r3, keys, None, True):
             n.append(((r1, r2, (x3n, y3n), r4, nkeys), dist))
-        for (x4n, y4n, nkeys, dist) in neighbors1(positions, r4, keys, None, set(), True):
+        for (x4n, y4n, nkeys, dist) in neighbors1(positions, r4, keys, None, True):
             n.append(((r1, r2, r3, (x4n, y4n), nkeys), dist))
         return n
 
@@ -199,7 +108,7 @@ def part2():
                 d[n] = dn if n not in d else min(d[n], dn)
             v.add(pos)
             for r in range(4):
-                v2.add(pos[r])
+                v2.add((pos[r], pos[4]))
             if pos[4] == KEYS:
                 print(d[pos])
                 break
