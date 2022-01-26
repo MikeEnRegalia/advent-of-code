@@ -77,8 +77,10 @@ SPRINGSCRIPT_RUN = (
     "RUN\n"
 )
 
-(_, o) = run((SPRINGDROID.copy(), 0, 0), [ord(c) for c in list(SPRINGSCRIPT_WALK)])
-print(''.join([chr(i) if i < 128 else str(i) for i in o]))
-
-(_, o) = run((SPRINGDROID.copy(), 0, 0), [ord(c) for c in list(SPRINGSCRIPT_RUN)])
-print(''.join([chr(i) if i < 128 else str(i) for i in o]))
+for s in [SPRINGSCRIPT_WALK, SPRINGSCRIPT_RUN]:
+    (_, o) = run((SPRINGDROID.copy(), 0, 0), [ord(c) for c in list(s)])
+    r = max(o)
+    if r > 127:
+        print(r)
+    else:
+        print(''.join([chr(i) for i in o]))
