@@ -51,7 +51,9 @@ def run(state, i: list):
             raise ValueError(instruction)
 
 
-SPRINGSCRIPT = (
+SPRINGDROID = {int(q): int(n) for (q, n) in enumerate(fileinput.input().readline().split(","))}
+
+SPRINGSCRIPT_WALK = (
     "NOT A T\n"
     "NOT B J\n"
     "OR T J\n"
@@ -61,6 +63,22 @@ SPRINGSCRIPT = (
     "WALK\n"
 )
 
-SPRINGDROID = {int(q): int(n) for (q, n) in enumerate(fileinput.input().readline().split(","))}
-(_, o) = run((SPRINGDROID, 0, 0), [ord(c) for c in list(SPRINGSCRIPT)])
+SPRINGSCRIPT_RUN = (
+    "NOT A T\n"
+    "NOT B J\n"
+    "OR T J\n"
+    "NOT C T\n"
+    "OR T J\n"
+    "AND D J\n"
+    "OR H T\n"
+    "AND H T\n"
+    "OR E T\n"
+    "AND T J\n"
+    "RUN\n"
+)
+
+(_, o) = run((SPRINGDROID.copy(), 0, 0), [ord(c) for c in list(SPRINGSCRIPT_WALK)])
+print(''.join([chr(i) if i < 128 else str(i) for i in o]))
+
+(_, o) = run((SPRINGDROID.copy(), 0, 0), [ord(c) for c in list(SPRINGSCRIPT_RUN)])
 print(''.join([chr(i) if i < 128 else str(i) for i in o]))
