@@ -33,14 +33,18 @@ def to_portal(c1, c2):
     return tuple(sorted([c1, c2]))
 
 
+def adjacent_portal(p):
+    (p, c1) = letter_neighbors(p)[0]
+    (_, c2) = letter_neighbors(p)[0]
+    return to_portal(c1, c2)
+
+
 def portals():
     r = set()
     for (x, y) in MAZE.keys():
         if x in [MAZE_MIN_X, MAZE_MAX_X] or y in [MAZE_MIN_Y, MAZE_MAX_Y]:
             if MAZE[(x, y)] == '.':
-                (p, c1) = letter_neighbors((x, y))[0]
-                (p2, c2) = letter_neighbors(p)[0]
-                po = to_portal(c1, c2)
+                po = adjacent_portal((x, y))
                 r.add(po)
                 connect_portals((x, y), (po, 'o'))
     return r
@@ -62,9 +66,7 @@ def connect_portals(start, from_p):
         q.remove(p)
         ln = letter_neighbors(p)
         if len(ln) == 1:
-            (p2, c1) = ln[0]
-            (_, c2) = letter_neighbors(p2)[0]
-            po = to_portal(c1, c2)
+            po = adjacent_portal(p)
             if po != from_portal:
                 from_portal_is_o = from_portal_dir == 'o'
                 po_is_o = p[0] in (MAZE_MIN_X, MAZE_MAX_X) or p[1] in (MAZE_MIN_Y, MAZE_MAX_Y)
