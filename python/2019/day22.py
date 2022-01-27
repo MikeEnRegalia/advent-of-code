@@ -1,12 +1,10 @@
 import fileinput
 
 
-def big_shuffle(deck_size, instructions):
-    def shuffle_id(g):
-        return g
+def big_shuffle(deck_size, instructions, init=lambda g: g):
 
     def shuffle_rev(f):
-        return lambda g: f(deck_size - g - 1)
+        return lambda g: f(deck_size - 1 - g)
 
     def shuffle_cut(pos, f):
         if pos < 0:
@@ -14,18 +12,19 @@ def big_shuffle(deck_size, instructions):
         at = deck_size - pos
         return lambda g: f(g + pos if g < at else g - at)
 
-    def shuffle_inc(inc, f):
-        def foo(g):
-            j = 0
+    def shuffle_inc(increment, f):
+        def g(index):
+            r = 0
             n = 0
-            while j != g:
-                j = (j + inc) % deck_size
-                n += 1
-            return f(n)
+            while r != index % increment:
+                n += (deck_size - r) // increment + 1
+                r = increment - (deck_size - r) % increment
+            new_index = n + (index - r) // increment
+            return f(new_index)
 
-        return foo
+        return g
 
-    s = shuffle_id
+    s = init
     for ins in instructions:
         if ins == "deal into new stack":
             s = shuffle_rev(s)
@@ -38,10 +37,21 @@ def big_shuffle(deck_size, instructions):
 
 
 INSTRUCTIONS = [line.strip() for line in fileinput.input()]
+
 part1 = big_shuffle(10007, INSTRUCTIONS)
-print(part1(6061))
+for i in range(10007):
+    if part1(i) == 2019:
+        print(i)
 
 part2 = big_shuffle(119315717514047, INSTRUCTIONS)
-# print("shuffling")
-# print(part2(2020))
-# TIMES = 101741582076661
+c = 2020
+h = {c: 0}
+for i in range(101741582076661):
+    if len(h) % 10000 == 0:
+        print(f"{len(h)} ({c})")
+    c = part2(c)
+    if c in h:
+        print(f"cycle: {c}, {i} -> {h[c]}")
+        break
+    else:
+        h[c] = i
