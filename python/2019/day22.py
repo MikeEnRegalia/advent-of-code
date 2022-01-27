@@ -2,13 +2,12 @@ import fileinput
 
 
 def big_shuffle(deck_size, instructions, init=lambda g: g):
-
     def shuffle_rev(f):
         return lambda g: f(deck_size - 1 - g)
 
     def shuffle_cut(pos, f):
         if pos < 0:
-            pos = deck_size - abs(pos)
+            pos = deck_size + pos
         at = deck_size - pos
         return lambda g: f(g + pos if g < at else g - at)
 
@@ -37,7 +36,6 @@ def big_shuffle(deck_size, instructions, init=lambda g: g):
 
 
 INSTRUCTIONS = [line.strip() for line in fileinput.input()]
-
 part1 = big_shuffle(10007, INSTRUCTIONS)
 for i in range(10007):
     if part1(i) == 2019:
@@ -45,13 +43,6 @@ for i in range(10007):
 
 part2 = big_shuffle(119315717514047, INSTRUCTIONS)
 c = 2020
-h = {c: 0}
 for i in range(101741582076661):
-    if len(h) % 10000 == 0:
-        print(f"{len(h)} ({c})")
     c = part2(c)
-    if c in h:
-        print(f"cycle: {c}, {i} -> {h[c]}")
-        break
-    else:
-        h[c] = i
+print(c)
