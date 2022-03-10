@@ -9,13 +9,9 @@ def transform_row(row):
         right = False if i == len(row) - 1 else row[i + 1]
 
         trap = False
-        if left and center and not right:
+        if left and center and not right or center and right and not left:
             trap = True
-        elif center and right and not left:
-            trap = True
-        elif left and not (center or right):
-            trap = True
-        elif right and not (left or center):
+        elif left and not (center or right) or right and not (left or center):
             trap = True
         transformed[i] = trap
 
