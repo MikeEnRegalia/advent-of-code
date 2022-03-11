@@ -25,7 +25,7 @@ private fun scramble(rule: String, password: MutableList<Char>) = when {
     rule.startsWith("rotate right ") -> rotateRight(rule, password)
     rule.startsWith("move position ") -> {
         val (from, to) = rule.split(" ").mapNotNull(String::toIntOrNull)
-        move(password, to, from)
+        move(password, from, to)
     }
     rule.startsWith("rotate based ") -> {
         val letter = rule.substring(rule.lastIndexOf(" ") + 1).first()
@@ -44,7 +44,7 @@ private fun unscramble(rule: String, password: MutableList<Char>) = when {
     rule.startsWith("rotate right ") -> rotateLeft(rule, password)
     rule.startsWith("move position ") -> {
         val (to, from) = rule.split(" ").mapNotNull(String::toIntOrNull)
-        move(password, to, from)
+        move(password, from, to)
     }
     rule.startsWith("rotate based ") -> {
         val letter = rule.substring(rule.lastIndexOf(" ") + 1).first()
@@ -57,50 +57,39 @@ private fun unscramble(rule: String, password: MutableList<Char>) = when {
             5 -> 3
             6 -> 8
             7 -> 4
-            else -> throw IllegalStateException(password.indexOf(letter).toString())
+            else -> throw IllegalStateException()
         }
         rotateLeft(steps, password)
     }
     else -> throw IllegalStateException(rule)
 }
 
-private fun move(
-    password: MutableList<Char>,
-    to: Int,
-    from: Int
-): MutableList<Char> {
-    password.add(to, password.removeAt(from))
-    return password
-}
+private fun move(password: MutableList<Char>, from: Int, to: Int) = password.apply { add(to, removeAt(from)) }
 
-private fun reverse(
-    rule: String,
-    password: MutableList<Char>
-): MutableList<Char> {
+private fun reverse(rule: String, password: MutableList<Char>): MutableList<Char> {
     val (from, to) = rule.split(" ").mapNotNull(String::toIntOrNull)
-    val scrambled2 = password.toMutableList()
+    val scrambled = password.toMutableList()
     for (i in from..to) {
-        scrambled2[i] = password[to - (i - from)]
+        scrambled[i] = password[to - (i - from)]
     }
-    return scrambled2
-}
-
-private fun swap(rule: String, password: MutableList<Char>): MutableList<Char> {
-    val (x, y) = rule.split(" ").mapNotNull(String::toIntOrNull)
-    val cx = password[x]
-    password[x] = password[y]
-    password[y] = cx
-    return password
-}
-
-private fun swapLetter(rule: String, scrambled: MutableList<Char>): MutableList<Char> {
-    val (a, b) = rule.split(" ").mapNotNull { if (it.length == 1) it[0] else null }
-    val x = scrambled.indexOf(a)
-    val y = scrambled.indexOf(b)
-    val cx = scrambled[x]
-    scrambled[x] = scrambled[y]
-    scrambled[y] = cx
     return scrambled
+}
+
+private fun swap(rule: String, password: MutableList<Char>) = password.also {
+    val (x, y) = rule.split(" ").mapNotNull(String::toIntOrNull)
+    swap(it, x, y)
+}
+
+private fun swap(it: MutableList<Char>, x: Int, y: Int) {
+    val cx = it[x]
+    it[x] = it[y]
+    it[y] = cx
+}
+
+private fun swapLetter(rule: String, password: MutableList<Char>): MutableList<Char> {
+    val (a, b) = rule.split(" ").mapNotNull { if (it.length == 1) it[0] else null }
+    swap(password, password.indexOf(a), password.indexOf(b))
+    return password
 }
 
 private fun rotateLeft(rule: String, password: MutableList<Char>): MutableList<Char> {
@@ -108,17 +97,8 @@ private fun rotateLeft(rule: String, password: MutableList<Char>): MutableList<C
     return rotateLeft(steps, password)
 }
 
-private fun rotateLeft(
-    steps: Int,
-    password: MutableList<Char>
-): MutableList<Char> {
-    var actualSteps = steps
-    var scrambled = password
-    actualSteps %= scrambled.size
-    val pos = actualSteps
-    scrambled = scrambled.subList(pos, scrambled.size).plus(scrambled.subList(0, pos)).toMutableList()
-    return scrambled
-}
+private fun rotateLeft(steps: Int, password: MutableList<Char>) =
+    password.subList(steps, password.size).plus(password.subList(0, steps)).toMutableList()
 
 private fun rotateRight(rule: String, password: MutableList<Char>): MutableList<Char> {
     val (steps) = rule.split(" ").mapNotNull(String::toIntOrNull)
@@ -126,10 +106,7 @@ private fun rotateRight(rule: String, password: MutableList<Char>): MutableList<
 }
 
 private fun rotateRight(steps: Int, password: MutableList<Char>): MutableList<Char> {
-    var actualSteps = steps
-    var scrambled = password
-    actualSteps %= scrambled.size
-    val pos = scrambled.size - actualSteps
-    scrambled = scrambled.subList(pos, scrambled.size).plus(scrambled.subList(0, pos)).toMutableList()
-    return scrambled
+    val actualSteps = steps % password.size
+    val pos = password.size - actualSteps
+    return password.subList(pos, password.size).plus(password.subList(0, pos)).toMutableList()
 }
