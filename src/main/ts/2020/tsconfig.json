@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es5",
+    "sourceMap": true,
+    "lib": [
+      "dom",
+      "es2015",
+      "es2020.bigint"
+    ],
+    "downlevelIteration": true
+  },
+  "exclude": [
+    "node_modules"
+  ]
+}
