@@ -1,4 +1,3 @@
-
 let paths = `PQK)Q5S
 8QF)BST
 7DY)PBP
@@ -2622,7 +2621,7 @@ while (paths.filter(path => path[0] !== 'COM').length > 0) {
 console.info(paths.reduce((acc, path) => acc + path.length - 1, 0))
 
 console.info(paths
-    .filter(path => ['SAN', 'YOU'].some(x => path[path.length-1] === x))
+    .filter(path => ['SAN', 'YOU'].some(x => path[path.length - 1] === x))
     .reduce((a, b) => {
         const prefixLength = a.reduce((acc, o, i) => o !== b[i] ? acc : (acc + 1), 0)
         return a.length - prefixLength + b.length - prefixLength - 2

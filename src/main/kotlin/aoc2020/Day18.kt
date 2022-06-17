@@ -14,11 +14,13 @@ class AoC2020Day18(val line: String, val part2: Boolean, var pos: Int = 0) {
                 read(' ')
                 r[r.size - 1] = r.last() + term()
             }
+
             '*' -> {
                 read(c)
                 read(' ')
                 if (part2) r += term() else r[r.size - 1] = r.last() * term()
             }
+
             ')' -> break
             else -> r += term()
         }

@@ -23,7 +23,7 @@ fun solve(lines: List<String>): List<Any?> {
         val flashed = cave.flashAll().size
         if (part2 <= 100) part1 += flashed
         if (flashed == cave.size) break
-      }
+    }
 
     return listOf(part1 to part2)
 }

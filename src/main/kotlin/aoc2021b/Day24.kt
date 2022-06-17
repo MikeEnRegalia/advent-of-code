@@ -37,6 +37,7 @@ class Day24(input: List<String>) {
                     r[0] = digit
                     secondInput = true
                 }
+
                 "add" -> r[aI] = r[aI] + b()
                 "mul" -> r[aI] = r[aI] * b()
                 "div" -> r[aI] = r[aI] / b()

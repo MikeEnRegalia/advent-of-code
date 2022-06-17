@@ -202,9 +202,9 @@ const input = `1429
     .map(s => parseInt(s))
 
 console.log(input.reduce((agg, n) => {
-        const foo = input.filter(m => m + n === 2020)
-        return foo.length > 0 ? n * foo[0] : agg
-    }, undefined))
+    const foo = input.filter(m => m + n === 2020)
+    return foo.length > 0 ? n * foo[0] : agg
+}, undefined))
 
 
 for (const x of input) {

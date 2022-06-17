@@ -129,7 +129,7 @@ console.info(diffs.get(1) * (diffs.get(3) + 1))
 function count(list: number[]) {
     return [0, ...list, list[list.length - 1] + 3]
         .reduce((agg, adapter, i, l) => {
-            if (i > 0 && l[i-1] === adapter -1 && i+1 < l.length && l[i+1] === adapter + 1) {
+            if (i > 0 && l[i - 1] === adapter - 1 && i + 1 < l.length && l[i + 1] === adapter + 1) {
                 return agg * BigInt(2)
             }
             return agg

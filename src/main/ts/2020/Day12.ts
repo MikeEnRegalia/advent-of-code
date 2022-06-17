@@ -96,8 +96,7 @@ function turnWaypoint(x: number, y: number, left: boolean, degrees: number) {
     if (left) {
         if (steps === 1) {
             steps = 3
-        }
-        else if (steps === 3) {
+        } else if (steps === 3) {
             steps = 1
         }
     }

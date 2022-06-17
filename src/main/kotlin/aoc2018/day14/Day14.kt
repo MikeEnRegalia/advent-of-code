@@ -1,6 +1,6 @@
 package aoc2018.day14
 
-import java.util.*
+import java.util.LinkedList
 
 fun init() = listOf(3, 7).toMutableList() to mutableListOf(0, 1)
 

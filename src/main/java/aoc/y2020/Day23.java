@@ -25,7 +25,7 @@ public class Day23 {
                 var soFar = Duration.between(start, Instant.now());
 
                 System.out.printf("%s     \r",
-                        soFar.multipliedBy((10_000_000 - i)/i));
+                        soFar.multipliedBy((10_000_000 - i) / i));
             }
             var pickedUp = new LinkedList<Integer>();
             pickedUp.add(circle.remove(1));

@@ -9,8 +9,7 @@ public class Day19 {
         part1();
         try {
             part2();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

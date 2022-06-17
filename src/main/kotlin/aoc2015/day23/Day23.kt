@@ -20,21 +20,27 @@ private fun compute(
             "hlf" -> {
                 r.set(args[0], get(args[0]) / 2).also { pos++ }
             }
+
             "tpl" -> {
                 r[args[0]] = get(args[0]) * 3; pos++
             }
+
             "inc" -> {
                 r[args[0]] = get(args[0]) + 1; pos++
             }
+
             "jmp" -> {
                 pos += args[0].toInt()
             }
+
             "jie" -> {
                 pos += if (get(args[0]) % 2 == 0) args[1].toInt() else 1
             }
+
             "jio" -> {
                 pos += if (get(args[0]) == 1) args[1].toInt() else 1
             }
+
             else -> throw IllegalStateException()
         }
     }

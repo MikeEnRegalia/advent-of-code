@@ -78,7 +78,7 @@ function calculate(reactions, n, chemical) {
                 .map(input => calculate(reactions, input[0] * factor, input[1]))
                 .reduce((acc, n) => acc + n, 0)
         })
-        .reduce((acc, x) => acc !== undefined && acc > x ? acc : x,0)
+        .reduce((acc, x) => acc !== undefined && acc > x ? acc : x, 0)
 }
 
 console.info(calculate(readInput(), 1, 'FUEL'))

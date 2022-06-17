@@ -1,4 +1,5 @@
 package aoc2021b
+
 import kotlin.math.max
 import kotlin.math.min
 

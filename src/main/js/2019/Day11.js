@@ -110,10 +110,14 @@ function Point(x, y, color = 0, painted = false) {
         },
         at: direction => {
             switch (direction) {
-                case 'up': return Point(x, y - 1)
-                case 'right': return Point(x + 1, y)
-                case 'down': return Point(x, y + 1)
-                case 'left': return Point(x - 1, y)
+                case 'up':
+                    return Point(x, y - 1)
+                case 'right':
+                    return Point(x + 1, y)
+                case 'down':
+                    return Point(x, y + 1)
+                case 'left':
+                    return Point(x - 1, y)
             }
         },
         toString: () => `(${x},${y}: ${color === 0 ? 'black' : 'white'}${painted ? ', painted' : ''})`
@@ -177,8 +181,7 @@ function paint(startColor, showCanvas = false) {
         const prevPos = pos
         if (alreadySeen) {
             pos = alreadySeen
-        }
-        else {
+        } else {
             pos = createdPoint
             hull.push(pos)
         }

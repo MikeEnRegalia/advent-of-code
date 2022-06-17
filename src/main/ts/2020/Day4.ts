@@ -1158,10 +1158,10 @@ const validators = {
     eyr: v => within(v, 2020, 2030),
     hgt: v => {
         if (v.endsWith('cm')) {
-            return within(v.substr(0, v.length-2), 150, 193)
+            return within(v.substr(0, v.length - 2), 150, 193)
         }
         if (v.endsWith('in')) {
-            return within(v.substr(0, v.length-2), 59, 76)
+            return within(v.substr(0, v.length - 2), 59, 76)
         }
         return false
     },

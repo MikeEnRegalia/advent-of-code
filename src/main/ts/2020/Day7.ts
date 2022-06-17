@@ -605,7 +605,7 @@ pale magenta bags contain 1 clear gold bag, 5 posh fuchsia bags, 2 faded cyan ba
             return {n, color: s.substr(s.indexOf(' ') + 1)}
         }))
         return agg
-    }, new Map<string, Array<{n: number, color: string}>>())
+    }, new Map<string, Array<{ n: number, color: string }>>())
 
 //console.log(input)
 
@@ -613,7 +613,7 @@ function removeBags(s: string) {
     return s.substr(0, s.lastIndexOf(" bag"))
 }
 
-function containsShinyGold(color: string, rules: Map<string, Array<{n: number, color: string}>>): boolean {
+function containsShinyGold(color: string, rules: Map<string, Array<{ n: number, color: string }>>): boolean {
     if (!rules.has(color)) {
         console.error('unknown color', color)
     }

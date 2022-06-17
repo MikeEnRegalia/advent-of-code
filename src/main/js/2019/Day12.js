@@ -1,4 +1,3 @@
-
 function simulate(moons, steps = 1000) {
     const pairs = createCombinations(moons)
 
@@ -109,10 +108,12 @@ function Moon(x, y, z) {
         toString: () => `<${pos.x()} (${speed.x()}), ${pos.y()} (${speed.y()}), ${pos.z()} (${speed.z()})>`
     }
 }
+
 function acc(n, n2) {
     if (n === n2) return 0n
     return n < n2 ? 1n : -1n
 }
+
 function abs(n) {
     return n < 0 ? -n : n
 }

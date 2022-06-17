@@ -1,7 +1,6 @@
 package aoc2020
 
-import java.util.*
-import kotlin.collections.ArrayDeque
+import java.util.LinkedList
 
 fun main() {
     val circle = "925176834".mapTo(ArrayDeque(), Char::digitToInt)
@@ -54,7 +53,7 @@ fun main() {
             circle = IntArray(1_000_000).apply {
                 if (destinationCupIndex == 0) {
                     circle.copyInto(this, 0, 4, circle.size)
-                    this[circle.size-4] = cup
+                    this[circle.size - 4] = cup
                     circle.copyInto(this, circle.size - 4 + 1, 1, 4)
                 } else {
                     circle.copyInto(this, 0, 4, destinationCupIndex + 1)

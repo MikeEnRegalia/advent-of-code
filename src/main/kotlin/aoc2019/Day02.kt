@@ -46,10 +46,12 @@ fun runIntCode(
                 w(2, if (opcode == 1) a.plus(b) else a.times(b))
                 pos += 4
             }
+
             3 -> {
                 w(0, input())
                 pos += 2
             }
+
             4 -> output(p(0)).also { pos += 2 }
             5 -> pos = if (p(0) != 0L) p(1) else pos + 3
             6 -> pos = if (p(0) == 0L) p(1) else pos + 3
@@ -57,14 +59,17 @@ fun runIntCode(
                 w(2, if (p(0) < p(1)) 1 else 0)
                 pos += 4
             }
+
             8 -> {
                 w(2, if (p(0) == p(1)) 1 else 0)
                 pos += 4
             }
+
             9 -> {
                 relativeBase += p(0)
                 pos += 2
             }
+
             99 -> return code[0]
         }
     }

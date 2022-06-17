@@ -1,5 +1,5 @@
 Array.prototype.last = function () {
-  return this.length === 0 ? undefined : this[this.length - 1]
+    return this.length === 0 ? undefined : this[this.length - 1]
 }
 
 const input = `R1009,D335,L942,D733,L398,U204,L521,D347,L720,U586,R708,D746,L292,U416,L824,U20,R359,D828,R716,U895,L498,D671,L325,D68,L667,U134,L435,D44,R801,U654,R188,U542,L785,D318,L806,U602,L465,U239,R21,U571,R653,U436,L52,U380,R446,D960,R598,U590,L47,U972,L565,D281,R790,U493,R864,D396,R652,D775,L939,D284,R554,U629,L842,D837,R554,D795,R880,D301,R948,U974,L10,D898,R588,D743,L334,U59,L413,U511,L132,U771,R628,D805,R465,D561,R18,D169,L580,D99,L508,U964,L870,D230,L472,U897,L85,U306,L103,U322,L637,U464,R129,D514,R454,U479,R801,U18,R929,U181,L113,D770,L173,D124,L122,U481,L666,D942,L534,U608,R90,U576,L641,U249,L857,U197,R783,D92,L938,D192,L698,D862,R995,U12,R766,D323,R934,U315,R956,D234,R983,D246,L153,U26,L779,D628,R174,D385,L758,D486,R132,U414,R915,D511,L152,D309,L708,D755,L679,D166,L699,U734,R55,D224,L582,U798,L348,U219,L304,U621,L788,D538,R781,D509,R486,U581,R759,D892,R16,D552,L82,D618,L309,D610,L645,U146,L328,U569,L307,D385,L249,D231,R928,U681,R384,D337,R715,D798,L788,D604,R517,U766,R368,U430,L49,U236,R621,U656,R997,U268,L18,D789,L935,D87,L670,U35,R463,D71,R268,U728,R693,D863,R656,D654,L350,U796,L72,U562,R56,U10,L651,D751,L557,D518,R901,D741,R787,D332,R723,D980,R206,U670,R645,D927,L641,D863,R478,D568,L858,D990,L124,D864,L162,U361,L407,U674,R508,D284,L675,D794,L138,U55,L781,U37,R956,D364,L111,U721,L91,U559,L852,U351,R994,U446,L162,D345,R92,D941,R572,U185,R615,D590,R459,D313,R127,D315,R96,U751,R210,D620,L790,U826,R410,D652,R549,D698,L805,U814,L364,U905,L96,U997,L689
@@ -7,23 +7,23 @@ L1008,D451,L146,D628,R877,U486,L464,U815,L119,U208,R686,U477,L510,D353,R189,D437
 
 const lines = input.split("\n").map(line => line.split(","))
 
-const Point = (x, y) => Object.freeze({ x, y })
+const Point = (x, y) => Object.freeze({x, y})
 
 function walk(point, line, pos) {
-  if (pos > line.length - 1)
-    return []
+    if (pos > line.length - 1)
+        return []
 
-  const dir = line[pos].substr(0, 1)
-  const distance = parseInt(line[pos].substr(1))
-  const places = []
-  Array(distance).fill(0).forEach(_ => {
-    const prev = places.length === 0 ? point : places.last()
-    const deltaX = dir === "R" ? 1 : dir === "L" ? -1 : 0
-    const deltaY = dir === "D" ? 1 : dir === "U" ? -1 : 0
-    const newPoint = Point(prev.x + deltaX, prev.y + deltaY)
-    places.push(newPoint)
-  })
-  return [...places, ...walk(places.last(), line, pos + 1)]
+    const dir = line[pos].substr(0, 1)
+    const distance = parseInt(line[pos].substr(1))
+    const places = []
+    Array(distance).fill(0).forEach(_ => {
+        const prev = places.length === 0 ? point : places.last()
+        const deltaX = dir === "R" ? 1 : dir === "L" ? -1 : 0
+        const deltaY = dir === "D" ? 1 : dir === "U" ? -1 : 0
+        const newPoint = Point(prev.x + deltaX, prev.y + deltaY)
+        places.push(newPoint)
+    })
+    return [...places, ...walk(places.last(), line, pos + 1)]
 }
 
 const path1 = walk(Point(0, 0), lines[0], 0)
@@ -32,25 +32,25 @@ const path2 = walk(Point(0, 0), lines[1], 0)
 const manhattanDistance = (point) => Math.abs(point.x) + Math.abs(point.y)
 
 console.info(manhattanDistance(path1.reduce((acc, p1) => {
-  if (acc && manhattanDistance(acc) < manhattanDistance(p1))
+    if (acc && manhattanDistance(acc) < manhattanDistance(p1))
+        return acc
+
+    if (path2.some(p2 => p2.x === p1.x && p2.y === p1.y))
+        return p1
+
     return acc
-
-  if (path2.some(p2 => p2.x === p1.x && p2.y === p1.y))
-    return p1
-
-  return acc
 }, undefined)))
 
 console.info(path1.reduce((acc, p1, path1I) => {
-  const path2I = path2.findIndex(p2 => p2.x === p1.x && p2.y === p1.y)
+    const path2I = path2.findIndex(p2 => p2.x === p1.x && p2.y === p1.y)
 
-  if (path2I > -1) {
-    const distance = path1I + path2I
-    if (!acc.point || acc.distance > distance)
-      return {
-        point: p1,
-        distance
-      }
-  }
-  return acc
+    if (path2I > -1) {
+        const distance = path1I + path2I
+        if (!acc.point || acc.distance > distance)
+            return {
+                point: p1,
+                distance
+            }
+    }
+    return acc
 }, {}).distance + 2)

@@ -333,7 +333,7 @@ function countTrees(input, right, down) {
     while (true) {
         x = (x + right) % input[0].length
         y += down
-        if ( y > input.length-1) {
+        if (y > input.length - 1) {
             break;
         }
         count += input[y][x]

@@ -4,14 +4,14 @@ import static java.lang.System.in;
 import static java.util.Arrays.stream;
 
 public class Day01 {
-    public static void main(String...args) throws Exception {
+    public static void main(String... args) throws Exception {
         var data = stream(new String(in.readAllBytes()).split("\n"))
                 .mapToInt(Integer::parseInt)
                 .toArray();
 
         var part1 = 0;
         for (int i = 1; i < data.length; ++i) {
-            if (data[i] > data[i-1]) {
+            if (data[i] > data[i - 1]) {
                 part1++;
             }
         }

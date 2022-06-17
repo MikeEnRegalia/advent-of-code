@@ -1,7 +1,12 @@
 package aoc2018.day13
 
-import aoc2018.day13.Action.*
-import aoc2018.day13.Direction.*
+import aoc2018.day13.Action.FORWARD
+import aoc2018.day13.Action.TURN_LEFT
+import aoc2018.day13.Action.TURN_RIGHT
+import aoc2018.day13.Direction.DOWN
+import aoc2018.day13.Direction.LEFT
+import aoc2018.day13.Direction.RIGHT
+import aoc2018.day13.Direction.UP
 
 fun crash(input: List<String>) = with(mutableListOf<Cart>()) {
     val map = input.mapIndexed { y, r -> r.mapIndexed { x, c -> c.asCart(x, y)?.let { add(it); it.track() } ?: c } }

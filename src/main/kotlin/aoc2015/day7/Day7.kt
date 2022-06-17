@@ -44,6 +44,7 @@ fun Map<String, List<String>>.compute(wire: String): Pair<String, Int>? {
                 else -> throw IllegalStateException()
             }
         }
+
         else -> throw IllegalStateException()
     }?.let { Pair(wire, it) }
 }

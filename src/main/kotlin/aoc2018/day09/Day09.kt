@@ -1,6 +1,6 @@
 package aoc2018.day09
 
-import java.util.*
+import java.util.LinkedList
 
 fun day09(players: Int, marbles: Int): Long = with(Circle()) {
     var player = 0

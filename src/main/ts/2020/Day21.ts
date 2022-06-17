@@ -2,11 +2,12 @@ export default {}
 
 function allergenFree(input: string) {
     const mapping = input.split('\n').map(s => {
-            const [,ingredientsList, allergensList] = s.match(/(?<ingredients>[\w,\s]+) \(contains (?<allergens>[\w,\s]+)\)/)
-            return {
-                ingredients: ingredientsList.split(/ /),
-                allergens: allergensList.split(/, /)}
-        })
+        const [, ingredientsList, allergensList] = s.match(/(?<ingredients>[\w,\s]+) \(contains (?<allergens>[\w,\s]+)\)/)
+        return {
+            ingredients: ingredientsList.split(/ /),
+            allergens: allergensList.split(/, /)
+        }
+    })
 
     const allergens = mapping.reduce((agg, {allergens}) => {
         allergens.filter(a => agg.indexOf(a) === -1).forEach(a => agg.push(a))
@@ -19,26 +20,25 @@ function allergenFree(input: string) {
         allergens
             .filter(a => !map.has(a))
             .forEach(allergen => {
-            const ingredients = mapping
-                .filter(m => m.allergens.indexOf(allergen) > -1)
-                .map(m => m.ingredients.filter(i => Array.from(map.values()).indexOf(i) === -1))
-                .reduce((agg, ingredients) => {
-                    if (agg.size === 0) {
-                        ingredients.forEach(i => agg.add(i))
-                    }
-                    else {
-                        Array.from(agg.values())
-                            .filter(i => ingredients.indexOf(i) === -1)
-                            .forEach(i => agg.delete(i))
-                    }
-                    return agg
-                }, new Set<string>())
-            if (ingredients.size === 1) {
-                const ingredient = ingredients.values().next().value
-                console.info(allergen, ingredient)
-                map.set(allergen, ingredient)
-            }
-        })
+                const ingredients = mapping
+                    .filter(m => m.allergens.indexOf(allergen) > -1)
+                    .map(m => m.ingredients.filter(i => Array.from(map.values()).indexOf(i) === -1))
+                    .reduce((agg, ingredients) => {
+                        if (agg.size === 0) {
+                            ingredients.forEach(i => agg.add(i))
+                        } else {
+                            Array.from(agg.values())
+                                .filter(i => ingredients.indexOf(i) === -1)
+                                .forEach(i => agg.delete(i))
+                        }
+                        return agg
+                    }, new Set<string>())
+                if (ingredients.size === 1) {
+                    const ingredient = ingredients.values().next().value
+                    console.info(allergen, ingredient)
+                    map.set(allergen, ingredient)
+                }
+            })
     }
 
 

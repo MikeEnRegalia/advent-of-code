@@ -18,8 +18,8 @@ function findBestSpots(map) {
 }
 
 const bestSpot = findBestSpots(createMap())
-    .map(row => row.reduce((acc, spot, i) => spot > acc.count ? { x: i, count: spot } : acc, { count: 0 }))
-    .reduce((acc, spot, i) => spot.count > acc.count ? { x: spot.x, y: i, count: spot.count } : acc, { count: 0 })
+    .map(row => row.reduce((acc, spot, i) => spot > acc.count ? {x: i, count: spot} : acc, {count: 0}))
+    .reduce((acc, spot, i) => spot.count > acc.count ? {x: spot.x, y: i, count: spot.count} : acc, {count: 0})
 
 console.info('bestSpot', bestSpot)
 
@@ -38,7 +38,7 @@ function blast(map, base) {
             const angle = p.polar(base).angle
             let o = acc.find(e => e.angle === angle)
             if (o === undefined) {
-                acc.push(o = { angle, points: [] })
+                acc.push(o = {angle, points: []})
             }
             o.points.push(p)
             return acc
@@ -54,7 +54,7 @@ function blast(map, base) {
     let i = 0
     while (destroyed < Math.min(total, 200)) {
 
-        const { points } = angles[i]
+        const {points} = angles[i]
         i = (i + 1) % angles.length
         lastDestroyed = points.find(p => p.isAsteroid(map))
         if (lastDestroyed) {
@@ -114,10 +114,12 @@ function Point(x, y) {
         polar: other => {
             const dx = x - other.x
             const dy = y - other.y
-            return { distance: Math.sqrt(dx * dx + dy * dy), angle: Math.atan2(dx, dy) * (180 / Math.PI) }
+            return {distance: Math.sqrt(dx * dx + dy * dy), angle: Math.atan2(dx, dy) * (180 / Math.PI)}
         },
         isAsteroid: map => map && map[y][x] === '#',
-        mark: (map, symbol) => { map[y][x] = symbol },
+        mark: (map, symbol) => {
+            map[y][x] = symbol
+        },
         toString: () => `(${x},${y})`
     })
 }

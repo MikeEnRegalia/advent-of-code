@@ -23,6 +23,7 @@ private data class Pos(var horizontal: Int = 0, var depth: Int = 0, var aim: Int
             "forward" -> {
                 horizontal += x; depth += aim * x
             }
+
             "up" -> aim -= x
             "down" -> aim += x
         }

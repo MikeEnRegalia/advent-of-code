@@ -2,7 +2,7 @@ export default {}
 
 function play(hands: number[][]) {
 
-    const isDone = (hands: number[][]) => hands.filter(h => h.length === 0).length === hands.length-1
+    const isDone = (hands: number[][]) => hands.filter(h => h.length === 0).length === hands.length - 1
 
     while (!isDone(hands)) {
         const turn = []

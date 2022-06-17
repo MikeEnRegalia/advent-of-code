@@ -100,26 +100,27 @@ const input = `99603
 59032`;
 
 function calcFuel(mass) {
-  return Math.floor(mass / 3) - 2;
+    return Math.floor(mass / 3) - 2;
 }
-function calcFuelRec(mass) {
-  const result = calcFuel(mass);
-  if (result <= 0)
-    return result
 
-  return result + calcFuelRec(result)
+function calcFuelRec(mass) {
+    const result = calcFuel(mass);
+    if (result <= 0)
+        return result
+
+    return result + calcFuelRec(result)
 }
 
 console.info(
-  input
-    .split("\n")
-    .map(calcFuel)
-    .reduce((a, b) => a + b)
+    input
+        .split("\n")
+        .map(calcFuel)
+        .reduce((a, b) => a + b)
 )
 
 console.info(
-  input
-    .split("\n")
-    .map(calcFuelRec)
-    .reduce((a, b) => a + b)
+    input
+        .split("\n")
+        .map(calcFuelRec)
+        .reduce((a, b) => a + b)
 )

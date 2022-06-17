@@ -3,7 +3,10 @@ const input = fs.readFileSync(0).toString()
 const data = input.split("\n").map(s => s.split(" "))
 
 function dive(pos) {
-    return data.reduce((acc, [cmd, x]) => { acc[cmd](parseInt(x)); return acc }, pos).calc()
+    return data.reduce((acc, [cmd, x]) => {
+        acc[cmd](parseInt(x));
+        return acc
+    }, pos).calc()
 }
 
 function Part1Pos() {
@@ -24,7 +27,10 @@ function Part2Pos() {
     let aim = 0
 
     return {
-        "forward": x => { horizontal += x; depth += aim * x },
+        "forward": x => {
+            horizontal += x;
+            depth += aim * x
+        },
         "up": x => aim -= x,
         "down": x => aim += x,
         "calc": () => horizontal * depth

@@ -17,7 +17,7 @@ function play(input: string) {
 
     const one = circle.indexOf(1)
     console.info('x', circle.join(''))
-    return [...circle.slice(one+1), ...circle.slice(0, one)].join('')
+    return [...circle.slice(one + 1), ...circle.slice(0, one)].join('')
 }
 
 console.info(play('389125467'))

@@ -5,6 +5,7 @@ fun main() = runViaStdInOut { day04() }
 fun List<String>.day04(): Pair<Int, Int> {
     data class Pos(val x: Int, val y: Int)
     data class Slot(val pos: Pos, val number: Int, var bingo: Boolean = false)
+
     fun List<Slot>.bingo() = sequence {
         for (i in 0..4) {
             yield((0..4).map { Pos(i, it) })

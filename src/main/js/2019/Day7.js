@@ -95,6 +95,7 @@ function createAmplifier(program, phaseSetting) {
         i: 0
     }
 }
+
 const calculateOutputWithFeedback = (program) => (phaseSettings) => {
     const amplifiers = phaseSettings.map(n => createAmplifier(program, n))
 
@@ -145,5 +146,5 @@ function createProgram(s) {
     9,1,9,4,9,3,9,1002,9,2,9,4,9,3,9,102,2,9,9,4,9,3,9,1001,9,2,9,4,9,3,9,101,1,9,9,4,9,3,9,102,2,9,9,4,9,3,9,
     102,2,9,9,4,9,99,3,9,1002,9,2,9,4,9,3,9,101,2,9,9,4,9,3,9,101,1,9,9,4,9,3,9,101,2,9,9,4,9,3,9,101,1,9,9,4,
     9,3,9,1001,9,2,9,4,9,3,9,1002,9,2,9,4,9,3,9,1001,9,1,9,4,9,3,9,1001,9,2,9,4,9,3,9,1002,9,2,9,4,9,99`)
-    .split(','))
+        .split(','))
 }

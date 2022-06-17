@@ -1025,7 +1025,7 @@ input.forEach((n, start, list) => {
         sum += list[start + i++]
         if (sum === foo && i > 1) {
             const sorted = list.slice(start, start + i).sort()
-            console.log(sorted[0] + sorted[sorted.length-1])
+            console.log(sorted[0] + sorted[sorted.length - 1])
         }
     }
 })

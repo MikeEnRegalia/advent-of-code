@@ -12,7 +12,7 @@ function test(input: string) {
     const resolve = (rules: Map<string, string>, rule: string) => {
         const instructions = rules.get(rule)
         if (instructions.startsWith('"')) {
-            return instructions.substr(1, instructions.length-2)
+            return instructions.substr(1, instructions.length - 2)
         }
         return '(' + instructions.split('|')
             .map(s => s.trim().split(' ').map(x => resolve(rules, x)).join(''))

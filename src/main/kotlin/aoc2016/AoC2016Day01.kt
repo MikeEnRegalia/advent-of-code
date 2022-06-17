@@ -1,6 +1,9 @@
 package aoc2016.day01
 
-import aoc2016.day01.Direction.*
+import aoc2016.day01.Direction.EAST
+import aoc2016.day01.Direction.NORTH
+import aoc2016.day01.Direction.SOUTH
+import aoc2016.day01.Direction.WEST
 import kotlin.math.abs
 
 enum class Direction {

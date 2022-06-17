@@ -27,12 +27,14 @@ private fun scramble(rule: String, password: MutableList<Char>) = when {
         val (from, to) = rule.split(" ").mapNotNull(String::toIntOrNull)
         move(password, from, to)
     }
+
     rule.startsWith("rotate based ") -> {
         val letter = rule.substring(rule.lastIndexOf(" ") + 1).first()
         val letterIndex = password.indexOf(letter)
         val steps = (1 + letterIndex).let { if (it >= 5) it + 1 else it }
         rotateRight(steps, password)
     }
+
     else -> throw IllegalStateException(rule)
 }
 
@@ -46,6 +48,7 @@ private fun unscramble(rule: String, password: MutableList<Char>) = when {
         val (to, from) = rule.split(" ").mapNotNull(String::toIntOrNull)
         move(password, from, to)
     }
+
     rule.startsWith("rotate based ") -> {
         val letter = rule.substring(rule.lastIndexOf(" ") + 1).first()
         val steps = when (password.indexOf(letter)) {
@@ -61,6 +64,7 @@ private fun unscramble(rule: String, password: MutableList<Char>) = when {
         }
         rotateLeft(steps, password)
     }
+
     else -> throw IllegalStateException(rule)
 }
 

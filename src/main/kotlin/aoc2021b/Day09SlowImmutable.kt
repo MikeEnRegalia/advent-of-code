@@ -4,10 +4,12 @@ fun main() = generateSequence(::readLine).day09Immutable().forEach(::println)
 
 fun Sequence<String>.day09Immutable(): Iterable<Any?> {
     data class Location(val x: Int, val y: Int, val height: Int)
+
     val area = flatMapIndexed { y, row -> row.mapIndexed { x, c -> Location(x, y, c.toString().toInt()) } }.toSet()
 
     val adj = setOf(-1 to 0, 1 to 0, 0 to -1, 0 to 1)
-    fun Set<Location>.adj() = area.filter { (x, y) -> any { p -> (x to y) in adj.map { (dx, dy) -> p.x + dx to p.y + dy } } }.toSet()
+    fun Set<Location>.adj() =
+        area.filter { (x, y) -> any { p -> (x to y) in adj.map { (dx, dy) -> p.x + dx to p.y + dy } } }.toSet()
 
     val lowPoints = area.filter { p -> setOf(p).adj().all { a -> a.height > p.height } }
     val part1 = lowPoints.sumOf { it.height + 1 }

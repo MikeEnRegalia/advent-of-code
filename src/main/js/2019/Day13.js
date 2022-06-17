@@ -58,7 +58,7 @@ const run = (program, input, i, base, outputCallback) => {
             case 3n: {
                 if (input === undefined) {
                     //console.log('expecting input')
-                    return { i, base }
+                    return {i, base}
                 }
                 const location = store(1, BigInt(input))
                 input = undefined
@@ -96,7 +96,7 @@ const run = (program, input, i, base, outputCallback) => {
                 i += 2n
                 continue
             case 99n:
-                return { i, base, output }
+                return {i, base, output}
             default:
                 console.info('invalid opcode: ', code)
                 return null
@@ -124,8 +124,7 @@ function play() {
             if (output[0] === -1n && output[1] === 0n) {
                 score = output[2]
                 //console.info('score', score)
-            }
-            else {
+            } else {
                 let row = canvas[output[1]]
                 if (!row) canvas[output[1]] = row = []
                 row[output[0]] = mapC(parseInt(output[2]))
@@ -154,11 +153,16 @@ function play() {
 
 function mapC(n) {
     switch (n) {
-        case 0: return ' '
-        case 1: return 'X'
-        case 2: return 'O'
-        case 3: return '-'
-        case 4: return '*'
+        case 0:
+            return ' '
+        case 1:
+            return 'X'
+        case 2:
+            return 'O'
+        case 3:
+            return '-'
+        case 4:
+            return '*'
     }
 }
 

@@ -1,6 +1,8 @@
 package aoc2018.day22
 
-import aoc2018.day22.Tool.*
+import aoc2018.day22.Tool.CLIMBING_GEAR
+import aoc2018.day22.Tool.NEITHER
+import aoc2018.day22.Tool.TORCH
 import java.lang.Integer.MAX_VALUE
 import kotlin.math.min
 
