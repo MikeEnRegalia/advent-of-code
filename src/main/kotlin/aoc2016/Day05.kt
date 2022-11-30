@@ -23,7 +23,7 @@ fun main() {
     println(part2)
 }
 
-fun String.md5(): String {
+private fun String.md5(): String {
     val md = MessageDigest.getInstance("MD5")
     return String.format("%032x", BigInteger(1, md.digest(toByteArray(Charsets.UTF_8))))
 }

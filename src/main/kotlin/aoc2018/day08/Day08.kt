@@ -1,7 +1,7 @@
 package aoc2018.day08
 
 fun main() {
-    with(readLine()!!.split(" ").map { it.toInt() }) {
+    with(readln().split(" ").map { it.toInt() }) {
         sumNodes { metadata, children -> children.sum() + metadata.sum() }.value.also { println(it) }
         sumNodes { metadata, children ->
             if (children.isEmpty()) metadata.sum() else {

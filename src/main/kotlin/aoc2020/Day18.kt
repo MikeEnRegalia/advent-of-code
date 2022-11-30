@@ -12,7 +12,7 @@ class AoC2020Day18(val line: String, val part2: Boolean, var pos: Int = 0) {
             '+' -> {
                 read(c)
                 read(' ')
-                r[r.size - 1] = r.last() + term()
+                r[r.lastIndex] = r.last() + term()
             }
 
             '*' -> {
