@@ -15,6 +15,7 @@ repositories {
 }
 
 dependencies {
+    implementation("commons-io:commons-io:2.11.0")
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
     implementation("com.google.code.gson:gson:2.9.0")
     testImplementation("io.kotest:kotest-assertions-core:5.3.1")
