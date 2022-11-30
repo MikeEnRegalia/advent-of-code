@@ -21,6 +21,9 @@ dependencies {
     testImplementation("io.kotest:kotest-assertions-core:5.3.1")
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
     implementation("org.jetbrains.kotlin:kotlin-script-runtime")
+    // https://mvnrepository.com/artifact/io.strikt/strikt-jvm
+    testImplementation("io.strikt:strikt-jvm:0.34.1")
+
 }
 
 tasks.withType<KotlinCompile> {

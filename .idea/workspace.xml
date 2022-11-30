@@ -4,9 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="01a23a2c-eb2b-4b66-a4cd-0cd961d92526" name="Changes" comment="implement 2016/day17 again for KLunch">
+    <list default="true" id="01a23a2c-eb2b-4b66-a4cd-0cd961d92526" name="Changes" comment="refactor">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/aoc2016/Day17KLunch.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/aoc2016/Day17KLunch.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/aoc2022/day01.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/aoc2022/day01.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/kotlin/aoc2022/day01.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/aoc2022/day01.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -27,6 +29,9 @@
       </list>
     </option>
   </component>
+  <component name="FormatOnSaveOptions">
+    <option name="myRunOnSave" value="true" />
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
@@ -35,6 +40,9 @@
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
+  </component>
+  <component name="OptimizeOnSaveOptions">
+    <option name="myRunOnSave" value="true" />
   </component>
   <component name="ProjectId" id="2AiXt2r9v9gWhdgo6AhrI4XIS5i" />
   <component name="ProjectLevelVcsManager">
@@ -48,38 +56,62 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showModules" value="false" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;DELOMBOK_PRE_COMMIT&quot;: &quot;false&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.format.on.save.advertiser.fired&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;full.screen.before.presentation.mode&quot;: &quot;false&quot;,
-    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/mike/dev/advent-of-code/build.gradle.kts&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;SDKs&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.23935556&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settingsdialog.project.gradle&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;/Applications/IntelliJ IDEA 2022.2 EAP.app/Contents/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "DELOMBOK_PRE_COMMIT": "false",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.go.format.on.save.advertiser.fired": "true",
+    "RunOnceActivity.go.formatter.settings.were.checked": "true",
+    "RunOnceActivity.go.migrated.go.modules.settings": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "code.cleanup.on.save": "true",
+    "full.screen.before.presentation.mode": "false",
+    "go.import.settings.migrated": "true",
+    "last_opened_file_path": "/Users/mike/dev/advent-of-code/build.gradle.kts",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "SDKs",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.23935556",
+    "settings.editor.selected.configurable": "actions.on.save",
+    "ts.external.directory.path": "/Applications/IntelliJ IDEA 2022.2 EAP.app/Contents/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/kts" />
     </key>
   </component>
-  <component name="RunManager" selected="Kotlin.Day17KLunchKt">
+  <component name="RunManager" selected="Gradle.Day01Test.test input">
+    <configuration name="Day01Test" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":test" />
+            <option value="--tests" />
+            <option value="&quot;aoc2022.Day01Test&quot;" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
     <configuration name="Day01Test.test actual solution" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -103,15 +135,28 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
-    <configuration name="AoC2018Day20Kt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="aoc2018.day20.AoC2018Day20Kt" />
-      <module name="advent-of-code.main" />
-      <option name="REDIRECT_INPUT" value="true" />
-      <option name="INPUT_FILE" value="$PROJECT_DIR$/src/main/resources/challenges/2018-day20.txt" />
-      <shortenClasspath name="NONE" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
+    <configuration name="Day01Test.test input" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":test" />
+            <option value="--tests" />
+            <option value="&quot;aoc2022.Day01Test.test input&quot;" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
     </configuration>
     <configuration name="Day17KLunchKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="aoc2016.Day17KLunchKt" />
@@ -127,27 +172,20 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="aoc2020-18.main.kts" type="KotlinStandaloneScriptRunConfigurationType" temporary="true" nameIsGenerated="true">
-      <module name="advent-of-code" />
-      <option name="filePath" value="$PROJECT_DIR$/kts/aoc2020-18.main.kts" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <list>
+      <item itemvalue="Gradle.Day01Test" />
+      <item itemvalue="Gradle.Day01Test.test input" />
       <item itemvalue="Gradle.Day01Test.test actual solution" />
       <item itemvalue="Kotlin.Day17KLunchKt" />
       <item itemvalue="Kotlin.Day17NewKt" />
-      <item itemvalue="Kotlin.AoC2018Day20Kt" />
-      <item itemvalue="Kotlin script (Beta).aoc2020-18.main.kts" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Kotlin.Day17KLunchKt" />
+        <item itemvalue="Gradle.Day01Test.test input" />
+        <item itemvalue="Gradle.Day01Test" />
         <item itemvalue="Gradle.Day01Test.test actual solution" />
+        <item itemvalue="Kotlin.Day17KLunchKt" />
         <item itemvalue="Kotlin.Day17NewKt" />
-        <item itemvalue="Kotlin script (Beta).aoc2020-18.main.kts" />
-        <item itemvalue="Kotlin.AoC2018Day20Kt" />
       </list>
     </recent_temporary>
   </component>
@@ -169,7 +207,7 @@
       <workItem from="1669631869876" duration="2249000" />
       <workItem from="1669668931308" duration="458000" />
       <workItem from="1669669812724" duration="14839000" />
-      <workItem from="1669807471045" duration="5780000" />
+      <workItem from="1669807471045" duration="7918000" />
     </task>
     <task id="LOCAL-00001" summary="some more fixes to the configuration">
       <created>1655494161322</created>
@@ -199,7 +237,14 @@
       <option name="project" value="LOCAL" />
       <updated>1669812095857</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="refactor">
+      <created>1669815360705</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1669815360705</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -220,7 +265,8 @@
     <MESSAGE value="some more fixes to the configuration" />
     <MESSAGE value="messing around with stuff" />
     <MESSAGE value="implement 2016/day17 again for KLunch" />
-    <option name="LAST_COMMIT_MESSAGE" value="implement 2016/day17 again for KLunch" />
+    <MESSAGE value="refactor" />
+    <option name="LAST_COMMIT_MESSAGE" value="refactor" />
   </component>
   <component name="VgoProject">
     <integration-enabled>false</integration-enabled>
