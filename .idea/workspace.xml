@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="01a23a2c-eb2b-4b66-a4cd-0cd961d92526" name="Changes" comment="some more fixes to the configuration">
+      <change afterPath="$PROJECT_DIR$/.idea/kotlinScripting.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/kotlinc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kts/aoc2020-18.main.kts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kts/aoc2020-18.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/kotlin/aoc2016/Day17New.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/kotlin/aoc2018/day20/AoC2018Day20.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules/advent-of-code.main.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules/advent-of-code.main.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/aoc2016/Day05.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/aoc2016/Day05.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/aoc2016/Day17.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/aoc2016/Day17.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/aoc2018/day08/Day08.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/aoc2018/day08/Day08.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/aoc2018/day12/Day12.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/aoc2018/day12/Day12.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/aoc2020/Day18.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/aoc2020/Day18.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/aoc2021b/Day02.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/aoc2021b/Day02.kt" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Kotlin Script" />
+        <option value="Kotlin File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GoLibraries">
+    <option name="indexEntireGoPath" value="true" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2AiXt2r9v9gWhdgo6AhrI4XIS5i" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="autoscrollFromSource" value="true" />
+    <option name="autoscrollToSource" value="true" />
+    <option name="flattenModules" value="true" />
+    <option name="flattenPackages" value="true" />
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showModules" value="false" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DELOMBOK_PRE_COMMIT": "false",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.go.format.on.save.advertiser.fired": "true",
+    "RunOnceActivity.go.formatter.settings.were.checked": "true",
+    "RunOnceActivity.go.migrated.go.modules.settings": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "full.screen.before.presentation.mode": "true",
+    "go.import.settings.migrated": "true",
+    "last_opened_file_path": "/Users/mike/dev/advent-of-code/build.gradle.kts",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "SDKs",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.23935556",
+    "settings.editor.selected.configurable": "reference.settingsdialog.project.gradle",
+    "ts.external.directory.path": "/Applications/IntelliJ IDEA 2022.2 EAP.app/Contents/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/kts" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Kotlin.Day17NewKt">
+    <configuration name="Tests in 'advent-of-code.test'" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":test" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="AoC2018Day20Kt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="aoc2018.day20.AoC2018Day20Kt" />
+      <module name="advent-of-code.main" />
+      <option name="REDIRECT_INPUT" value="true" />
+      <option name="INPUT_FILE" value="$PROJECT_DIR$/src/main/resources/challenges/2018-day20.txt" />
+      <shortenClasspath name="NONE" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Day17NewKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="aoc2016.Day17NewKt" />
+      <module name="advent-of-code.main" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="aoc2020-18.main.kts" type="KotlinStandaloneScriptRunConfigurationType" temporary="true" nameIsGenerated="true">
+      <module name="advent-of-code" />
+      <option name="filePath" value="$PROJECT_DIR$/kts/aoc2020-18.main.kts" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="Gradle.Tests in 'advent-of-code.test'" />
+      <item itemvalue="Kotlin.Day17NewKt" />
+      <item itemvalue="Kotlin.AoC2018Day20Kt" />
+      <item itemvalue="Kotlin script (Beta).aoc2020-18.main.kts" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Kotlin.Day17NewKt" />
+        <item itemvalue="Kotlin script (Beta).aoc2020-18.main.kts" />
+        <item itemvalue="Kotlin.AoC2018Day20Kt" />
+        <item itemvalue="Gradle.Tests in 'advent-of-code.test'" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="01a23a2c-eb2b-4b66-a4cd-0cd961d92526" name="Changes" comment="" />
+      <created>1655493591102</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1655493591102</updated>
+      <workItem from="1655493592285" duration="1222000" />
+      <workItem from="1655706798703" duration="4000" />
+      <workItem from="1667828514582" duration="4606000" />
+      <workItem from="1668516731878" duration="7399000" />
+      <workItem from="1668681775313" duration="591000" />
+      <workItem from="1668764583186" duration="597000" />
+      <workItem from="1669320336448" duration="3061000" />
+      <workItem from="1669631869876" duration="2249000" />
+      <workItem from="1669668931308" duration="458000" />
+      <workItem from="1669669812724" duration="10808000" />
+    </task>
+    <task id="LOCAL-00001" summary="some more fixes to the configuration">
+      <created>1655494161322</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1655494161322</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="some more fixes to the configuration" />
+    <option name="LAST_COMMIT_MESSAGE" value="some more fixes to the configuration" />
+  </component>
+  <component name="VgoProject">
+    <integration-enabled>false</integration-enabled>
+    <settings-migrated>true</settings-migrated>
+  </component>
+</project>
