@@ -1,56 +1,50 @@
 package aoc2016
 
 import java.math.BigInteger
-import java.security.MessageDigest
+import kotlin.Int.Companion.MAX_VALUE
+import kotlin.math.min
+import java.security.MessageDigest.getInstance as messageDigest
 
 private const val MAX = 3
-
-val Char.isOpen get() = this in "bcdef"
 
 fun main() {
     val passcode = "rrrbmfta"
 
     data class State(val x: Int = 0, val y: Int = 0, val path: String = "") {
         val isVault = x == MAX && y == MAX
-        fun neighbors() = md5(passcode + path).let { hash ->
-                buildList {
-                    if (hash[0].isOpen && y > 0) add(copy(y = y - 1, path = path + "U"))
-                    if (hash[1].isOpen && y < MAX) add(copy(y = y + 1, path = path + "D"))
-                    if (hash[2].isOpen && x > 0) add(copy(x = x - 1, path = path + "L"))
-                    if (hash[3].isOpen && x < MAX) add(copy(x = x + 1, path = path + "R"))
-                }
-            }
+        val isInMaze = x in 0..MAX && y in 0..MAX
+        val doors = (passcode + path).md5().substring(0..3).map { it in "bcdef" }
+
+        fun neighbors() = doors.mapIndexedNotNull { door, open -> neighbor(door)?.takeIf { open && it.isInMaze } }
+
+        private fun neighbor(door: Int) = when (door) {
+            0 -> copy(y = y - 1, path = path + "U")
+            1 -> copy(y = y + 1, path = path + "D")
+            2 -> copy(x = x - 1, path = path + "L")
+            3 -> copy(x = x + 1, path = path + "R")
+            else -> null
+        }
     }
 
-    var state = State()
-    val visited = mutableSetOf<State>()
-    val unvisited = mutableSetOf<State>()
-    val distances = mutableMapOf(state to 0)
+    var s = State()
+    val v = mutableSetOf<State>()
+    val u = mutableSetOf<State>()
+    val d = mutableMapOf(s to 0)
 
     val vaultPaths = mutableSetOf<String>()
 
     while (true) {
-        if (state.isVault) {
-            vaultPaths += state.path
-        } else {
-            state.neighbors().filter { it !in visited }.forEach { neighbor ->
-                unvisited += neighbor
-                val distance = distances.getValue(state) + 1
-                if (distances.getOrDefault(neighbor, Integer.MAX_VALUE) > distance)
-                    distances[neighbor] = distance
-            }
+        if (s.isVault) vaultPaths += s.path
+        else s.neighbors().filter { it !in v }.also { u += it }.forEach { n ->
+            d.compute(n) { _, old -> min(old ?: MAX_VALUE, d.getValue(s) + 1) }
         }
-
-        visited += state
-        unvisited -= state
-
-        state = unvisited.randomOrNull() ?: break
+        v += s
+        u -= s
+        s = u.randomOrNull() ?: break
     }
+
     println(vaultPaths.minBy { it.length })
     println(vaultPaths.maxOf { it.length })
 }
 
-private fun md5(input: String): String {
-    val md = MessageDigest.getInstance("MD5")
-    return BigInteger(1, md.digest(input.toByteArray())).toString(16).padStart(32, '0')
-}
+private fun String.md5() = BigInteger(1, messageDigest("MD5").digest(toByteArray())).toString(16).padStart(32, '0')

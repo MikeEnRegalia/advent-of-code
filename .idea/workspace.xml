@@ -4,13 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="01a23a2c-eb2b-4b66-a4cd-0cd961d92526" name="Changes" comment="messing around with stuff">
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/aoc2016/Day17KLunch.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/aoc2022/day01.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/kotlin/aoc2022/day01.kt" afterDir="false" />
+    <list default="true" id="01a23a2c-eb2b-4b66-a4cd-0cd961d92526" name="Changes" comment="implement 2016/day17 again for KLunch">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/aoc2018/day01/input.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/aoc2016/Day17KLunch.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/aoc2016/Day17KLunch.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -173,7 +169,7 @@
       <workItem from="1669631869876" duration="2249000" />
       <workItem from="1669668931308" duration="458000" />
       <workItem from="1669669812724" duration="14839000" />
-      <workItem from="1669807471045" duration="3321000" />
+      <workItem from="1669807471045" duration="5780000" />
     </task>
     <task id="LOCAL-00001" summary="some more fixes to the configuration">
       <created>1655494161322</created>
@@ -196,7 +192,14 @@
       <option name="project" value="LOCAL" />
       <updated>1669802741137</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="implement 2016/day17 again for KLunch">
+      <created>1669812095857</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1669812095857</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -216,7 +219,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="some more fixes to the configuration" />
     <MESSAGE value="messing around with stuff" />
-    <option name="LAST_COMMIT_MESSAGE" value="messing around with stuff" />
+    <MESSAGE value="implement 2016/day17 again for KLunch" />
+    <option name="LAST_COMMIT_MESSAGE" value="implement 2016/day17 again for KLunch" />
   </component>
   <component name="VgoProject">
     <integration-enabled>false</integration-enabled>
