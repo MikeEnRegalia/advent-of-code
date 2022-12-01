@@ -4,9 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="01a23a2c-eb2b-4b66-a4cd-0cd961d92526" name="Changes" comment="refactor">
+    <list default="true" id="01a23a2c-eb2b-4b66-a4cd-0cd961d92526" name="Changes" comment="add test">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/kotlin/aoc2022/day01.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/aoc2022/day01.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/aoc2022/day01.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/aoc2022/day01.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -205,7 +205,7 @@
       <workItem from="1669631869876" duration="2249000" />
       <workItem from="1669668931308" duration="458000" />
       <workItem from="1669669812724" duration="14839000" />
-      <workItem from="1669807471045" duration="10942000" />
+      <workItem from="1669807471045" duration="12336000" />
     </task>
     <task id="LOCAL-00001" summary="some more fixes to the configuration">
       <created>1655494161322</created>
@@ -256,7 +256,14 @@
       <option name="project" value="LOCAL" />
       <updated>1669880646613</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="add test">
+      <created>1669881267082</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1669881267082</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -280,7 +287,8 @@
     <MESSAGE value="create template for 2022 day 1, using Junit" />
     <MESSAGE value="aoc 2020 day 1 solved" />
     <MESSAGE value="refactor" />
-    <option name="LAST_COMMIT_MESSAGE" value="refactor" />
+    <MESSAGE value="add test" />
+    <option name="LAST_COMMIT_MESSAGE" value="add test" />
   </component>
   <component name="VgoProject">
     <integration-enabled>false</integration-enabled>
