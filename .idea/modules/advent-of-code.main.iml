@@ -5,4 +5,9 @@
       <configuration sdkName="Python 3.10 (advent-of-code)" />
     </facet>
   </component>
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$/../../src/main">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/main/rust" isTestSource="false" />
+    </content>
+  </component>
 </module>
