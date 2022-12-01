@@ -1,14 +1,14 @@
 package aoc2022
 
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 class Day01KtTest {
     @Test
     fun foo() {
 
-        println(day01SortedSet(data))
+        println(day01MinMax(data))
     }
+
     val data = """4920
 3254
 4147
