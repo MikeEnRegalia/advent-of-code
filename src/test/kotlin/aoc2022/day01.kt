@@ -1,28 +1,32 @@
 package aoc2022
 
-import org.apache.commons.io.IOUtils
 import org.junit.jupiter.api.Test
-import strikt.api.expect
+import strikt.api.expectThat
+import strikt.assertions.isEqualTo
 
 class Day01Test {
 
     @Test
-    fun `actual input`() {
-        val input = String(IOUtils.resourceToByteArray("/challenges/aoc2022-day01.txt"))
-        test(input)
-    }
-
-    @Test
     fun `test input`() {
-        val input = ""
-        test(input)
+        val input = """
+            1000
+            2000
+            3000
+            
+            4000
+            
+            5000
+            6000
+            
+            7000
+            8000
+            9000
+            
+            10000
+            """.trimIndent()
+        val (part1, part2) = day01(input)
+        expectThat(part1) { isEqualTo(24000) }
+        expectThat(part2) { isEqualTo(45000) }
     }
 
-    private fun test(input: String) {
-        val (part1, part2) = day01(input)
-        println("part1: $part1")
-        println("part2: $part2")
-        expect {
-        }
-    }
 }

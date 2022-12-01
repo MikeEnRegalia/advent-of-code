@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="01a23a2c-eb2b-4b66-a4cd-0cd961d92526" name="Changes" comment="aoc 2020 day 1 solved">
+    <list default="true" id="01a23a2c-eb2b-4b66-a4cd-0cd961d92526" name="Changes" comment="refactor">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/aoc2022/day01.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/aoc2022/day01.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/test/kotlin/aoc2022/day01.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/aoc2022/day01.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -87,7 +86,7 @@
       <recent name="$PROJECT_DIR$/kts" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.Day01Test">
+  <component name="RunManager" selected="Gradle.Day01Test.test input">
     <configuration name="Day01Test" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -180,8 +179,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.Day01Test" />
         <item itemvalue="Gradle.Day01Test.test input" />
+        <item itemvalue="Gradle.Day01Test" />
         <item itemvalue="Gradle.Day01Test.test actual solution" />
         <item itemvalue="Kotlin.Day17KLunchKt" />
         <item itemvalue="Kotlin.Day17NewKt" />
@@ -206,7 +205,7 @@
       <workItem from="1669631869876" duration="2249000" />
       <workItem from="1669668931308" duration="458000" />
       <workItem from="1669669812724" duration="14839000" />
-      <workItem from="1669807471045" duration="10437000" />
+      <workItem from="1669807471045" duration="10942000" />
     </task>
     <task id="LOCAL-00001" summary="some more fixes to the configuration">
       <created>1655494161322</created>
@@ -250,7 +249,14 @@
       <option name="project" value="LOCAL" />
       <updated>1669817521420</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="refactor">
+      <created>1669880646612</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1669880646613</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -271,10 +277,10 @@
     <MESSAGE value="some more fixes to the configuration" />
     <MESSAGE value="messing around with stuff" />
     <MESSAGE value="implement 2016/day17 again for KLunch" />
-    <MESSAGE value="refactor" />
     <MESSAGE value="create template for 2022 day 1, using Junit" />
     <MESSAGE value="aoc 2020 day 1 solved" />
-    <option name="LAST_COMMIT_MESSAGE" value="aoc 2020 day 1 solved" />
+    <MESSAGE value="refactor" />
+    <option name="LAST_COMMIT_MESSAGE" value="refactor" />
   </component>
   <component name="VgoProject">
     <integration-enabled>false</integration-enabled>
