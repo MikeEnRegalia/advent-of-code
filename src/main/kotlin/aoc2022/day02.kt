@@ -2,48 +2,30 @@ package aoc2022
 
 fun main() = day02(String(System.`in`.readAllBytes())).forEach(::println)
 
-fun day02(input: String): List<Any?> {
-    fun String.toRPS() = when (this) {
-        "A", "X" -> "R"
-        "B", "Y" -> "P"
-        "C", "Z" -> "S"
-        else -> throw IllegalArgumentException(this)
-    }
+fun day02(input: String) = with(input.lines()) { listOf(sumOf(::part1Round), sumOf(::part2Round)) }
 
-    val score = input.lines().map { it.split(" ") }.fold(0 to 0) { (part1, part2), (opp, you) ->
-        val roundPart1 = when (you.toRPS()) {
-            "R" -> 1
-            "P" -> 2
-            "S" -> 3
-            else -> throw IllegalArgumentException(you)
-        } + when (you.toRPS() to opp.toRPS()) {
-            "R" to "S", "S" to "P", "P" to "R" -> 6
-            "R" to "R", "S" to "S", "P" to "P" -> 3
-            "R" to "P", "S" to "R", "P" to "S" -> 0
-            else -> throw IllegalArgumentException(you)
-        }
-        val roundPart2 = when (you) {
-            "X" -> when (opp.toRPS()) {
-                "R" -> 3
-                "S" -> 2
-                else -> 1
-            }
-
-            "Y" -> when (opp.toRPS()) {
-                "R" -> 1 + 3
-                "P" -> 2 + 3
-                else -> 3 + 3
-            }
-
-            else -> when (opp.toRPS()) {
-                "R" -> 2 + 6
-                "S" -> 1 + 6
-                else -> 3 + 6
-            }
-        }
-        part1 + roundPart1 to part2 + roundPart2
-    }
-
-    return listOf(score.first, score.second)
+private fun part1Round(line: String) = when (line) {
+    "A X" -> 1 + 3
+    "B X" -> 1 + 0
+    "C X" -> 1 + 6
+    "A Y" -> 2 + 6
+    "B Y" -> 2 + 3
+    "C Y" -> 2 + 0
+    "A Z" -> 3 + 0
+    "B Z" -> 3 + 6
+    "C Z" -> 3 + 3
+    else -> throw IllegalArgumentException(line)
 }
 
+private fun part2Round(line: String) = when (line) {
+    "A X" -> 3 + 0
+    "B X" -> 1 + 0
+    "C X" -> 2 + 0
+    "A Y" -> 1 + 3
+    "B Y" -> 2 + 3
+    "C Y" -> 3 + 3
+    "A Z" -> 2 + 6
+    "B Z" -> 3 + 6
+    "C Z" -> 1 + 6
+    else -> throw IllegalArgumentException(line)
+}
