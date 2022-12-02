@@ -46,7 +46,7 @@ private fun playPart2(line: List<String>): Int {
     val opponentMove = line[0].toRPSMove()
     val desiredResult = line[1].toRPSResult()
     val myMove = opponentMove.whatToPlayToAchieve(desiredResult)
-    return myMove.score + myMove.playAgainst(opponentMove).score
+    return myMove.score + desiredResult.score
 }
 
 private enum class RPSMove(val score: Int) { Rock(1), Paper(2), Scissors(3) }
