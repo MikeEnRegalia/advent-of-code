@@ -5,34 +5,6 @@ import aoc2022.RPSResult.*
 
 fun main() = day02Clean(String(System.`in`.readAllBytes())).forEach(::println)
 
-fun day02KISS(input: String) = with(input.lines()) { listOf(sumOf(::part1Round), sumOf(::part2Round)) }
-
-private fun part1Round(line: String) = when (line) {
-    "A X" -> 1 + 3
-    "B X" -> 1 + 0
-    "C X" -> 1 + 6
-    "A Y" -> 2 + 6
-    "B Y" -> 2 + 3
-    "C Y" -> 2 + 0
-    "A Z" -> 3 + 0
-    "B Z" -> 3 + 6
-    "C Z" -> 3 + 3
-    else -> throw IllegalArgumentException(line)
-}
-
-private fun part2Round(line: String) = when (line) {
-    "A X" -> 3 + 0
-    "B X" -> 1 + 0
-    "C X" -> 2 + 0
-    "A Y" -> 1 + 3
-    "B Y" -> 2 + 3
-    "C Y" -> 3 + 3
-    "A Z" -> 2 + 6
-    "B Z" -> 3 + 6
-    "C Z" -> 1 + 6
-    else -> throw IllegalArgumentException(line)
-}
-
 fun day02Clean(input: String) = with(input.lines().map { it.split(" ") }) {
     listOf(sumOf(::playPart1), sumOf(::playPart2))
 }
@@ -52,17 +24,20 @@ private fun playPart2(line: List<String>): Int {
 
 private enum class RPSMove(val score: Int) { Rock(1), Paper(2), Scissors(3) }
 
-private fun RPSMove.playAgainst(move: RPSMove): RPSResult = when (this to move) {
-    Rock to Scissors, Paper to Rock, Scissors to Paper -> Win
-    Scissors to Rock, Paper to Scissors, Rock to Paper -> Lose
-    else -> Draw
+private fun beats(move: RPSMove) = when (move) {
+    Paper -> Rock
+    Rock -> Scissors
+    Scissors -> Paper
 }
-private fun RPSMove.whatToPlayToAchieve(result: RPSResult) = when (result to this) {
-    Win to Scissors, Lose to Paper -> Rock
-    Win to Rock, Lose to Scissors -> Paper
-    Win to Paper, Lose to Rock -> Scissors
-    else -> this
+
+private fun RPSMove.playAgainst(move: RPSMove): RPSResult = when {
+    this == beats(move) -> Lose
+    this == move -> Draw
+    else -> Win
 }
+
+private fun RPSMove.whatToPlayToAchieve(result: RPSResult) =
+    RPSMove.values().first { it.playAgainst(this) == result }
 
 private fun String.toRPSMove() = when (this) {
     "A", "X" -> Rock
