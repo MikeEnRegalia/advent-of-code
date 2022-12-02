@@ -57,9 +57,9 @@ private fun RPSMove.playAgainst(move: RPSMove): RPSResult = when (this to move) 
     else -> Draw
 }
 private fun RPSMove.whatToPlayToAchieve(result: RPSResult) = when (result to this) {
+    Win to Scissors, Lose to Paper -> Rock
     Win to Rock, Lose to Scissors -> Paper
     Win to Paper, Lose to Rock -> Scissors
-    Win to Scissors, Lose to Paper -> Rock
     else -> this
 }
 
