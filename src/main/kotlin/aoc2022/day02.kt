@@ -28,17 +28,17 @@ private enum class RPSResult(val score: Int, val token: String) { Lose(0, "X"), 
 private enum class RPSMove(val score: Int, vararg val tokens: String) {
     Rock(1, "A", "X"), Paper(2, "B", "Y"), Scissors(3, "C", "Z");
 
-    fun playAgainst(move: RPSMove): RPSResult = when {
-        this == beats(move) -> Lose
-        this == move -> Draw
+    fun playAgainst(opponentMove: RPSMove): RPSResult = when {
+        this == defeatedBy(opponentMove) -> Lose
+        this == opponentMove -> Draw
         else -> Win
     }
 
-    private fun beats(move: RPSMove) = when (move) {
+    private fun defeatedBy(opponentMove: RPSMove) = when (opponentMove) {
         Paper -> Rock
         Rock -> Scissors
         Scissors -> Paper
     }
 
-    fun whatToPlayToAchieve(result: RPSResult) = RPSMove.values().first { it.playAgainst(this) == result }
+    fun whatToPlayToAchieve(result: RPSResult) = RPSMoves().first { it.playAgainst(this) == result }
 }
