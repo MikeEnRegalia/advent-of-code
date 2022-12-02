@@ -39,7 +39,8 @@ fun day02Clean(input: String) = with(input.lines().map { it.split(" ") }) {
 
 private fun playPart1(line: List<String>): Int {
     val (opponentMove, myMove) = line.map { it.toRPSMove() }
-    return myMove.score + myMove.playAgainst(opponentMove).score
+    val result = myMove.playAgainst(opponentMove)
+    return myMove.score + result.score
 }
 
 private fun playPart2(line: List<String>): Int {
@@ -78,5 +79,3 @@ private fun String.toRPSResult() = when (this) {
     "Z" -> Win
     else -> throw IllegalArgumentException(this)
 }
-
-
