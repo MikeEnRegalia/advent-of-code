@@ -40,7 +40,7 @@ private enum class RPSMove(val score: Int, vararg val tokens: String) {
         Scissors -> Paper
     }
 
-    fun whatAchieves(result: RPSResult) = RPSMove.values().first { it.playAgainst(this) == result }
+    fun whatAchieves(result: RPSResult) = RPSMove.values().single { it.playAgainst(this) == result }
 }
 
 private fun String.toRPSMove() = RPSMove.values().single { this in it.tokens }
