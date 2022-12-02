@@ -52,9 +52,9 @@ private fun playPart2(line: List<String>): Int {
 private enum class RPSMove(val score: Int) { Rock(1), Paper(2), Scissors(3) }
 
 private fun RPSMove.playAgainst(move: RPSMove): RPSResult = when (this to move) {
-    Rock to Rock, Paper to Paper, Scissors to Scissors -> Draw
     Rock to Scissors, Paper to Rock, Scissors to Paper -> Win
-    else -> Lose
+    Scissors to Rock, Paper to Scissors, Rock to Paper -> Lose
+    else -> Draw
 }
 private fun RPSMove.whatToPlayToAchieve(result: RPSResult) = when (result to this) {
     Win to Rock, Lose to Scissors -> Paper
