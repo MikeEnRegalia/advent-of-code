@@ -6,6 +6,6 @@ class Day02KtTest {
     @Test
     fun test() {
         val input = """"""
-        day02(input).forEach(::println)
+        day02KISS(input).forEach(::println)
     }
 }

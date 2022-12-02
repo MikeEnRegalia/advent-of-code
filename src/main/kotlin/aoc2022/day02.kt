@@ -1,12 +1,11 @@
 package aoc2022
 
-import aoc2022.RPSMove.Companion.toRPSMove
+import aoc2022.RPSMove.*
 import aoc2022.RPSResult.*
-import aoc2022.RPSResult.Companion.toRPSResult
 
 fun main() = day02Clean(String(System.`in`.readAllBytes())).forEach(::println)
 
-fun day02(input: String) = with(input.lines()) { listOf(sumOf(::part1Round), sumOf(::part2Round)) }
+fun day02KISS(input: String) = with(input.lines()) { listOf(sumOf(::part1Round), sumOf(::part2Round)) }
 
 private fun part1Round(line: String) = when (line) {
     "A X" -> 1 + 3
@@ -50,47 +49,34 @@ private fun playPart2(line: List<String>): Int {
     return myMove.score + myMove.playAgainst(opponentMove).score
 }
 
-private enum class RPSMove(val score: Int) {
-    Rock(1), Paper(2), Scissors(3);
+private enum class RPSMove(val score: Int) { Rock(1), Paper(2), Scissors(3) }
 
-    fun playAgainst(move: RPSMove): RPSResult = when (this to move) {
-        Rock to Rock, Paper to Paper, Scissors to Scissors -> Draw
-        Rock to Scissors, Paper to Rock, Scissors to Paper -> Win
-        else -> Lose
-    }
-
-    fun whatToPlayToAchieve(result: RPSResult) = when (result to this) {
-        Win to Rock -> Paper
-        Win to Paper -> Scissors
-        Win to Scissors -> Rock
-        Lose to Rock -> Scissors
-        Lose to Paper -> Rock
-        Lose to Scissors -> Paper
-        else -> this
-    }
-
-
-    companion object {
-        fun String.toRPSMove() = when (this) {
-            "A", "X" -> Rock
-            "B", "Y" -> Paper
-            "C", "Z" -> Scissors
-            else -> throw IllegalArgumentException(this)
-        }
-    }
+private fun RPSMove.playAgainst(move: RPSMove): RPSResult = when (this to move) {
+    Rock to Rock, Paper to Paper, Scissors to Scissors -> Draw
+    Rock to Scissors, Paper to Rock, Scissors to Paper -> Win
+    else -> Lose
+}
+private fun RPSMove.whatToPlayToAchieve(result: RPSResult) = when (result to this) {
+    Win to Rock, Lose to Scissors -> Paper
+    Win to Paper, Lose to Rock -> Scissors
+    Win to Scissors, Lose to Paper -> Rock
+    else -> this
 }
 
-private enum class RPSResult(val score: Int) {
-    Win(6), Lose(0), Draw(3);
+private fun String.toRPSMove() = when (this) {
+    "A", "X" -> Rock
+    "B", "Y" -> Paper
+    "C", "Z" -> Scissors
+    else -> throw IllegalArgumentException(this)
+}
 
-    companion object {
-        fun String.toRPSResult() = when (this) {
-            "X" -> Lose
-            "Y" -> Draw
-            "Z" -> Win
-            else -> throw IllegalArgumentException(this)
-        }
-    }
+private enum class RPSResult(val score: Int) { Win(6), Lose(0), Draw(3) }
+
+private fun String.toRPSResult() = when (this) {
+    "X" -> Lose
+    "Y" -> Draw
+    "Z" -> Win
+    else -> throw IllegalArgumentException(this)
 }
 
 
