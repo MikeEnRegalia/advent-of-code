@@ -8,12 +8,10 @@ fun day03(input: String): List<Any?> {
         else -> this - 'A' + 27
     }
 
-    val part1 = input.lines().fold<String, MutableList<Char>>(mutableListOf()) { acc, line ->
+    val part1 = input.lines().sumOf { line ->
         val (a, b) = line.chunked(line.length / 2)
-        acc.apply {
-            acc.addAll(line.toSet().filter { it in a && it in b })
-        }
-    }.sumOf { it.score() }
+        line.toSet().filter { it in a && it in b }.sumOf { it.score() }
+    }
 
     val part2 = input.lines().chunked(3).sumOf { group ->
         val inAll = group.flatMap { it.toList() }.toSet().filter { c -> group.all { c in it } }
