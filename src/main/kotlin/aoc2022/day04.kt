@@ -11,5 +11,5 @@ fun day04(input: String) = input.lines()
     .run {
         listOf(
             count { (a, b) -> a.all { it in b } || b.all { it in a } },
-            count { (elf1, elf2) -> elf1.any { it in elf2 } || elf2.any { it in elf1 } })
+            count { (a, b) -> a.any { it in b } || b.any { it in a } })
     }
