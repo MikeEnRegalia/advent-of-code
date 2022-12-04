@@ -11,5 +11,5 @@ fun day04(input: String) = input.lines()
         )
     }
 
-fun IntRange.overlapsWith(o: IntRange) = first in o || last in o
+fun IntRange.overlapsWith(o: IntRange) = first in o || last in o || includes(o)
 fun IntRange.includes(o: IntRange) = o.first in this && o.last in this
