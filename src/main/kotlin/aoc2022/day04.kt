@@ -3,13 +3,14 @@ package aoc2022
 fun main() = day04(String(System.`in`.readAllBytes())).forEach(::println)
 
 fun day04(input: String) = input.lines()
-    .map { line ->
-        line.split(",").map { elf ->
-            elf.split("-").map(String::toInt).let { it[0]..it[1] }
-        }
-    }
+    .map { it.split(",", "-").map(String::toInt) }
+    .map { (a, b, c, d) -> a..b to c..d }
     .run {
-        listOf(Iterable<Int>::all, Iterable<Int>::any).map { op ->
-            count { (a, b) -> op(a) { it in b } || op(b) { it in a } }
-        }
+        listOf(
+            count { (a, b) -> a.includes(b) || b.includes(a) },
+            count { (a, b) -> a.overlapsWith(b) || b.overlapsWith(a) },
+        )
     }
+
+fun IntRange.overlapsWith(o: IntRange) = any { it in o }
+fun IntRange.includes(o: IntRange) = o.all { it in this }
