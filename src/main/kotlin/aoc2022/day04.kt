@@ -9,7 +9,7 @@ fun day04(input: String) = input.lines()
         }
     }
     .run {
-        listOf(
-            count { (a, b) -> a.all { it in b } || b.all { it in a } },
-            count { (a, b) -> a.any { it in b } || b.any { it in a } })
+        listOf(Iterable<Int>::all, Iterable<Int>::any).map { op ->
+            count { (a, b) -> op(a) { it in b } || op(b) { it in a } }
+        }
     }
