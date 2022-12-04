@@ -3,8 +3,7 @@ package aoc2022
 fun main() = day04(String(System.`in`.readAllBytes())).forEach(::println)
 
 fun day04(input: String) = input.lines()
-    .map { it.split(",", "-").map(String::toInt) }
-    .map { (a, b, c, d) -> a..b to c..d }
+    .map { it.split(",", "-").map(String::toInt).let { (a, b, c, d) -> a..b to c..d } }
     .run {
         listOf(
             count { (a, b) -> a.includes(b) || b.includes(a) },
