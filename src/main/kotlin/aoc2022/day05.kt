@@ -3,13 +3,12 @@ package aoc2022
 fun main() = day05(String(System.`in`.readAllBytes())).forEach(::println)
 
 fun day05(input: String): List<Any?> {
-    fun String.parseLine() = this
     val (stacksInput, commandsInput) = input.split("\n\n").map { it.split("\n") }
 
-    fun compute(part2: Boolean = false) = with(loadStacks(stacksInput)) {
-        commandsInput.map(String::parseLine).forEach { line ->
+    fun compute(part1: Boolean = false) = with(loadStacks(stacksInput)) {
+        commandsInput.forEach { line ->
             val (n, from, to) = line.split(" ").mapNotNull(String::toIntOrNull)
-            if (part2) {
+            if (!part1) {
                 val newCrates = mutableListOf<Char>()
                 repeat(n) {
                     newCrates += this[from - 1].removeLast()
@@ -24,7 +23,8 @@ fun day05(input: String): List<Any?> {
         this
     }
 
-    return listOf(compute(), compute(part2 = true)).map { it.joinToString("") { it.last().toString() } }
+    return listOf(compute(part1 = true), compute(part1 = false))
+        .map { it.joinToString("") { it.last().toString() } }
 }
 
 private fun loadStacks(stacksInput: List<String>): MutableList<MutableList<Char>> {
