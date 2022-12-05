@@ -7,23 +7,21 @@ fun day05(input: String): List<Any?> {
 
     val size = stacksInput.last().split(" ").mapNotNull(String::toIntOrNull).last()
     val stacksContents = with(stacksInput) { take(size - 1).reversed() }
-    val initialStacks = List(size) { stack ->
+    val initial = List(size) { stack ->
         buildList {
-            for (line in stacksContents) {
-                line.getOrNull(1 + (stack * 4))?.takeIf { it != ' ' }?.let { add(it) }
-            }
+            for (line in stacksContents) line.getOrNull(1 + (stack * 4))?.takeIf { it != ' ' }?.let { add(it) }
         }
     }
 
-    fun compute(mod: List<Char>.() -> List<Char> = { this }) =
-        List(initialStacks.size) { initialStacks[it].toMutableList() }.let { stacks ->
-            for (line in commandsInput) {
-                val (n, from, to) = line.split(" ").mapNotNull(String::toIntOrNull)
-                    .mapIndexed { i, x -> if (i == 0) x else x - 1 }
-                stacks[to] += buildList { repeat(n) { add(stacks[from].removeLast()) } }.mod()
-            }
-            stacks.joinToString("") { it.last().toString() }
-        }
+    val commands = commandsInput.map {
+        it.split(" ").mapNotNull(String::toIntOrNull).mapIndexed { i, x -> if (i == 0) x else x - 1 }
+    }
 
-    return listOf(compute(), compute { reversed() })
+    fun compute(mod: ArrayDeque<Char>.(Char) -> Unit) = List(initial.size) { ArrayDeque(initial[it]) }.let { stacks ->
+        for ((n, from, to) in commands)
+            stacks[to] += ArrayDeque<Char>().apply { repeat(n) { mod(stacks[from].removeLast()) } }
+        stacks.joinToString("") { it.last().toString() }
+    }
+
+    return listOf(compute { addLast(it) }, compute { addFirst(it) })
 }
