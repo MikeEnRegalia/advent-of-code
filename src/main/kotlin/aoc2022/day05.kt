@@ -1,7 +1,5 @@
 package aoc2022
 
-import kotlin.math.min
-
 fun main() = day05(String(System.`in`.readAllBytes())).forEach(::println)
 
 fun day05(input: String): List<Any?> {
