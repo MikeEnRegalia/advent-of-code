@@ -3,10 +3,10 @@ package aoc2022
 fun main() = day05(String(System.`in`.readAllBytes())).forEach(::println)
 
 fun day05(input: String): List<Any?> {
-    val (stacksInput, commandsInput) = input.split("\n\n").map { it.split("\n") }
+    val (cratesInput, commandsInput) = input.split("\n\n").map { it.split("\n") }
 
-    val size = stacksInput.last().trim().substringAfterLast(' ').toInt()
-    val initialStacks = with(stacksInput.dropLast(1).asReversed()) {
+    val size = cratesInput.last().trim().substringAfterLast(' ').toInt()
+    val initialStacks = with(cratesInput.dropLast(1).asReversed()) {
         List(size) { i -> mapNotNull { it.getOrNull(1 + (i * 4))?.takeUnless(Char::isWhitespace) } }
     }
 
