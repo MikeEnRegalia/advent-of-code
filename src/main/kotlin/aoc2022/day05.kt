@@ -4,17 +4,17 @@ fun main() = day05B(String(System.`in`.readAllBytes())).forEach(::println)
 
 // inspired by other solutions
 fun day05B(input: String): List<Any?> {
-    fun solve(part2: Boolean) = with(mutableMapOf<Int, ArrayDeque<Char>>()) {
-        for (l in input.lines()) when {
-            l.contains("[") -> l.chunked(4).map { it[1] }.forEachIndexed { i, c ->
-                if (c != ' ') compute(i + 1) { _, old -> (old ?: ArrayDeque()).apply { addFirst(c) } }
+    fun solve(part2: Boolean) = with(sortedMapOf<Int, ArrayDeque<Char>>()) {
+        for (line in input.lines()) when {
+            line.contains("[") -> line.chunked(4).map { it[1] }.forEachIndexed { i, c ->
+                if (c != ' ') getOrPut(i + 1) { ArrayDeque() }.addFirst(c)
             }
 
-            l.startsWith("move") -> l.split(" ").mapNotNull(String::toIntOrNull).let { (n, from, to) ->
+            line.startsWith("move") -> line.split(" ").mapNotNull(String::toIntOrNull).let { (n, from, to) ->
                 getValue(to) += List(n) { getValue(from).removeLast() }.run { if (part2) asReversed() else this }
             }
         }
-        entries.sortedBy { it.key }.joinToString("") { it.value.last().toString() }
+        values.joinToString("") { it.last().toString() }
     }
     return listOf(solve(part2 = false), solve(part2 = true))
 }
