@@ -1,7 +1,27 @@
 package aoc2022
 
-fun main() = day05(String(System.`in`.readAllBytes())).forEach(::println)
+fun main() = day05B(String(System.`in`.readAllBytes())).forEach(::println)
 
+// inspired by other solutions
+fun day05B(input: String): List<Any?> {
+    fun solve(part2: Boolean) = with(mutableMapOf<Int, ArrayDeque<Char>>()) {
+        for (line in input.lines()) when {
+            line.contains("[") -> line.chunked(4).map { it[1] }.forEachIndexed { i, c ->
+                if (c != ' ') compute(i) { _, old -> (old ?: ArrayDeque()).apply { addFirst(c) } }
+            }
+
+            line.startsWith("move") -> line.split(" ").mapNotNull(String::toIntOrNull).let { (n, from, to) ->
+                getValue(to - 1) += buildList { repeat(n) { add(getValue(from - 1).removeLast()) } }.run {
+                    if (part2) asReversed() else this
+                }
+            }
+        }
+        entries.sortedBy { it.key }.joinToString("") { it.value.last().toString() }
+    }
+    return listOf(solve(part2 = false), solve(part2 = true))
+}
+
+// my own refactored solution
 fun day05(input: String): List<Any?> {
     val (cratesInput, commandsInput) = input.split("\n\n").map { it.split("\n") }
 
