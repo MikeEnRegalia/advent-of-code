@@ -5,15 +5,13 @@ fun main() = day05B(String(System.`in`.readAllBytes())).forEach(::println)
 // inspired by other solutions
 fun day05B(input: String): List<Any?> {
     fun solve(part2: Boolean) = with(mutableMapOf<Int, ArrayDeque<Char>>()) {
-        for (line in input.lines()) when {
-            line.contains("[") -> line.chunked(4).map { it[1] }.forEachIndexed { i, c ->
-                if (c != ' ') compute(i) { _, old -> (old ?: ArrayDeque()).apply { addFirst(c) } }
+        for (l in input.lines()) when {
+            l.contains("[") -> l.chunked(4).map { it[1] }.forEachIndexed { i, c ->
+                if (c != ' ') compute(i + 1) { _, old -> (old ?: ArrayDeque()).apply { addFirst(c) } }
             }
 
-            line.startsWith("move") -> line.split(" ").mapNotNull(String::toIntOrNull).let { (n, from, to) ->
-                getValue(to - 1) += List(n) { getValue(from - 1).removeLast() }.run {
-                    if (part2) asReversed() else this
-                }
+            l.startsWith("move") -> l.split(" ").mapNotNull(String::toIntOrNull).let { (n, from, to) ->
+                getValue(to) += List(n) { getValue(from).removeLast() }.run { if (part2) asReversed() else this }
             }
         }
         entries.sortedBy { it.key }.joinToString("") { it.value.last().toString() }
