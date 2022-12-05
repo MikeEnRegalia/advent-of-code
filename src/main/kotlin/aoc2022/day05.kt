@@ -11,7 +11,7 @@ fun day05B(input: String): List<Any?> {
             }
 
             line.startsWith("move") -> line.split(" ").mapNotNull(String::toIntOrNull).let { (n, from, to) ->
-                getValue(to - 1) += buildList { repeat(n) { add(getValue(from - 1).removeLast()) } }.run {
+                getValue(to - 1) += List(n) { getValue(from - 1).removeLast() }.run {
                     if (part2) asReversed() else this
                 }
             }
