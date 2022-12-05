@@ -3,9 +3,9 @@ package aoc2022
 import com.google.gson.Gson
 import java.security.MessageDigest
 
-fun main() = day00(String(System.`in`.readAllBytes())).forEach(::println)
+fun main() = day06(String(System.`in`.readAllBytes())).forEach(::println)
 
-private fun day00(input: String): List<Any?> {
+private fun day06(input: String): List<Any?> {
 
     return listOf(null, null)
 }
