@@ -14,12 +14,14 @@ fun day05(input: String): List<Any?> {
         it.split(" ").mapNotNull(String::toIntOrNull).mapIndexed { i, x -> if (i == 0) x else x - 1 }
     }
 
-    fun compute(mod: ArrayDeque<Char>.(Char) -> Unit): String {
+    fun lift(dropCrates: (List<Char>) -> List<Char> = { it }): String {
         val stacks = initialStacks.map { it.toMutableList() }
-        for ((n, from, to) in commands)
-            stacks[to] += (1..n).fold(ArrayDeque()) { d, _ -> d.apply { mod(stacks[from].removeLast()) } }
+        for ((n, from, to) in commands) stacks[to].addAll(dropCrates(stacks[from].removeLast(n)))
         return stacks.joinToString("") { it.last().toString() }
     }
 
-    return listOf(compute { addLast(it) }, compute { addFirst(it) })
+    return listOf(lift { it.asReversed() }, lift())
 }
+
+private fun <T> MutableList<T>.removeLast(n: Int) =
+    buildList { repeat(n) { add(this@removeLast.removeLast()) } }.asReversed()
