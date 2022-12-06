@@ -1,0 +1,5 @@
+day := 2;
+import "advent-prelude.noul";
+
+puzzle_input := advent_input();
+

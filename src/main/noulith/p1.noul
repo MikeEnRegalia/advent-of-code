@@ -1,0 +1,10 @@
+day := 1;
+import "advent-prelude.noul";
+
+puzzle_input := advent_input();
+
+elves := puzzle_input split "\n\n" map ints map sum then sort then reverse;
+part1 := first elves;
+part2 := (elves then tail(3));
+print part1;
+print part2;
