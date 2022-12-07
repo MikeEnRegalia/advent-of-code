@@ -12,16 +12,16 @@ private fun day07(input: String): List<Any?> {
     }
 
     val sizes = mutableMapOf<List<String>, Int>()
-    fun List<String>.add(size: Int) = indices.map { subList(0, it + 1) }
+    fun List<String>.add(size: Int) = (0..this.size).map { subList(0, it) }
         .forEach { sizes[it] = (sizes[it] ?: 0) + size }
 
-    var dir = listOf<String>()
+    var dir = emptyList<String>()
     for (line in input.lines()) when {
         line.startsWith("$ cd ") -> dir = dir.cd(line.substringAfterLast(" "))
         else -> line.split(" ").first().toIntOrNull()?.let(dir::add)
     }
 
-    val toFree = sizes.filterKeys { it.size == 1 }.values.sum() - 40_000_000
+    val toFree = sizes.getValue(emptyList()) - 40_000_000
 
     return with(sizes.values) { listOf(filter { it <= 100_000 }.sum(), filter { it >= toFree }.min()) }
 }
