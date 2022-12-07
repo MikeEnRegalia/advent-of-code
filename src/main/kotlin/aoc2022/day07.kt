@@ -22,7 +22,7 @@ private fun day07(input: String): List<Any?> {
 
     for (line in input.lines()) when {
         line.startsWith("$ cd ") -> dir = dir.cd(line.substringAfterLast(" "))
-        else -> line.split(" ").first().toIntOrNull()?.let { addFile(it) }
+        else -> line.split(" ").first().toIntOrNull()?.let(::addFile)
     }
 
     return with(sizes.values) { listOf(filter { it <= 100_000 }.sum(), filter { it >= used - 40_000_000 }.min()) }
