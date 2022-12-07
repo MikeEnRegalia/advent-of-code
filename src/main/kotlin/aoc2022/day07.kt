@@ -21,7 +21,10 @@ private fun day07(input: String): List<Any?> {
 
     for (line in input.lines()) when {
         line.startsWith("$ cd ") -> dir = dir.cd(line.substringAfterLast(" "))
-        else -> line.split(" ").first().toIntOrNull()?.also(dir::addSize)?.also { used += it }
+        else -> line.split(" ").first().toIntOrNull()?.also {
+            dir.addSize(it)
+            used += it
+        }
     }
 
     return with(sizes.values) {
