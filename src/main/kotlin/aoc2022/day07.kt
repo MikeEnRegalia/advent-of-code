@@ -15,15 +15,15 @@ private fun day07(input: String): List<Any?> {
         else -> plus(dir)
     }
 
-    fun List<String>.addSize(size: Int) = indices.map { subList(0, it + 1) }.forEach { path ->
+    fun List<String>.add(size: Int) = indices.map { subList(0, it + 1) }.forEach { path ->
         sizes[path] = (sizes[path] ?: 0) + size
     }
 
     for (line in input.lines()) when {
         line.startsWith("$ cd ") -> dir = dir.cd(line.substringAfterLast(" "))
-        else -> line.split(" ").first().toIntOrNull()?.also {
-            dir.addSize(it)
-            used += it
+        else -> line.split(" ").first().toIntOrNull()?.also { size ->
+            dir.add(size)
+            used += size
         }
     }
 
