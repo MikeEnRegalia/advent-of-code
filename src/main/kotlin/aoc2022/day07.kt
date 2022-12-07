@@ -2,14 +2,16 @@ package aoc2022
 
 fun main() = day07(String(System.`in`.readAllBytes())).forEach(::println)
 
+// this is the refactored solution, it is "inspired" by many other solutions and authors.
+// if you are interested in my original solution you are free to look at the history.
 private fun day07(input: String): List<Any?> {
     var dir = listOf<String>()
     val sizes = mutableMapOf<List<String>, Int>()
     var used = 0
 
     fun List<String>.cd(dir: String) = when (dir) {
-        ".." -> subList(0, size - 1)
-        "/" -> listOf()
+        ".." -> dropLast(1)
+        "/" -> emptyList()
         else -> plus(dir)
     }
 
