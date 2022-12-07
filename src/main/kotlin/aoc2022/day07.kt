@@ -13,16 +13,14 @@ private fun day07(input: String): List<Any?> {
         else -> plus(dir)
     }
 
-    fun List<String>.addSize(size: Int) {
-        indices.map { subList(0, it + 1).toList() }.forEach { path ->
-            sizes[path] = (sizes[path] ?: 0) + size
-        }
-        used += size
+    fun List<String>.allPaths() = indices.map { subList(0, it + 1).toList() }
+    fun List<String>.addSize(size: Int) = allPaths().forEach { path ->
+        sizes[path] = (sizes[path] ?: 0) + size
     }
 
     for (line in input.lines()) when {
         line.startsWith("$ cd ") -> dir = dir.cd(line.substringAfterLast(" "))
-        else -> line.split(" ").first().toIntOrNull()?.let(dir::addSize)
+        else -> line.split(" ").first().toIntOrNull()?.also(dir::addSize)?.also { used += it }
     }
 
     return with(sizes.values) { listOf(filter { it <= 100_000 }.sum(), filter { it >= used - 40_000_000 }.min()) }
