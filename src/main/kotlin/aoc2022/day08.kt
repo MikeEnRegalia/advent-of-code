@@ -10,12 +10,13 @@ private fun day08(input: List<String>): List<Any?> {
         (0 until y).reversed().map { x to it }, (y + 1 until heights.size).map { x to it }
     ).map { it.map { (x, y) -> heights[y][x] } }
 
-    fun List<Int>.countViewable(h: Int) = if (none { it >= h }) size else takeWhile { it < h }.count() + 1
+    fun List<Int>.isVisible(h: Int) = all { it < h }
+    fun List<Int>.countVisible(h: Int) = indexOfFirst { it >= h }.let { if (it == -1) size else it + 1 }
 
     return with(heights.flatMapIndexed { y, l -> l.mapIndexed { x, h -> Triple(x, y, h) } }) {
         listOf(
-            count { (x, y, h) -> linesOfSight(x, y).any { los -> los.all { it < h } } },
-            maxOf { (x, y, h) -> linesOfSight(x, y).map { it.countViewable(h) }.reduce(Int::times) }
+            count { (x, y, h) -> linesOfSight(x, y).any { it.isVisible(h) } },
+            maxOf { (x, y, h) -> linesOfSight(x, y).map { it.countVisible(h) }.reduce(Int::times) }
         )
     }
 }
