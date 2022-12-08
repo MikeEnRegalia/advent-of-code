@@ -6,9 +6,9 @@ private fun day08(input: List<String>): List<Int> {
     val H = input.map { it.map(Char::digitToInt) }
 
     fun linesOfSight(x: Int, y: Int) = sequenceOf(
-        (0 until x).reversed().map { it to y }, (x + 1 until H[0].size).map { it to y },
-        (0 until y).reversed().map { x to it }, (y + 1 until H.size).map { x to it }
-    ).map { it.map { (x, y) -> H[y][x] } }
+        listOf((x - 1 downTo 0), (x + 1 until H[0].size)).map { it.map { x -> x to y } },
+        listOf((y - 1 downTo 0), (y + 1 until H.size)).map { it.map { y -> x to y } }
+    ).flatten().map { it.map { (x, y) -> H[y][x] } }
 
     fun List<Int>.isVisible(h: Int) = all { it < h }
     fun List<Int>.countVisible(h: Int) = indexOfFirst { it >= h }.let { if (it == -1) size else it + 1 }
