@@ -6,8 +6,8 @@ private fun day08(input: List<String>): List<Int> {
     val H = input.map { it.map(Char::digitToInt) }
 
     fun linesOfSight(x: Int, y: Int) = sequenceOf(
-        listOf((x - 1 downTo 0), (x + 1 until H[0].size)).map { it.map { x -> x to y } },
-        listOf((y - 1 downTo 0), (y + 1 until H.size)).map { it.map { y -> x to y } }
+        sequenceOf((x - 1 downTo 0), (x + 1 until H[0].size)).map { it.map { x -> x to y } },
+        sequenceOf((y - 1 downTo 0), (y + 1 until H.size)).map { it.map { y -> x to y } }
     ).flatten().map { it.map { (x, y) -> H[y][x] } }
 
     fun List<Int>.isVisible(h: Int) = all { it < h }
@@ -20,3 +20,4 @@ private fun day08(input: List<String>): List<Int> {
         )
     }
 }
+
