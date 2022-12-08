@@ -18,5 +18,6 @@ private fun day00(input: String): List<Any?> {
 
     return listOf(
         heights.count { (pos, height) -> pos.linesOfSight().any { los -> los.all { it < height } } },
-        heights.maxOf { (pos, height) -> pos.linesOfSight().map { it.countViewable(height) }.reduce(Int::times) })
+        heights.maxOf { (pos, height) -> pos.linesOfSight().map { it.countViewable(height) }.reduce(Int::times) }
+    )
 }
