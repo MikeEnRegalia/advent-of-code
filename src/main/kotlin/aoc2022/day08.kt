@@ -12,8 +12,8 @@ fun main() {
     fun List<Int>.countVisible(h: Int) = indexOfFirst { it >= h }.let { if (it == -1) size else it + 1 }
 
     with(M.flatMapIndexed { y, l -> l.mapIndexed { x, h -> Triple(x, y, h) } }) {
-        count { (x, y, h) -> linesOfSight(x, y).any { it.isVisible(h) } }.also(::println)
-        maxOf { (x, y, h) -> linesOfSight(x, y).map { it.countVisible(h) }.reduce(Int::times) }.also(::println)
+        println(count { (x, y, h) -> linesOfSight(x, y).any { it.isVisible(h) } })
+        println(maxOf { (x, y, h) -> linesOfSight(x, y).map { it.countVisible(h) }.reduce(Int::times) })
     }
 }
 
