@@ -1,8 +1,8 @@
 package aoc2022
 
-fun main() = day00(System.`in`.reader().readLines()).forEach(::println)
+fun main() = day08(System.`in`.reader().readLines()).forEach(::println)
 
-private fun day00(input: List<String>): List<Any?> {
+private fun day08(input: List<String>): List<Any?> {
     val heights = input.map { it.map(Char::digitToInt) }
 
     fun linesOfSight(x: Int, y: Int) = sequenceOf(
