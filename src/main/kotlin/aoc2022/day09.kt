@@ -21,10 +21,8 @@ fun main() {
         for ((dir, n) in this) repeat(n) {
             with(rope.first()) {
                 rope[0] = when (dir) {
-                    "R" -> copy(x = x + 1)
-                    "L" -> copy(x = x - 1)
-                    "U" -> copy(y = y - 1)
-                    else -> copy(y = y + 1)
+                    "R", "L" -> copy(x = x + if (dir == "R") 1 else -1)
+                    else -> copy(y = y + if (dir == "U") 1 else -1)
                 }
             }
 
