@@ -19,11 +19,11 @@ private fun day09(input: String): List<Any?> {
 
     fun List<Pair<String, Int>>.move(knots: Int): Int {
         val rope = MutableList(knots) { Pos(0, 0) }
-        val tailHistory = mutableSetOf(rope.first())
+        val tailHistory = mutableSetOf(rope.last())
 
         for ((dir, n) in this) repeat(n) {
-            with(rope.last()) {
-                rope[rope.lastIndex] = when (dir) {
+            with(rope.first()) {
+                rope[0] = when (dir) {
                     "R" -> copy(x = x + 1)
                     "L" -> copy(x = x - 1)
                     "U" -> copy(y = y - 1)
@@ -31,9 +31,9 @@ private fun day09(input: String): List<Any?> {
                 }
             }
 
-            for (i in rope.lastIndex - 1 downTo 0) rope[i] = rope[i].follow(rope[i + 1])
+            for (i in rope.indices.drop(1)) rope[i] = rope[i].follow(rope[i - 1])
 
-            tailHistory += rope.first()
+            tailHistory += rope.last()
         }
         return tailHistory.size
     }
