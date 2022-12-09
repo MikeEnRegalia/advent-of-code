@@ -2,10 +2,7 @@ package aoc2022
 
 import kotlin.math.abs
 
-fun main() = day09(String(System.`in`.readAllBytes())).forEach(::println)
-
-private fun day09(input: String): List<Any?> {
-
+fun main() {
     data class Pos(val x: Int, val y: Int) {
         fun diagonals() = sequenceOf(Pos(x - 1, y - 1), Pos(x + 1, y + 1), Pos(x - 1, y + 1), Pos(x + 1, y - 1))
         fun straights() = sequenceOf(Pos(x - 1, y), Pos(x + 1, y), Pos(x, y + 1), Pos(x, y - 1))
@@ -38,7 +35,7 @@ private fun day09(input: String): List<Any?> {
         return tailHistory.size
     }
 
-    with(input.lines().map { it.split(" ").let { (a, b) -> a to b.toInt() } }) {
-        return listOf(move(2), move(10))
+    with(generateSequence { readlnOrNull() }.toList().map { it.split(" ").let { (a, b) -> a to b.toInt() } }) {
+        listOf(2, 10).forEach { println(move(it)) }
     }
 }
