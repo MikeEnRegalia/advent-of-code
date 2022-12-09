@@ -2,6 +2,7 @@ package aoc2022
 
 import kotlin.math.abs
 
+// DISCLAIMER: Got the idea of refactoring to do both parts in one run from other solutions.
 fun main() {
     data class Pos(val x: Int, val y: Int) {
         fun diagonals() = sequenceOf(Pos(x - 1, y - 1), Pos(x + 1, y + 1), Pos(x - 1, y + 1), Pos(x + 1, y - 1))
@@ -19,19 +20,19 @@ fun main() {
         }
     }
 
-    fun List<Pair<String, Int>>.walk(knots: Int): Int {
-        val rope = MutableList(knots) { Pos(0, 0) }
-        val tailHistory = mutableSetOf(rope.last())
+    val rope = MutableList(10) { Pos(0, 0) }
+    val H = List(2) { mutableSetOf<Pos>() }
 
-        for ((dir, n) in this) repeat(n) {
-            rope[0] = rope.first().move(dir)
-            for (i in rope.indices.drop(1)) rope[i] = rope[i].follow(rope[i - 1])
-            tailHistory += rope.last()
+    val commands = generateSequence(::readlnOrNull).map { it.split(" ") }
+    for ((dir, n) in commands) repeat(n.toInt()) {
+        for (i in rope.indices) rope[i] = when (i) {
+            0 -> rope.first().move(dir)
+            else -> rope[i].follow(rope[i - 1])
         }
-        return tailHistory.size
+
+        H[0] += rope[1]
+        H[1] += rope.last()
     }
 
-    with(generateSequence { readlnOrNull() }.toList().map { it.split(" ").let { (a, b) -> a to b.toInt() } }) {
-        listOf(2, 10).forEach { println(walk(it)) }
-    }
+    H.map { it.size }.forEach(::println)
 }
