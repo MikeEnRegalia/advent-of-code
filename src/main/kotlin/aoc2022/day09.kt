@@ -12,28 +12,26 @@ fun main() {
             dist(head) == 2 && head !in diagonals() -> straights().minBy { it.dist(head) }
             else -> this
         }
+
+        fun move(dir: String) = when (dir) {
+            "R", "L" -> copy(x = x + if (dir == "R") 1 else -1)
+            else -> copy(y = y + if (dir == "U") 1 else -1)
+        }
     }
 
-    fun List<Pair<String, Int>>.move(knots: Int): Int {
+    fun List<Pair<String, Int>>.walk(knots: Int): Int {
         val rope = MutableList(knots) { Pos(0, 0) }
         val tailHistory = mutableSetOf(rope.last())
 
         for ((dir, n) in this) repeat(n) {
-            with(rope.first()) {
-                rope[0] = when (dir) {
-                    "R", "L" -> copy(x = x + if (dir == "R") 1 else -1)
-                    else -> copy(y = y + if (dir == "U") 1 else -1)
-                }
-            }
-
+            rope[0] = rope.first().move(dir)
             for (i in rope.indices.drop(1)) rope[i] = rope[i].follow(rope[i - 1])
-
             tailHistory += rope.last()
         }
         return tailHistory.size
     }
 
     with(generateSequence { readlnOrNull() }.toList().map { it.split(" ").let { (a, b) -> a to b.toInt() } }) {
-        listOf(2, 10).forEach { println(move(it)) }
+        listOf(2, 10).forEach { println(walk(it)) }
     }
 }
