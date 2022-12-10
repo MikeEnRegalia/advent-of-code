@@ -9,8 +9,7 @@ fun main() {
         if (cycle in listOf(20, 60, 100, 140, 180, 220)) part1 += cycle * x
         val row = (cycle - 1) / 40
         val col = (cycle - 1) % 40
-        val sprite = x - 1..x + 1
-        if (col in sprite) screen[row][col] = true
+        if (col - x in -1..1) screen[row][col] = true
         cycle++
     }
     for (cmd in generateSequence(::readlnOrNull).map { it.split(" ") }) when {
@@ -22,6 +21,6 @@ fun main() {
         }
     }
     println(part1)
-    println(screen.joinToString("\n") { it.joinToString("") { if (it) "O" else " " } })
+    println(screen.joinToString("\n") { it.joinToString("") { c -> if (c) "O" else " " } })
 }
 
