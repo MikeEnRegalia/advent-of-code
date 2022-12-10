@@ -1,34 +1,27 @@
 package aoc2022
 
-fun main() = day10(String(System.`in`.readAllBytes())).forEach(::println)
-
-private fun day10(input: String): List<Any?> {
+fun main() {
     var x = 1
     var cycle = 1
-    val agg = mutableListOf<Int>()
-    val commands = input.lines().map { it.split(" ") }
-    val screen = List(6) { MutableList(40) { "." } }
-    fun count() {
-        if (cycle in listOf(20, 60, 100, 140, 180, 220)) {
-            agg += cycle * x
-        }
-        val sprite = x
-        val row = (cycle-1) /40
-        val col = (cycle-1) % 40
-        if (col in (x-1..x+1)) screen[row][col] = "#"
+    var part1 = 0
+    val screen = Array(6) { BooleanArray(40) }
+    fun tick() {
+        if (cycle in listOf(20, 60, 100, 140, 180, 220)) part1 += cycle * x
+        val row = (cycle - 1) / 40
+        val col = (cycle - 1) % 40
+        val sprite = x - 1..x + 1
+        if (col in sprite) screen[row][col] = true
         cycle++
     }
-
-    for (cmd in commands) {
-        if (cmd[0] == "noop") {
-            count()
-            continue
+    for (cmd in generateSequence(::readlnOrNull).map { it.split(" ") }) when {
+        cmd[0] == "noop" -> tick()
+        else -> {
+            tick()
+            tick()
+            x += cmd[1].toInt()
         }
-        count()
-        count()
-        val toAdd = cmd[1].toInt()
-        x += toAdd
     }
-    return listOf(agg.sum(), screen.joinToString("\n") { it.joinToString("") })
+    println(part1)
+    println(screen.joinToString("\n") { it.joinToString("") { if (it) "O" else " " } })
 }
 
