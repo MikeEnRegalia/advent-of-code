@@ -23,7 +23,7 @@ private fun day12(input: String): List<Any?> {
     grid[startPart1] = 'a'
     grid[target] = 'z'
 
-    val foo = mutableMapOf<State, Int>()
+    val shortestPaths = mutableMapOf<State, Int>()
     grid.filter { it.value == 'a' }.keys.forEach { start ->
         var s = start
         val v = mutableSetOf<State>()
@@ -36,17 +36,14 @@ private fun day12(input: String): List<Any?> {
                 val distance = d.getValue(s) + 1
                 d.compute(n) { _, old -> min(distance, old ?: MAX_VALUE) }
             }
-            if (s == target) break
+            if (s == target) {
+                shortestPaths[start] = d.getValue(s)
+                break
+            }
             v += s
             u -= s
             s = u.minByOrNull { d.getValue(it) } ?: break
         }
-        val res = d[target]
-        if (res != null) {
-            foo[start] = res
-        }
     }
-
-    return listOf(foo[startPart1], foo.values.min())
+    return listOf(shortestPaths[startPart1], shortestPaths.values.min())
 }
-
