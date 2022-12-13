@@ -7,17 +7,15 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.int
 
 fun main() {
-    val data = System.`in`.reader().readText().split("\n\n").map { packets ->
-        packets.split("\n").map { packet -> Json.decodeFromString<JsonArray>(packet) }
-    }
+    val data = System.`in`.reader().readText().split("\n\n")
+        .map { packets -> packets.split("\n").map { packet -> Json.decodeFromString<JsonArray>(packet) } }
 
     fun compare(a: JsonArray, b: JsonArray, pos: Int = 0): Boolean? {
         val l = a.elementAtOrNull(pos)
         val r = b.elementAtOrNull(pos)
         return when {
             l == null && r == null -> null
-            l == null -> true
-            r == null -> false
+            l == null || r == null -> l == null
             l is JsonPrimitive && r is JsonPrimitive -> if (l == r) compare(a, b, pos + 1) else l.int < r.int
             l is JsonArray && r is JsonArray -> compare(l, r) ?: compare(a, b, pos + 1)
             l is JsonPrimitive && r is JsonArray -> compare(JsonArray(listOf(l)), r) ?: compare(a, b, pos + 1)
