@@ -28,8 +28,7 @@ fun main() {
 
     val divs = listOf(2, 6).map { JsonArray(listOf(JsonPrimitive(it))) }
 
-    data.asSequence().flatten().plus(divs)
-        .sortedWith { a, b -> compare(a, b).let { if (it == null) 0 else if (it) -1 else 1 } }
+    data.asSequence().flatten().plus(divs).sortedWith { a, b -> if (compare(a, b) == true) -1 else 1 }
         .mapIndexedNotNull { i, p -> if (p in divs) i + 1 else null }.reduce(Int::times).also(::println)
 }
 
