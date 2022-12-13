@@ -5,13 +5,12 @@ fun main() = day11(String(System.`in`.readAllBytes())).forEach(::println)
 private fun day11(input: String): List<Any?> {
 
     data class Item(private val initial: Int, private val remainders: Map<Int, Int>) {
-        fun isDivisibleByPart1(d: Int) = initial % d == 0
-        fun isDivisibleByPart2(d: Int) = remainders.getValue(d) == 0
-        operator fun plus(x: Int) = r { it + x }
-        operator fun times(x: Int) = r { it * x }
-        operator fun div(x: Int) = r { it / x }
-        fun squared() = r { it * it }
-        private fun r(op: (Int) -> Int) = Item(op(initial), remainders.toMutableMap().apply {
+        fun rem(d: Int, useInitial: Boolean) = (if (useInitial) (initial % d) else remainders.getValue(d)) == 0
+        operator fun plus(x: Int) = transform { it + x }
+        operator fun times(x: Int) = transform { it * x }
+        operator fun div(x: Int) = transform { it / x }
+        fun squared() = transform { it * it }
+        private fun transform(op: (Int) -> Int) = Item(op(initial), remainders.toMutableMap().apply {
             keys.forEach { prime -> set(prime, op(getValue(prime)) % prime) }
         })
     }
@@ -20,16 +19,8 @@ private fun day11(input: String): List<Any?> {
         for (prime in listOf(2, 3, 5, 7, 9, 11, 13, 17, 19, 23)) set(prime, this@toItem % prime)
     })
 
-    data class Monkey(
-        val items: MutableList<Item>,
-        val op: (Item) -> Item,
-        val div: Int,
-        val ifTrue: Int,
-        val ifFalse: Int
-    ) {
-        fun test1(item: Item) = if (item.isDivisibleByPart1(div)) ifTrue else ifFalse
-        fun test2(item: Item) = if (item.isDivisibleByPart2(div)) ifTrue else ifFalse
-        override fun toString() = "$items"
+    data class Monkey(val items: MutableList<Item>, val worry: (Item) -> Item, val test: Triple<Int, Int, Int>) {
+        fun test(item: Item, useInitial: Boolean) = if (item.rem(test.first, useInitial)) test.second else test.third
     }
 
     fun loadMonkeys() = input.split("\n\n").map { it.split("\n") }.map { lines ->
@@ -38,28 +29,28 @@ private fun day11(input: String): List<Any?> {
         val operand = lines[2].substringAfterLast(" ").toIntOrNull()
         val operation: (Item) -> Item = when (opChar) {
             '+' -> { old -> old + operand!! }
-            '*' -> { old -> if (operand == null) old.squared() else old * operand }
-            else -> throw IllegalArgumentException()
+            else -> { old -> if (operand == null) old.squared() else old * operand }
         }
 
         val divBy = lines[3].split(" ").mapNotNull(String::toIntOrNull).single()
         val monkeyIfTrue = lines[4].split(" ").mapNotNull(String::toIntOrNull).single()
         val monkeyIfFalse = lines[5].split(" ").mapNotNull(String::toIntOrNull).single()
-        Monkey(items.map { it.toItem() }.toMutableList(), operation, divBy, monkeyIfTrue, monkeyIfFalse)
+        Monkey(items.map { it.toItem() }.toMutableList(), operation, Triple(divBy, monkeyIfTrue, monkeyIfFalse))
     }
 
     fun doMonkeyBusiness(rounds: Int, div: Boolean): Long {
         val monkeys = loadMonkeys()
-        val inspections = mutableMapOf<Int, Long>()
-        repeat(rounds) { round ->
+        val inspections = LongArray(monkeys.size) { 0 }
+        repeat(rounds) {
             for ((i, monkey) in monkeys.withIndex()) with(monkey) {
-                inspections[i] = inspections.getOrDefault(i, 0) + items.size
-                items.map { op(it).let { if (div) it / 3 else it } }
-                    .forEach { monkeys[if (div) test1(it) else test2(it)].items += it }
+                inspections[i] = inspections[i] + items.size
+                for (item in items) worry(item)
+                    .let { if (div) it / 3 else it }
+                    .also { monkeys[test(it, div)].items += it }
                 items.clear()
             }
         }
-        return inspections.values.sortedDescending().take(2).reduce(Long::times)
+        return inspections.sortedDescending().take(2).reduce(Long::times)
     }
 
     return listOf(doMonkeyBusiness(20, true), doMonkeyBusiness(10_000, false))
