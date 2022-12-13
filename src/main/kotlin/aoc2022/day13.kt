@@ -1,47 +1,36 @@
 package aoc2022
 
-import util.toJsonList
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.*
 
-fun main() = day13(String(System.`in`.readAllBytes())).forEach(::println)
-
-private fun day13(input: String): List<Any?> {
-    fun Any?.clean(): Any = when (this) {
-        is Double -> toInt()
-        is List<*> -> map { it?.clean() }
-        else -> throw IllegalStateException()
+fun main() {
+    val data = System.`in`.reader().readText().split("\n\n").map { packets ->
+        packets.split("\n").map<String, JsonArray> { packet -> Json.decodeFromString(packet) }.let { it[0] to it[1] }
     }
 
-    val data = input.split("\n\n").map {
-        it.split("\n").map { packet ->
-            packet.toJsonList().clean()
-        }.let { it[0] to it[1] }
-    } as List<Pair<List<*>, List<*>>>
-
-    fun compare(a: List<*>, b: List<*>, pos: Int = 0): Boolean? {
-        val left = a.elementAtOrNull(pos)
-        val right = b.elementAtOrNull(pos)
+    fun compare(a: JsonArray, b: JsonArray, pos: Int = 0): Boolean? {
+        val l = a.elementAtOrNull(pos)
+        val r = b.elementAtOrNull(pos)
         return when {
-            left == null && right == null -> null
-            left == null -> true
-            right == null -> false
-            left is Int && right is Int -> if (left == right) compare(a, b, pos + 1) else left < right
-            left is List<*> && right is List<*> -> compare(left, right) ?: compare(a, b, pos+1)
-            left is Int && right is List<*> -> compare(listOf(left), right) ?: compare(a, b, pos+1)
-            left is List<*> && right is Int -> compare(left, listOf(right)) ?: compare(a, b, pos+1)
-            else -> throw IllegalStateException("$left $right")
+            l == null && r == null -> null
+            l == null -> true
+            r == null -> false
+            l is JsonPrimitive && r is JsonPrimitive -> if (l == r) compare(a, b, pos + 1) else l.int < r.int
+            l is JsonArray && r is JsonArray -> compare(l, r) ?: compare(a, b, pos + 1)
+            l is JsonPrimitive && r is JsonArray -> compare(JsonArray(listOf(l)), r) ?: compare(a, b, pos + 1)
+            l is JsonArray && r is JsonPrimitive -> compare(l, JsonArray(listOf(r))) ?: compare(a, b, pos + 1)
+            else -> throw IllegalStateException("$l $r")
         }
     }
 
     val part1 = data.mapIndexedNotNull { i, it -> if (compare(it.first, it.second)!!) i + 1 else null }.sum()
 
-    val divider1 = listOf(listOf(2))
-    val divider2 = listOf(listOf(6))
+    val dividers = listOf(2, 6).map { JsonArray(listOf(JsonPrimitive(it))) }
 
-    val dataPart2 = data.flatMap { it.toList() }.plus(listOf(divider1, divider2))
+    val part2 = data.flatMap { it.toList() }.plus(dividers)
         .sortedWith { a, b -> compare(a, b).let { if (it == null) 0 else if (it) -1 else 1 } }
+        .mapIndexedNotNull { i, packet -> if (packet in dividers) i + 1 else null}.reduce(Int::times)
 
-    val i1 = dataPart2.indexOf(divider1) + 1
-    val i2 = dataPart2.indexOf(divider2) + 1
-    return listOf(part1, i1 * i2)
+    listOf(part1, part2).forEach(::println)
 }
 

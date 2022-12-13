@@ -17,9 +17,10 @@ repositories {
 dependencies {
     implementation("commons-io:commons-io:2.11.0")
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
-    implementation("com.google.code.gson:gson:2.9.0")
-    testImplementation("io.kotest:kotest-assertions-core:5.3.1")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
+    implementation("com.google.code.gson:gson:2.10")
+    testImplementation("io.kotest:kotest-assertions-core:5.5.4")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.9.0")
     implementation("org.jetbrains.kotlin:kotlin-script-runtime")
     // https://mvnrepository.com/artifact/io.strikt/strikt-jvm
     testImplementation("io.strikt:strikt-jvm:0.34.1")
