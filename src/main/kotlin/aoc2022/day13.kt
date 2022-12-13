@@ -26,10 +26,10 @@ fun main() {
 
     data.mapIndexedNotNull { i, it -> if (compare(it[0], it[1])!!) i + 1 else null }.sum().also(::println)
 
-    val dividers = listOf(2, 6).map { JsonArray(listOf(JsonPrimitive(it))) }
+    val divs = listOf(2, 6).map { JsonArray(listOf(JsonPrimitive(it))) }
 
-    data.asSequence().flatten().plus(dividers)
+    data.asSequence().flatten().plus(divs)
         .sortedWith { a, b -> compare(a, b).let { if (it == null) 0 else if (it) -1 else 1 } }
-        .mapIndexedNotNull { i, packet -> if (packet in dividers) i + 1 else null }.reduce(Int::times).also(::println)
+        .mapIndexedNotNull { i, p -> if (p in divs) i + 1 else null }.reduce(Int::times).also(::println)
 }
 
