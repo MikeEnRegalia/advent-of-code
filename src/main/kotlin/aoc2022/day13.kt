@@ -1,11 +1,14 @@
 package aoc2022
 
 import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.int
 
 fun main() {
     val data = System.`in`.reader().readText().split("\n\n").map { packets ->
-        packets.split("\n").map<String, JsonArray> { packet -> Json.decodeFromString(packet) }.let { it[0] to it[1] }
+        packets.split("\n").map { packet -> Json.decodeFromString<JsonArray>(packet) }
     }
 
     fun compare(a: JsonArray, b: JsonArray, pos: Int = 0): Boolean? {
@@ -23,13 +26,13 @@ fun main() {
         }
     }
 
-    val part1 = data.mapIndexedNotNull { i, it -> if (compare(it.first, it.second)!!) i + 1 else null }.sum()
+    val part1 = data.mapIndexedNotNull { i, it -> if (compare(it[0], it[1])!!) i + 1 else null }.sum()
 
     val dividers = listOf(2, 6).map { JsonArray(listOf(JsonPrimitive(it))) }
 
-    val part2 = data.flatMap { it.toList() }.plus(dividers)
+    val part2 = data.asSequence().flatten().plus(dividers)
         .sortedWith { a, b -> compare(a, b).let { if (it == null) 0 else if (it) -1 else 1 } }
-        .mapIndexedNotNull { i, packet -> if (packet in dividers) i + 1 else null}.reduce(Int::times)
+        .mapIndexedNotNull { i, packet -> if (packet in dividers) i + 1 else null }.reduce(Int::times)
 
     listOf(part1, part2).forEach(::println)
 }
