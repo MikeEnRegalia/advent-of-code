@@ -1,29 +1,34 @@
 package aoc2022
 
-import java.math.BigInteger
-import java.math.BigInteger.ZERO
-
 fun main() = day11(String(System.`in`.readAllBytes())).forEach(::println)
 
 private fun day11(input: String): List<Any?> {
-    data class Item(val level: BigInteger, val divisibilities: MutableMap<Int, Boolean> = mutableMapOf()) {
-        operator fun plus(x: Int) = Item(level + x.toBigInteger())
-        operator fun div(x: Int) = Item(level / x.toBigInteger())
-        operator fun times(x: Int) =
-            Item(level * x.toBigInteger(), divisibilities.toMutableMap().apply { set(x, true) })
 
-        fun squared() = Item(level * level, divisibilities.toMutableMap())
-        fun isDivisibleBy(x: Int) = divisibilities[x] ?: (level.remainder(x.toBigInteger()) == ZERO).also { divisibilities[x] = it }
+    data class Item(private val initial: Int, private val remainders: Map<Int, Int>) {
+        fun isDivisibleByPart1(d: Int) = initial % d == 0
+        fun isDivisibleByPart2(d: Int) = remainders.getValue(d) == 0
+        operator fun plus(x: Int) = r { it + x }
+        operator fun times(x: Int) = r { it * x }
+        operator fun div(x: Int) = r { it / x }
+        fun squared() = r { it * it }
+        private fun r(op: (Int) -> Int) = Item(op(initial), remainders.toMutableMap().apply {
+            keys.forEach { prime -> set(prime, op(getValue(prime)) % prime) }
+        })
     }
 
+    fun Int.toItem() = Item(this, mutableMapOf<Int, Int>().apply {
+        for (prime in listOf(2, 3, 5, 7, 9, 11, 13, 17, 19, 23)) set(prime, this@toItem % prime)
+    })
+
     data class Monkey(
-        var items: MutableList<Item>,
-        val operation: (Item) -> Item,
-        val divBy: Int,
+        val items: MutableList<Item>,
+        val op: (Item) -> Item,
+        val div: Int,
         val ifTrue: Int,
         val ifFalse: Int
     ) {
-        fun test(item: Item) = if (item.isDivisibleBy(divBy)) ifTrue else ifFalse
+        fun test1(item: Item) = if (item.isDivisibleByPart1(div)) ifTrue else ifFalse
+        fun test2(item: Item) = if (item.isDivisibleByPart2(div)) ifTrue else ifFalse
         override fun toString() = "$items"
     }
 
@@ -33,30 +38,29 @@ private fun day11(input: String): List<Any?> {
         val operand = lines[2].substringAfterLast(" ").toIntOrNull()
         val operation: (Item) -> Item = when (opChar) {
             '+' -> { old -> old + operand!! }
-            '*' -> { old -> operand?.let { old * it } ?: old.squared() }
+            '*' -> { old -> if (operand == null) old.squared() else old * operand }
             else -> throw IllegalArgumentException()
         }
 
         val divBy = lines[3].split(" ").mapNotNull(String::toIntOrNull).single()
         val monkeyIfTrue = lines[4].split(" ").mapNotNull(String::toIntOrNull).single()
         val monkeyIfFalse = lines[5].split(" ").mapNotNull(String::toIntOrNull).single()
-        Monkey(items.map { Item(it.toBigInteger()) }.toMutableList(), operation, divBy, monkeyIfTrue, monkeyIfFalse)
+        Monkey(items.map { it.toItem() }.toMutableList(), operation, divBy, monkeyIfTrue, monkeyIfFalse)
     }
 
     fun doMonkeyBusiness(rounds: Int, div: Boolean): Long {
         val monkeys = loadMonkeys()
         val inspections = mutableMapOf<Int, Long>()
         repeat(rounds) { round ->
-            println("$round")
             for ((i, monkey) in monkeys.withIndex()) with(monkey) {
                 inspections[i] = inspections.getOrDefault(i, 0) + items.size
-                items.map { operation(it)  }.forEach { monkeys[test(it)].items += it }
+                items.map { op(it).let { if (div) it / 3 else it } }
+                    .forEach { monkeys[if (div) test1(it) else test2(it)].items += it }
                 items.clear()
             }
-            if (!div && round in listOf(0, 19, 999)) println(inspections)
         }
         return inspections.values.sortedDescending().take(2).reduce(Long::times)
     }
 
-    return listOf(doMonkeyBusiness(10_000, false))
+    return listOf(doMonkeyBusiness(20, true), doMonkeyBusiness(10_000, false))
 }
