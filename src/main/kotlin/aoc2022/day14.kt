@@ -19,21 +19,20 @@ fun main() {
     }
 
     val maxY = rock.maxOf { it.y }
-    val floor = maxY + 2
     val source = Pos(500, 0)
 
-    fun part1() = mutableSetOf<Pos>().also { stableSand ->
-        var s: Pos = source
-        while (s.y < maxY)
-            s = s.flowTo { it !in rock && it !in stableSand } ?: source.also { stableSand += s }
+    val stableSand = mutableSetOf<Pos>()
+
+    var hitFloor = false
+    var s: Pos = source
+    while (source !in stableSand) {
+        s = s.flowTo { it.y < maxY + 2 && it !in rock && it !in stableSand } ?: source.also { stableSand += s }
+        if (!hitFloor && s.y == maxY + 1) {
+            hitFloor = true
+            println(stableSand.size)
+        }
     }
 
-    fun part2() = mutableSetOf<Pos>().also { stableSand ->
-        var s: Pos = source
-        while (source !in stableSand)
-            s = s.flowTo { it.y < floor && it !in rock && it !in stableSand } ?: source.also { stableSand += s }
-    }
-
-    listOf(part1().size, part2().size).forEach(::println)
+    println(stableSand.size)
 }
 
