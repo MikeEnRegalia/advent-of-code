@@ -5,9 +5,9 @@ import kotlin.math.min
 
 fun main() {
     val rock = generateSequence(::readlnOrNull).flatMap { row ->
-        row.split(" -> ").map { it.split(",").map(String::toInt) }.windowed(2).flatMap { (from, to) ->
-            (min(from[0], to[0])..max(from[0], to[0])).flatMap { x ->
-                (min(from[1], to[1])..max(from[1], to[1])).map { y -> Pair(x, y) }
+        row.split(" -> ").map { it.split(",").map(String::toInt) }.windowed(2).flatMap { (f, t) ->
+            (min(f[0], t[0])..max(f[0], t[0])).flatMap { x ->
+                (min(f[1], t[1])..max(f[1], t[1])).map { y -> Pair(x, y) }
             }
         }
     }.toSet()
@@ -23,10 +23,7 @@ fun main() {
     var s: Pair<Int, Int> = source
     while (source !in stableSand) {
         s = s.flowTo().firstOrNull { it !in stableSand } ?: source.also { stableSand += s }
-        if (s.second == maxY + 1 && !reachedFloor) {
-            reachedFloor = true
-            println(stableSand.size)
-        }
+        if (s.second == maxY + 1 && !reachedFloor) println(stableSand.size).also { reachedFloor = true }
     }
 
     println(stableSand.size)
