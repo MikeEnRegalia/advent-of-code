@@ -4,11 +4,10 @@ import kotlin.math.max
 import kotlin.math.min
 
 fun main() {
+    infix fun Int.range(i: Int) = min(this, i)..max(this, i)
     val rock = generateSequence(::readlnOrNull).flatMap { row ->
-        row.split(" -> ").map { it.split(",").map(String::toInt) }.windowed(2).flatMap { (f, t) ->
-            (min(f[0], t[0])..max(f[0], t[0])).flatMap { x ->
-                (min(f[1], t[1])..max(f[1], t[1])).map { y -> Pair(x, y) }
-            }
+        row.split(" -> ", ",").map(String::toInt).windowed(4, 2).flatMap { (x1, y1, x2, y2) ->
+            if (x1 == x2) (y1 range y2).map { Pair(x1, it) } else (x1 range x2).map { Pair(it, y1) }
         }
     }.toSet()
 
