@@ -11,23 +11,29 @@ fun main() {
         fun isValid() = x in 0..MAX && y in 0..MAX
     }
 
-    val data = generateSequence(::readlnOrNull).map { l ->
-        l.split("""[=,:\s]""".toRegex()).mapNotNull(String::toIntOrNull).let { Pos(it[0], it[1]) to Pos(it[2], it[3]) }
+    data class Sensor(val pos: Pos, val detectedBeacon: Pos) {
+        val beaconDistance = pos dist detectedBeacon
+    }
+
+    val sensors = generateSequence(::readlnOrNull).map { l ->
+        l.split("""[=,:\s]""".toRegex()).mapNotNull(String::toIntOrNull)
+            .let { Sensor(Pos(it[0], it[1]), Pos(it[2], it[3])) }
     }.toList()
 
-    val knownBeacons = data.map { it.second }.toSet()
-    data.filter { (s, b) -> s dist Pos(s.x, PART1_Y) <= s dist b }.fold(mutableSetOf<Int>()) { acc, (s, b) ->
+    val knownBeacons = buildSet { sensors.forEach { add(it.detectedBeacon) } }
+
+    sensors.filter { (s, b) -> s dist Pos(s.x, PART1_Y) <= s dist b }.fold(mutableSetOf<Int>()) { acc, (s, b) ->
         val d = s.dist(b) - s.dist(Pos(s.x, PART1_Y))
         (-d..d).asSequence().map { s.x + it }.filter { Pos(it, PART1_Y) !in knownBeacons }.forEach(acc::add)
         acc
     }.size.also(::println)
 
-    fun Pos.isOutOfRange() = data.none { (sensor, beacon) -> dist(sensor) <= sensor.dist(beacon) }
+    fun Pos.isOutOfRange() = sensors.none { (sensor, beacon) -> dist(sensor) <= sensor.dist(beacon) }
 
-    for ((s, b) in data) {
+    for ((s, b) in sensors.sortedBy { it.beaconDistance }) {
         val dist = s.dist(b) + 1
-        for (x in 1..dist) {
-            val (dx, dy) = (dist - x).let { y -> listOf(x to y, x to -y, -x to y, -x to -y) }
+        for (x in dist downTo 1) {
+            val (dx, dy) = (dist - x).let { y -> sequenceOf(x to y, x to -y, -x to y, -x to -y) }
                 .map { (x, y) -> Pos(s.x + x, s.y + y) }
                 .singleOrNull { it.isValid() && it.isOutOfRange() } ?: continue
             println(dx.toLong() * MAX + dy)
