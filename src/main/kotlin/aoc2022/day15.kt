@@ -2,55 +2,43 @@ package aoc2022
 
 import kotlin.math.abs
 
-fun main() = day15(String(System.`in`.readAllBytes())).forEach(::println)
+fun main() {
+    val data = generateSequence(::readlnOrNull).map { l ->
+        l.split("""[=,:\s]""".toRegex()).mapNotNull(String::toIntOrNull).let { listOf(it[0] to it[1], it[2] to it[3]) }
+    }.toList()
 
-private fun day15(input: String): List<Any?> {
     fun dist(a: Pair<Int, Int>, b: Pair<Int, Int>) = abs(a.first - b.first) + abs(a.second - b.second)
-    val data = input.lines().map {
-        it.map { if (it == '-' || it.isDigit()) it else ' ' }.joinToString("").split(" ")
-            .mapNotNull(String::toIntOrNull)
-    }
-    val noBeacons = data.fold(mutableSetOf<Pair<Int, Int>>()) { acc, (sx, sy, bx, by) ->
-        val sensor = sx to sy
-        val beacon = bx to by
-        val safe = dist(sensor, beacon)
-        val start = sx to 2000000
-        var s = start
-        while (dist(sensor, s) < safe) {
-            acc += s
-            s = s.first + 1 to s.second
+
+    data.fold(mutableSetOf<Pair<Int, Int>>()) { acc, (s, b) ->
+        val d = dist(s, b)
+        val start = s.first to 2000000
+        var p = start
+
+        while (dist(s, p) < d) {
+            acc += p
+            p = p.first + 1 to p.second
         }
-        s = start
-        while (dist(sensor, s) <= safe) {
-            acc += s
-            s = s.first - 1 to s.second
+        p = start
+        while (dist(s, p) <= d) {
+            acc += p
+            p = p.first - 1 to p.second
         }
         acc
-    }.size
+    }.size.also(::println)
 
     fun Pair<Int, Int>.pIsValid() = first in 0..4000000 && second in 0..4000000
-    fun Pair<Int, Int>.undetected() = data.none { (sx, sy, bx, by) -> dist(sx to sy, this) <= dist(sx to sy, bx to by)}
+    fun Pair<Int, Int>.beyondAllSensors() = data.none { (sensor, beacon) -> dist(sensor, this) <= dist(sensor, beacon) }
 
-    val beacon = data.fold(mutableSetOf<Pair<Int, Int>>()) { acc, (sx, sy, bx, by) ->
-        val sensor = sx to sy
-        val dist = dist(sensor, bx to by) + 1
-        val sensorPoints = buildSet {
-            for (x in 1..dist) {
-                val y = dist - x
-                listOf(x to y, x to -y, -x to y, -x to -y)
-                    .map { (x, y) -> sx + x to sy + y }
-                    .onEach { assert(dist(sensor, it) == dist) }
-                    .filter { it.pIsValid() }
-                    .forEach {
-                        if (it.undetected()) add(it)
-                    }
-            }
+    for ((s, b) in data) {
+        val dist = dist(s, b) + 1
+        for (x in 1..dist) {
+            val y = dist - x
+            val (dx, dy) = listOf(x to y, x to -y, -x to y, -x to -y)
+                .map { (x, y) -> s.first + x to s.second + y }
+                .singleOrNull { it.pIsValid() && it.beyondAllSensors() } ?: continue
+            println(dx.toLong() * 4000000 + dy)
+            return
         }
-        acc += sensorPoints
-        acc
-    }.single()
-
-
-    return listOf(noBeacons, beacon.first.toBigInteger() * 4000000.toBigInteger() + beacon.second.toBigInteger())
+    }
 }
 
