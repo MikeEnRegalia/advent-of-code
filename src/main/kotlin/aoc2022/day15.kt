@@ -7,37 +7,38 @@ private const val PART1_Y = 2000000
 
 fun main() {
     data class Pos(val x: Int, val y: Int) {
-        infix fun dist(p: Pos) = abs(x - p.x) + abs(y - p.y)
+        fun dist(p: Pos) = abs(x - p.x) + abs(y - p.y)
         fun isValid() = x in 0..MAX && y in 0..MAX
+        operator fun plus(pos: Pos) = Pos(x + pos.x, y + pos.y)
+        fun all(x: Int, y: Int) = sequenceOf(Pos(x, y), Pos(x, -y), Pos(-x, y), Pos(-x, -y)).map { this + it }
     }
 
-    data class Sensor(val pos: Pos, val detectedBeacon: Pos) {
-        val beaconDistance = pos dist detectedBeacon
+    data class Sensor(val pos: Pos, val beacon: Pos) {
+        val beaconDistance = pos.dist(beacon)
     }
 
-    val sensors = generateSequence(::readlnOrNull).map { l ->
-        l.split("""[=,:\s]""".toRegex()).mapNotNull(String::toIntOrNull)
+    val sensors = generateSequence(::readlnOrNull).mapTo(mutableListOf()) { l ->
+        l.split(Regex("""[=,:\s]""")).mapNotNull(String::toIntOrNull)
             .let { Sensor(Pos(it[0], it[1]), Pos(it[2], it[3])) }
-    }.toList()
+    } as List<Sensor>
 
-    val knownBeacons = buildSet { sensors.forEach { add(it.detectedBeacon) } }
+    val knownBeacons = buildSet { sensors.forEach { add(it.beacon) } }
 
-    sensors.filter { (s, b) -> s dist Pos(s.x, PART1_Y) <= s dist b }.fold(mutableSetOf<Int>()) { acc, (s, b) ->
-        val d = s.dist(b) - s.dist(Pos(s.x, PART1_Y))
-        (-d..d).asSequence().map { s.x + it }.filter { Pos(it, PART1_Y) !in knownBeacons }.forEach(acc::add)
+    sensors.filter { abs(it.pos.y - PART1_Y) < it.beaconDistance }.fold(mutableSetOf<Int>()) { acc, sensor ->
+        val d = sensor.beaconDistance - sensor.pos.dist(Pos(sensor.pos.x, PART1_Y))
+        (-d..d).asSequence().map { sensor.pos.x + it }.filter { Pos(it, PART1_Y) !in knownBeacons }
+            .forEach(acc::add)
         acc
     }.size.also(::println)
 
     fun Pos.isOutOfRange() = sensors.none { (sensor, beacon) -> dist(sensor) <= sensor.dist(beacon) }
 
-    for ((s, b) in sensors.sortedBy { it.beaconDistance }) {
-        val dist = s.dist(b) + 1
-        for (x in dist downTo 1) {
-            val (dx, dy) = (dist - x).let { y -> sequenceOf(x to y, x to -y, -x to y, -x to -y) }
-                .map { (x, y) -> Pos(s.x + x, s.y + y) }
-                .singleOrNull { it.isValid() && it.isOutOfRange() } ?: continue
-            println(dx.toLong() * MAX + dy)
-            return
+    for (sensor in sensors.sortedBy { it.beaconDistance }) {
+        for (x in sensor.beaconDistance + 1 downTo 1) for (p in sensor.pos.all(x, y = sensor.beaconDistance + 1 - x)) {
+            if (p.isValid() && p.isOutOfRange()) {
+                println(p.x.toLong() * MAX + p.y)
+                return
+            }
         }
     }
 }
