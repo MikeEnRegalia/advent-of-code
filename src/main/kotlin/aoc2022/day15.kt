@@ -8,7 +8,7 @@ private const val PART1_Y = 2000000
 fun main() {
     data class Pos(val x: Int, val y: Int) {
         infix fun dist(p: Pos) = abs(x - p.x) + abs(y - p.y)
-        fun pIsValid() = x in 0..MAX && y in 0..MAX
+        fun isValid() = x in 0..MAX && y in 0..MAX
     }
 
     val data = generateSequence(::readlnOrNull).map { l ->
@@ -22,14 +22,14 @@ fun main() {
         acc
     }.size.also(::println)
 
-    fun Pos.beyondAllSensors() = data.none { (sensor, beacon) -> dist(sensor) <= sensor.dist(beacon) }
+    fun Pos.isOutOfRange() = data.none { (sensor, beacon) -> dist(sensor) <= sensor.dist(beacon) }
 
     for ((s, b) in data) {
         val dist = s.dist(b) + 1
         for (x in 1..dist) {
             val (dx, dy) = (dist - x).let { y -> listOf(x to y, x to -y, -x to y, -x to -y) }
                 .map { (x, y) -> Pos(s.x + x, s.y + y) }
-                .singleOrNull { it.pIsValid() && it.beyondAllSensors() } ?: continue
+                .singleOrNull { it.isValid() && it.isOutOfRange() } ?: continue
             println(dx.toLong() * MAX + dy)
             return
         }
