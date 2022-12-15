@@ -6,23 +6,22 @@ private const val MAX = 4000000
 private const val PART1_Y = 2000000
 
 fun main() {
-    data class Pos(val x: Int, val y: Int)
+    data class Pos(val x: Int, val y: Int) {
+        infix fun dist(p: Pos) = abs(x - p.x) + abs(y - p.y)
+        fun pIsValid() = x in 0..MAX && y in 0..MAX
+    }
 
     val data = generateSequence(::readlnOrNull).map { l ->
         l.split("""[=,:\s]""".toRegex()).mapNotNull(String::toIntOrNull).let { Pos(it[0], it[1]) to Pos(it[2], it[3]) }
     }.toList()
 
-    infix fun Pos.dist(p: Pos) = abs(x - p.x) + abs(y - p.y)
-
     val knownBeacons = data.map { it.second }.toSet()
-
     data.filter { (s, b) -> s dist Pos(s.x, PART1_Y) <= s dist b }.fold(mutableSetOf<Int>()) { acc, (s, b) ->
         val d = s.dist(b) - s.dist(Pos(s.x, PART1_Y))
         (-d..d).asSequence().map { s.x + it }.filter { Pos(it, PART1_Y) !in knownBeacons }.forEach(acc::add)
         acc
     }.size.also(::println)
 
-    fun Pos.pIsValid() = x in 0..MAX && y in 0..MAX
     fun Pos.beyondAllSensors() = data.none { (sensor, beacon) -> dist(sensor) <= sensor.dist(beacon) }
 
     for ((s, b) in data) {
