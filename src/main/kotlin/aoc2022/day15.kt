@@ -24,12 +24,12 @@ fun main() {
 
     val knownBeacons = buildSet { sensors.forEach { add(it.beacon) } }
 
-    sensors.filter { abs(it.pos.y - PART1_Y) < it.beaconDistance }.fold(mutableSetOf<Int>()) { acc, sensor ->
+    println(sensors.filter { abs(it.pos.y - PART1_Y) < it.beaconDistance }.fold(mutableSetOf<Int>()) { acc, sensor ->
         val d = sensor.beaconDistance - sensor.pos.dist(Pos(sensor.pos.x, PART1_Y))
         (-d..d).asSequence().map { sensor.pos.x + it }.filter { Pos(it, PART1_Y) !in knownBeacons }
             .forEach(acc::add)
         acc
-    }.size.also(::println)
+    }.size)
 
     fun Pos.isOutOfRange() = sensors.none { (sensor, beacon) -> dist(sensor) <= sensor.dist(beacon) }
 
