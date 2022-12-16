@@ -19,31 +19,44 @@ private fun day16(input: String): List<Any?> {
 
     val functioningValves = flowRates.filter { it.value > 0 }.keys
 
+    val pathCache = mutableMapOf<Pair<String, String>, Int>()
+
+    fun distanceBetween(valve: String, target: String): Int? {
+        val fromCache = pathCache[valve to target]
+        if (fromCache != null) {
+            return fromCache
+        }
+        data class State(val valve: String, val path: List<String> = listOf())
+
+        var s = State(valve)
+        val v = mutableSetOf<State>()
+        val u = mutableSetOf<State>()
+        val d = mutableMapOf(s to 0)
+
+        while (true) {
+            tunnels.getValue(s.valve)
+                .map { State(it, s.path + it) }
+                .filter { n -> v.none { it.valve == n.valve } }.forEach { n ->
+                    u += n
+                    val distance = d.getValue(s) + 1
+                    d.compute(n) { _, old -> min(distance, old ?: MAX_VALUE) }
+                }
+            if (s.valve == target) {
+                val distance = s.path.size + 1
+                pathCache[valve to target] = distance
+                return distance
+            }
+            v += s
+            u -= s
+            s = u.minByOrNull { d.getValue(it) } ?: break
+        }
+        return null
+    }
+
     fun whereToNext(valve: String, remainingValves: Set<String>) = buildSet {
         for (target in remainingValves.minus(valve)) {
-            data class State(val valve: String, val path: List<String> = listOf())
-
-            var s = State(valve)
-            val v = mutableSetOf<State>()
-            val u = mutableSetOf<State>()
-            val d = mutableMapOf(s to 0)
-
-            while (true) {
-                tunnels.getValue(s.valve)
-                    .map { State(it, s.path + it) }
-                    .filter { n -> v.none { it.valve == n.valve } }.forEach { n ->
-                        u += n
-                        val distance = d.getValue(s) + 1
-                        d.compute(n) { _, old -> min(distance, old ?: MAX_VALUE) }
-                    }
-                if (s.valve == target) {
-                    add(target to s.path.size + 1)
-                    break
-                }
-                v += s
-                u -= s
-                s = u.minByOrNull { d.getValue(it) } ?: break
-            }
+            val distance = distanceBetween(valve, target)
+            if (distance != null) add(target to distance)
         }
     }
 
@@ -60,14 +73,31 @@ private fun day16(input: String): List<Any?> {
         }
 
     var max = 0
-    fun openValves(deadline: Int, helpers: List<Helper>, openedValves: List<OpenedValve> = listOf()): Int {
-        val pressureReleased = openedValves.pressureReleased(deadline)
+
+    fun openValves(deadline: Int, helpers: List<Helper>, openedValves: Set<OpenedValve> = setOf()): Int {
+        val remainingValves = functioningValves.minus(openedValves.map { it.valve }.toSet())
+
+        val sim = buildList {
+            addAll(openedValves)
+            var nextOpenMinute = helpers.minOf { it.minutesSpent } + 2
+            val valvesToOpen = remainingValves.sortedByDescending { flowRates.getValue(it) }.toMutableList()
+            while (valvesToOpen.isNotEmpty()) {
+                repeat(helpers.size) {
+                    val valve = valvesToOpen.removeFirstOrNull() ?: return@repeat
+                    add(OpenedValve(valve, nextOpenMinute))
+                    nextOpenMinute += 2
+                }
+            }
+        }.pressureReleased(deadline)
+        if (sim < max) {
+            return 0
+        }
 
         return buildList {
-            for (helper in helpers) {
-                val nextValves = functioningValves.minus(openedValves.map { it.valve }.toSet())
-                val moves = whereToNext(helper.valve, nextValves)
+            for (helper in helpers.distinct()) {
+                val moves = whereToNext(helper.valve, remainingValves)
                     .filter { (_, distance) -> helper.minutesSpent + distance <= deadline }
+                    .sortedByDescending { (target) -> (deadline - helper.minutesSpent - distanceBetween(helper.valve, target)!!) * flowRates.getValue(target) }
 
                 moves.forEach { (valve, distance) ->
                     val newHelper = Helper(valve, helper.minutesSpent + distance)
@@ -75,9 +105,10 @@ private fun day16(input: String): List<Any?> {
                     add(openValves(deadline, helpers - helper + newHelper, openedValves + openedValve))
                 }
             }
-        }.maxOfOrNull { it } ?: pressureReleased.also {
-            if (it >= max) {
+        }.maxOfOrNull { it } ?: openedValves.pressureReleased(deadline).also {
+            if (it > max) {
                 max = it
+                println(max)
             }
         }
     }
