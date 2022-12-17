@@ -43,6 +43,7 @@ private fun day16(input: String): List<Any?> {
                 }
             if (s.valve == target) {
                 val distance = s.path.size + 1
+                println("$valve -> $target: $distance")
                 pathCache[valve to target] = distance
                 return distance
             }
@@ -73,8 +74,10 @@ private fun day16(input: String): List<Any?> {
         }
 
     var max = 0
-
+    var seenBefore = mutableSetOf<Pair<Set<Helper>, Set<OpenedValve>>>()
     fun openValves(deadline: Int, helpers: List<Helper>, openedValves: Set<OpenedValve> = setOf()): Int {
+        if (Pair(helpers.toSet(), openedValves) in seenBefore) return 0
+
         val remainingValves = functioningValves.minus(openedValves.map { it.valve }.toSet())
 
         val sim = buildList {
@@ -96,8 +99,13 @@ private fun day16(input: String): List<Any?> {
         return buildList {
             for (helper in helpers.distinct()) {
                 val moves = whereToNext(helper.valve, remainingValves)
-                    .filter { (_, distance) -> helper.minutesSpent + distance <= deadline }
-                    .sortedByDescending { (target) -> (deadline - helper.minutesSpent - distanceBetween(helper.valve, target)!!) * flowRates.getValue(target) }
+                    .filter { (_, distance) -> helper.minutesSpent + distance < deadline }
+                    .sortedByDescending { (target) ->
+                        (deadline - helper.minutesSpent - distanceBetween(
+                            helper.valve,
+                            target
+                        )!!) * flowRates.getValue(target)
+                    }
 
                 moves.forEach { (valve, distance) ->
                     val newHelper = Helper(valve, helper.minutesSpent + distance)
@@ -106,6 +114,7 @@ private fun day16(input: String): List<Any?> {
                 }
             }
         }.maxOfOrNull { it } ?: openedValves.pressureReleased(deadline).also {
+            seenBefore += Pair(helpers.toSet(), openedValves)
             if (it > max) {
                 max = it
                 println(max)
@@ -117,6 +126,7 @@ private fun day16(input: String): List<Any?> {
     println(part1)
 
     max = 0
+    seenBefore.clear()
 
     val part2 = openValves(26, listOf(Helper("AA"), Helper("AA")))
     println(part2)
