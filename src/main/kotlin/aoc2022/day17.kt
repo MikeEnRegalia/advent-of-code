@@ -1,9 +1,9 @@
 package aoc2022
 
-fun main() = day00(String(System.`in`.readAllBytes())).forEach(::println)
+import java.util.*
 
-private fun day00(input: String): List<Any?> {
-    val jets = input.split("").filter { it.isNotBlank() }.also(::println)
+fun main() {
+    val jets = generateSequence(::readlnOrNull).first().split("").filter { it.isNotBlank() }
 
     data class Pos(val x: Int, val y: Int) {
         operator fun plus(p: Pos) = Pos(x + p.x, y + p.y)
@@ -20,6 +20,13 @@ private fun day00(input: String): List<Any?> {
         fun right() = at(pos + Pos(1, 0))
         fun down() = at(pos + Pos(0, -1))
         fun intersects(shape: Shape) = points.intersect(shape.points).isNotEmpty()
+        fun similar(shape: Shape) = (points.first().y - shape.points.first().y).let { dy ->
+            points.zip(shape.points).all { (a, b) -> b + Pos(0, dy) == a }
+        }
+    }
+
+    fun Iterable<Shape>.merge() = flatMap { it.points }.toSet().let { points ->
+        Shape(points, Pos(points.minOf { it.x }, points.minOf { it.y }))
     }
 
     val shapes = listOf(
@@ -31,48 +38,78 @@ private fun day00(input: String): List<Any?> {
     )
 
     var shapesTick = 0
-    fun newShape() = shapes[shapesTick % shapes.size].also { shapesTick++ }
+    fun newShape() = shapes[shapesTick].also { shapesTick = (shapesTick + 1) % shapes.size }
 
     var jetsTick = 0
-    fun newJet() = jets[jetsTick % jets.size].also { jetsTick++ }
+    fun newJet() = jets[jetsTick].also { jetsTick = (jetsTick + 1) % jets.size }
 
-    val stuckShapes = mutableListOf<Shape>()
+    val stuckShapes = ArrayDeque<Shape>()
+
     var shape = newShape().at(Pos(2, 4))
     val xRange = 0..6
+    var nStuckShapes = 0
 
-    fun print() {
-        for (y in (stuckShapes.maxOfOrNull { it.maxY() } ?: shape.maxY()) downTo 1) {
-            println((0..6).map { x -> when (Pos(x, y)) {
-                in stuckShapes.flatMap { it.points } -> "#"
-                in shape.points -> "@"
-                else -> "."
-            } }.joinToString(""))
-        }
-    }
+    data class State(val jetsTick: Int, val shapesTick: Int, val stuckShapes: Shape)
 
-    while (true) {
-        if (stuckShapes.size <= 2) print()
-        when (val newJet = newJet()) {
-            "<" -> if (shape.minX() > xRange.first && stuckShapes.none { it.intersects(shape.left()) }) shape =
-                shape.left()
+    val states = mutableMapOf<Int, State>()
+    val history = mutableMapOf<Pair<Int, Int>, Pair<Int, Iterable<Shape>>>()
+    val heights = mutableMapOf<Int, Int>()
 
-            ">" -> if (shape.maxX() < xRange.last && stuckShapes.none { it.intersects(shape.right()) }) shape =
-                shape.right()
-            else -> throw IllegalArgumentException(newJet)
-        }
-        if (stuckShapes.size <= 2) print()
+    var cycleStart: Int? = null
 
-        if (shape.down().minY() == 0 || stuckShapes.any { it.intersects(shape.down()) }) {
-            stuckShapes += shape
-            if (stuckShapes.size <= 2) print()
-            shape = newShape().at(Pos(2, stuckShapes.maxOf { it.maxY() } + 4))
-            if (stuckShapes.size == 2022) {
-                println(stuckShapes.maxOf { it.maxY() })
-                break
+    var part1: Int? = null
+    var part2: Long? = null
+    while (part1 == null || part2 == null) {
+        with(shape) {
+            shape = when (newJet()) {
+                "<" -> if (minX() > xRange.first && stuckShapes.none { it.intersects(left()) }) left() else this
+
+                else -> if (maxX() < xRange.last && stuckShapes.none { it.intersects(right()) }) right() else this
             }
-        } else shape = shape.down()
+        }
+
+        if (shape.down().minY() != 0 && !stuckShapes.any { it.intersects(shape.down()) }) {
+            shape = shape.down()
+            continue
+        }
+
+        stuckShapes += shape
+        nStuckShapes++
+        states[nStuckShapes] = State(jetsTick, shapesTick, stuckShapes.merge())
+
+        heights[nStuckShapes] = stuckShapes.maxOf { it.maxY() }
+        if (stuckShapes.size > 40) {
+            stuckShapes.removeFirst()
+
+            val k = Pair(jetsTick, shapesTick)
+            val prev = history[k]
+            if (prev != null) {
+                val prevShape = prev.second.merge()
+                val currShape = stuckShapes.merge()
+                if (prevShape.similar(currShape) && cycleStart == null) {
+                    val y1 = prevShape.maxY()
+                    val y2 = currShape.maxY()
+                    val cycleHeight = y2 - y1
+                    val cycleCount = nStuckShapes - prev.first
+                    cycleStart = prev.first
+
+                    val fullCycles = (1_000_000_000_000 - cycleStart) / cycleCount
+                    val partialCycle = ((1_000_000_000_000 - cycleStart) % cycleCount).toInt()
+                    val remIndex = states[cycleStart + partialCycle]!!.stuckShapes.maxY() - cycleStart
+                    part2 = prev.first + (fullCycles * cycleHeight) + remIndex
+                }
+            }
+            history[k] = nStuckShapes to stuckShapes.toList()
+        }
+
+        if (nStuckShapes == 2022) {
+            part1 = stuckShapes.maxOf { it.maxY() }
+        }
+
+        shape = newShape().at(Pos(2, stuckShapes.maxOf { it.maxY() } + 4))
     }
 
-    return listOf(null, null)
+    println(part1)
+    println(part2)
 }
 
