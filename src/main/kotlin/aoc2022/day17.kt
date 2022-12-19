@@ -49,7 +49,7 @@ private fun day00(input: String): List<Any?> {
         }
         if (shape.down().minY() == 0 || stuckShapes.any { it.intersects(shape.down()) }) {
             stuckShapes += shape
-            if (stuckShapes.size < 10) println(stuckShapes.map { it.pos })
+            if (stuckShapes.size ==10) println(stuckShapes.map { "${it.minY()}" })
             shape = newShape().at(Pos(2, stuckShapes.maxOf { it.maxY() } + 4))
             if (stuckShapes.size == 2022) {
                 println(stuckShapes.maxOf { it.maxY() })
