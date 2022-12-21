@@ -2,14 +2,12 @@ package aoc2022
 
 import kotlin.math.abs
 
-fun main() = day20(String(System.`in`.readAllBytes())).forEach(::println)
-
-private fun day20(input: String): List<Any?> {
+fun main() {
     class N(val x: Long) {
         override fun toString() = "$x"
     }
 
-    val numbers = input.lines().map { N(it.toLong()) }
+    val numbers = generateSequence(::readlnOrNull).map { N(it.toLong()) }.toList()
 
     fun MutableList<N>.swap(i: Int, j: Int) {
         val e = this[i]
@@ -52,5 +50,4 @@ private fun day20(input: String): List<Any?> {
 
     println(numbers.mix(1).foo())
     println(numbers.map { N(it.x * 811589153)}.mix(10).foo())
-    return listOf()
 }
