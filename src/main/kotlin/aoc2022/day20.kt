@@ -33,13 +33,11 @@ private fun day20(input: String): List<Any?> {
         val mixed = toMutableList()
 
         repeat(times) { round ->
-            println(round)
             for (n in this) {
                 var i = mixed.indexOf(n)
                 var move = abs(n.x)
                 if (move == 0L) continue
                 while (move > size) move = (move % size) + (move / size)
-                //println("move $move ($size)")
                 if (n.x > 0L) for (c in 1L..move) i = mixed.swapWithNext(i)
                 else for (c in 1L..move) i = mixed.swapWithPrev(i)
             }
