@@ -1,13 +1,10 @@
 package aoc2022
 
-import kotlin.math.min
-
 fun main() {
     data class Point(val x: Int, val y: Int, val z: Int) {
         fun neighbors() = sequenceOf(
-            Point(x + 1, y, z), Point(x - 1, y, z),
-            Point(x, y - 1, z), Point(x, y + 1, z),
-            Point(x, y, z - 1), Point(x, y, z + 1)
+            copy(x = x + 1), copy(y = y + 1), copy(z = z + 1),
+            copy(x = x - 1), copy(y = y - 1), copy(z = z - 1),
         )
     }
 
@@ -25,23 +22,17 @@ fun main() {
         var s = Point(minX - 1, minY - 1, minZ - 1)
         val air = mutableSetOf<Point>()
         val u = mutableSetOf<Point>()
-        val d = mutableMapOf(s to 0)
 
         while (true) {
             s.neighbors()
-                .filter { it !in cubes }
+                .filter { it !in cubes && it !in air}
                 .filter { it.x in minX - 1..maxX + 1 }
                 .filter { it.y in minY - 1..maxY + 1 }
                 .filter { it.z in minZ - 1..maxZ + 1 }
-                .filter { it !in air }
-                .forEach { n ->
-                    u += n
-                    val distance = d.getValue(s) + 1
-                    d.compute(n) { _, old -> min(distance, old ?: Int.MAX_VALUE) }
-                }
+                .forEach { u += it }
             air += s
             u -= s
-            s = u.minByOrNull { d.getValue(it) } ?: break
+            s = u.firstOrNull() ?: break
         }
         return air
     }
