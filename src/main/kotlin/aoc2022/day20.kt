@@ -32,7 +32,7 @@ private fun day20(input: String): List<Any?> {
     fun List<N>.mix(times: Int): List<N> {
         val mixed = toMutableList()
 
-        repeat(times) { round ->
+        repeat(times) {
             for (n in this) {
                 var i = mixed.indexOf(n)
                 var move = abs(n.x)
