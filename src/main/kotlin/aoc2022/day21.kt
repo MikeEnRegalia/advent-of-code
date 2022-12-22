@@ -1,9 +1,7 @@
 package aoc2022
 
-fun main() = day21(String(System.`in`.readAllBytes())).forEach(::println)
-
-private fun day21(input: String): List<Any?> {
-    val monkeys = input.lines().map { it.split(": ").map { it.split(" ") } }.associate { it[0].first() to it[1] }
+fun main() {
+    val monkeys = generateSequence(::readlnOrNull).map { it.split(": ").map { it.split(" ") } }.associate { it[0].first() to it[1] }
 
     fun lookup(name: String, part2: Boolean = false): Long? {
         if (part2 && name == "humn") return null
@@ -57,6 +55,8 @@ private fun day21(input: String): List<Any?> {
             }
         }
     }
-    return listOf(lookup("root"), part2())
+
+    println(lookup("root"))
+    println(part2())
 }
 
