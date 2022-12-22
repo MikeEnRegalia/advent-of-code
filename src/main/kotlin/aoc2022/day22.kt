@@ -60,6 +60,8 @@ fun main() {
     pos = Pos(maze[0].indexOf('.'), 0)
     facing = 0
 
+    // NOTE: Obviously this solution is catered specifically towards my puzzle input.
+    // It would be enormously difficult to automatically detect the 2D layout of the cube.
     fun Pos.neighborCube(facing: Int): Pair<Pos, Int> {
         val direct = directNeighbor(facing)
         if (direct != null) return direct to facing
