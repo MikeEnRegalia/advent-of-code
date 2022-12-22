@@ -1,10 +1,10 @@
 package aoc2022
 
+import kotlin.math.max
 import kotlin.math.min
 
-fun main() = day19(String(System.`in`.readAllBytes())).forEach(::println)
+fun main() {
 
-private fun day19(input: String): List<Any?> {
     data class Configuration(
         val oreForOreRobot: Int,
         val oreForClayRobot: Int,
@@ -12,13 +12,21 @@ private fun day19(input: String): List<Any?> {
         val clayForObsidianRobot: Int,
         val oreForGeodeRobot: Int,
         val obsidianForGeodeRobot: Int
-    )
+    ) {
+        fun maxNewOreRobot(ore: Int) = min(1, ore / oreForOreRobot)
+        fun maxNewClayRobot(ore: Int) = min(1, ore / oreForClayRobot)
+        fun maxNewObsidianRobot(ore: Int, clay: Int) =
+            min(1, min(ore / oreForObsidianRobot, clay / clayForObsidianRobot))
 
-    val blueprints = input.lines().map { line ->
+        fun maxNewGeodeRobot(ore: Int, obsidian: Int) =
+            min(1, min(ore / oreForGeodeRobot, obsidian / obsidianForGeodeRobot))
+    }
+
+    val blueprints = generateSequence(::readlnOrNull).map { line ->
         line.split(" ").mapNotNull(String::toIntOrNull).let {
             Configuration(it[0], it[1], it[2], it[3], it[4], it[5])
         }
-    }
+    }.toList()
 
     data class State(
         val cfg: Configuration,
@@ -33,72 +41,128 @@ private fun day19(input: String): List<Any?> {
         val geodeRobots: Int = 0
     ) {
         override fun toString(): String {
-            return "$minute: $ore $clay $obsidian $geode"
-        }
-        fun maxNewOreRobot(ore: Int) = ore / cfg.oreForOreRobot
-        fun maxNewClayRobot(ore: Int) = ore / cfg.oreForClayRobot
-        fun maxNewObsidianRobot(ore: Int, clay: Int) = min(ore / cfg.oreForObsidianRobot, clay / cfg.clayForObsidianRobot)
-        fun maxNewGeodeRobot(ore: Int, obsidian: Int) = min(ore / cfg.oreForGeodeRobot, obsidian / cfg.obsidianForGeodeRobot)
-
-        fun next() = buildList {
-            var ore = this@State.ore
-            var clay = this@State.clay
-            var obsidian = this@State.obsidian
-            val geode = this@State.geode
-            val newGeodeRobots = maxNewGeodeRobot(ore, obsidian)
-            ore -= newGeodeRobots * cfg.oreForGeodeRobot
-            obsidian -= newGeodeRobots * cfg.obsidianForGeodeRobot
-            val needMoreObsidian = obsidianRobots/oreRobots < cfg.obsidianForGeodeRobot/cfg.oreForGeodeRobot
-            val newObsidianRobots = if (needMoreObsidian) maxNewObsidianRobot(ore, clay) else 0
-            ore -= newObsidianRobots * cfg.oreForObsidianRobot
-            clay -= newObsidianRobots * cfg.clayForObsidianRobot
-            val needMoreClayRobots = clayRobots/oreRobots < cfg.clayForObsidianRobot/cfg.oreForObsidianRobot
-            val newClayRobots = if (needMoreClayRobots) maxNewClayRobot(ore) else 0
-            ore -= newClayRobots * cfg.oreForClayRobot
-            val newOreRobots = maxNewOreRobot(ore)
-            ore -= newOreRobots * cfg.oreForOreRobot
-            add(copy(
-                minute = minute + 1,
-                ore = ore + oreRobots,
-                clay = clay + clayRobots,
-                obsidian = obsidian + obsidianRobots,
-                geode = geode + geodeRobots,
-                oreRobots = oreRobots + newOreRobots,
-                clayRobots = clayRobots + newClayRobots,
-                obsidianRobots = obsidianRobots + newObsidianRobots,
-                geodeRobots = geodeRobots + newGeodeRobots))
+            return "$minute: $ore ($oreRobots) $clay ($clayRobots) $obsidian ($obsidianRobots) $geode ($geodeRobots)"
         }
 
+        fun nextAll(): List<State> {
+            return buildList {
+                var buildingRobot = false
+                if (cfg.maxNewOreRobot(ore) > 0 && oreRobots < max(cfg.oreForClayRobot, max(cfg.oreForObsidianRobot, cfg.oreForGeodeRobot))) {
+                    buildingRobot = true
+                    add(
+                        copy(
+                            minute = minute + 1,
+                            ore = ore + oreRobots - cfg.oreForOreRobot,
+                            clay = clay + clayRobots,
+                            obsidian = obsidian + obsidianRobots,
+                            geode = geode + geodeRobots,
+                            oreRobots = oreRobots + 1,
+                            clayRobots = clayRobots,
+                            obsidianRobots = obsidianRobots,
+                            geodeRobots = geodeRobots
+                        )
+                    )
+                }
+                if (cfg.maxNewClayRobot(ore) > 0 && clayRobots < cfg.clayForObsidianRobot) {
+                    buildingRobot = true
+                    add(
+                        copy(
+                            minute = minute + 1,
+                            ore = ore + oreRobots - cfg.oreForClayRobot,
+                            clay = clay + clayRobots,
+                            obsidian = obsidian + obsidianRobots,
+                            geode = geode + geodeRobots,
+                            oreRobots = oreRobots,
+                            clayRobots = clayRobots + 1,
+                            obsidianRobots = obsidianRobots,
+                            geodeRobots = geodeRobots
+                        )
+                    )
+                }
+                if (cfg.maxNewObsidianRobot(ore, clay) > 0 && obsidianRobots < cfg.obsidianForGeodeRobot) {
+                    buildingRobot = true
+                    add(
+                        copy(
+                            minute = minute + 1,
+                            ore = ore + oreRobots - cfg.oreForObsidianRobot,
+                            clay = clay + clayRobots - cfg.clayForObsidianRobot,
+                            obsidian = obsidian + obsidianRobots,
+                            geode = geode + geodeRobots,
+                            oreRobots = oreRobots,
+                            clayRobots = clayRobots,
+                            obsidianRobots = obsidianRobots + 1,
+                            geodeRobots = geodeRobots
+                        )
+                    )
+                }
+                if (cfg.maxNewGeodeRobot(ore, obsidian) > 0) {
+                    buildingRobot = true
+                    add(
+                        copy(
+                            minute = minute + 1,
+                            ore = ore + oreRobots - cfg.oreForGeodeRobot,
+                            clay = clay + clayRobots,
+                            obsidian = obsidian + obsidianRobots - cfg.obsidianForGeodeRobot,
+                            geode = geode + geodeRobots,
+                            oreRobots = oreRobots,
+                            clayRobots = clayRobots,
+                            obsidianRobots = obsidianRobots,
+                            geodeRobots = geodeRobots + 1
+                        )
+                    )
+                }
+                if (!buildingRobot) {
+                    add(
+                        copy(
+                            minute = minute + 1,
+                            ore = ore + oreRobots,
+                            clay = clay + clayRobots,
+                            obsidian = obsidian + obsidianRobots,
+                            geode = geode + geodeRobots,
+                            oreRobots = oreRobots,
+                            clayRobots = clayRobots,
+                            obsidianRobots = obsidianRobots,
+                            geodeRobots = geodeRobots
+                        )
+                    )
+                }
+            }
+        }
     }
 
-    fun simulate(s: State, cache: MutableMap<State, Int> = mutableMapOf()): Int? {
-        println(s)
-        if (s.minute == 24) {
+    fun simulate(s: State, minutes: Int, cache: MutableMap<State, Int> = mutableMapOf()): Int? {
+        if (s.minute == minutes) {
+            //println(s)
             return s.geode
         }
         val cached = cache[s]
-        if (cached != null) {
-            //println("cached")
-            return cached
-        }
-        return s.next().maxOfOrNull { s2 ->simulate(s2, cache)?.also { cache[s2] = it } ?: 0 }
+        if (cached != null) return cached
+        return s.nextAll().maxOfOrNull { s2 -> simulate(s2, minutes, cache)?.also { cache[s2] = it } ?: 0 }
     }
 
-    println("x: " + simulate(State(Configuration(4, 2, 3, 14, 2, 7))))
-    println("y: " + simulate(State(Configuration(2, 3, 3, 8, 3, 12))))
-
-    fun part1(): Int {
+    fun List<Configuration>.part1(): Int {
         val stats = mutableMapOf<Int, Int>()
-        for ((index, cfg) in blueprints.withIndex()) {
-            val s = State(cfg)
-            val max = simulate(s) ?: 0
+        for ((index, cfg) in withIndex()) {
+            val max = simulate(State(cfg), 24) ?: 0
             println(max)
             stats[index] = max
         }
         return stats.entries.sumOf { (it.key + 1) * it.value }
     }
 
+    fun List<Configuration>.part2(): Int {
+        val stats = mutableMapOf<Int, Int>()
+        for ((index, cfg) in take(3).withIndex()) {
+            val max = simulate(State(cfg), 32) ?: 0
+            println(max)
+            stats[index] = max
+        }
+        return stats.values.reduce(Int::times)
+    }
 
-    return listOf(null, null)
+    println(listOf(Configuration(4, 2, 3, 14, 2, 7), Configuration(2, 3, 3, 8, 3, 12)).part2())
+
+    println(blueprints.part1())
+    println(blueprints.part2())
 }
 
