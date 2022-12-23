@@ -9,13 +9,17 @@ fun main() {
     val width = maze[0].size
     val height = maze.size
 
-    val instructions: List<Any> = lines.last().fold(mutableListOf<String>()) { acc, c ->
-        if (c.isDigit()) {
-            if (acc.isEmpty() || acc.last().toIntOrNull() == null) acc.add("")
-            acc[acc.lastIndex] = acc.last() + c
-        } else acc.add(c.toString())
-        acc
-    }.map { it.toIntOrNull() ?: it }
+    val instructions: List<Any> = lines.last().asSequence().fold(mutableListOf<String>()) { acc, c ->
+        acc.apply {
+            when {
+                c.isDigit() -> {
+                    if (isEmpty() || last().toIntOrNull() == null) add("")
+                    set(lastIndex, last() + c)
+                }
+                else -> add(c.toString())
+            }
+        }
+    }.map { it.toIntOrNull() ?: it }.toList()
 
     data class Pos(val x: Int, val y: Int) {
         override fun toString() = "($x,$y)"
