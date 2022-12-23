@@ -19,7 +19,6 @@ fun main() {
         .toMutableSet()
 
     var dir = 0
-
     var round = 0
     while(true) {
         val proposals = mutableMapOf<Pos, MutableList<Pos>>()
