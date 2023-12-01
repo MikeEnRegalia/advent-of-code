@@ -8,13 +8,9 @@ private fun day01(lines: List<String>): List<Any?> {
         line.mapNotNull(Char::digitToIntOrNull).let { it.first() * 10 + it.last() }
     }
 
-    val digits = buildMap {
-        listOf("one", "two", "three", "four", "five", "six", "seven", "eight", "nine").forEachIndexed { i, s ->
-            val n = i + 1
-            put(n.toString(), n)
-            put(s, n)
-        }
-    }
+    val digits = listOf("one", "two", "three", "four", "five", "six", "seven", "eight", "nine")
+        .flatMapIndexed { i, s -> (i + 1).let { listOf(s to it, it.toString() to it) } }
+        .toMap()
 
     val part2 = lines.sumOf { line ->
         val first = digits.getValue(digits.keys.minBy { line.indexOfOrNull(it) ?: Int.MAX_VALUE })
