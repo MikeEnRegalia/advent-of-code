@@ -6,15 +6,17 @@ private fun day02(lines: List<String>): List<Any?> {
 
     val limits = mapOf("red" to 12, "green" to 13, "blue" to 14)
 
+    data class Draw(val color: String, val n: Int)
+
     val games = lines.map { line ->
         val game = line.split(" ")[1].replace(":", "").toInt()
         val maxValues = line.substring(line.indexOf(":") + 2).split(";").flatMap { part ->
             part.split(",").map { it.trim() }.map {
                 val (nS, color) = it.split(" ")
                 val n = nS.toInt()
-                color to n
+                Draw(color, n)
             }
-        }.groupBy { it.first }.mapValues { (k, v) -> v.maxOf { it.second } }
+        }.groupBy { it.color }.mapValues { (k, v) -> v.maxOf { it.n } }
 
         val part1 = game.takeUnless {
             limits.any { (color, maxAllowed) ->
