@@ -12,7 +12,7 @@ private fun List<Int>.byThree() {
     var minQE: Long? = null
     for (n in 1..size) {
         nCombos(n, groupSum)
-            .map { it to it.multiplied() }
+            .map { it to it.fold(1L) { acc, x -> acc * x } }
             .filter { (_, qe) -> minQE?.let { min -> qe < min } ?: true }
             .mapNotNull { (firstGroup, qe) ->
                 with(minus(firstGroup)) {
@@ -60,16 +60,14 @@ private fun List<Int>.byFour() {
                     }
                     .firstOrNull()
             }
-            .sortedBy { it[0].multiplied() }
+            .sortedBy { it[0].fold(1L) { acc, x -> acc * x } }
             .firstOrNull()
             ?.also { groups ->
-                println(groups[0].multiplied().toString())
+                println(groups[0].fold(1L) { acc, x -> acc * x }.toString())
                 return
             }
     }
 }
-
-fun Iterable<Int>.multiplied() = fold(1L) { acc, x -> acc * x }
 
 fun List<Int>.nCombos(n: Int, sum: Int): Sequence<List<Int>> = sum()
     .let { mySum ->

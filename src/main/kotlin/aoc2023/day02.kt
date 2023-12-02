@@ -1,7 +1,5 @@
 package aoc2023
 
-import aoc2015.day24.multiplied
-
 fun main() = day02(String(System.`in`.readAllBytes()).split("\n")).forEach(::println)
 
 private fun day02(lines: List<String>): List<Any?> {
@@ -24,15 +22,12 @@ private fun day02(lines: List<String>): List<Any?> {
                 val max = maxValues[k]
                 max != null && max > v
             } -> 0
+
             else -> game
         }
-        val part2 = maxValues.values.multiplied()
+        val part2 = maxValues.values.reduce(Int::times)
         part1 to part2
     }
 
     return listOf(sum.sumOf { it.first }, sum.sumOf { it.second})
 }
-
-private val digits = sequenceOf("one", "two", "three", "four", "five", "six", "seven", "eight", "nine")
-    .flatMapIndexed { i, s -> (i + 1).let { sequenceOf(s to it, it.toString() to it) } }
-    .toMap()
