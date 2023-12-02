@@ -17,5 +17,4 @@ private fun day01(lines: List<String>): List<Any?> {
 private val digits = sequenceOf("one", "two", "three", "four", "five", "six", "seven", "eight", "nine")
     .flatMapIndexed { i, s -> (i + 1).let { sequenceOf(s to it, it.toString() to it) } }
     .toMap()
-
-fun String.indexOfOrMax(s: String) = indexOf(s).takeIf { it >= 0 } ?: Int.MAX_VALUE
+private fun String.indexOfOrMax(s: String) = indexOf(s).takeIf { it >= 0 } ?: Int.MAX_VALUE
