@@ -17,17 +17,15 @@ private fun day02(lines: List<String>): List<Any?> {
                 if (curr == null || curr < n) maxValues[color] = n
             }
         }
-        val part1 = when {
-            limits.any { (k, v) ->
-                val max = maxValues[k]
-                max != null && max > v
-            } -> 0
-
-            else -> game
-        }
+        val part1 = game.takeUnless {
+            limits.any { (color, maxAllowed) ->
+                val maxEncountered = maxValues[color]
+                maxEncountered != null && maxEncountered > maxAllowed
+            }
+        } ?: 0
         val part2 = maxValues.values.reduce(Int::times)
         part1 to part2
     }
 
-    return listOf(sum.sumOf { it.first }, sum.sumOf { it.second})
+    return listOf(sum.sumOf { it.first }, sum.sumOf { it.second })
 }
