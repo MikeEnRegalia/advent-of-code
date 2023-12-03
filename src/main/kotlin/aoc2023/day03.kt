@@ -15,7 +15,9 @@ private fun day03(lines: List<String>): List<Any?> {
 
     var sum = 0L
 
-    val adjacentGears = mutableMapOf<Pos, Pos>()
+    val numbers = mutableMapOf<Pos, Long>()
+
+    val adjacentGears = mutableMapOf<Pos, Set<Pos>>()
 
     for (y in lines.indices) {
         val row = lines[y]
@@ -24,17 +26,36 @@ private fun day03(lines: List<String>): List<Any?> {
         while (x in row.indices) {
             if (row[x].isDigit()) {
                 val n = row.drop(x).takeWhile { it.isDigit() }
-                if (n.indices.any {
-                        Pos(x + it, y).neighbors().any { neighbor ->
-                            val c = lines[neighbor.y][neighbor.x]
-                            !(c.isDigit() || c == '.')
-                        }
-                    }) {
-                    sum += n.toLong()
+                val symbols = n.indices.flatMap {
+                    Pos(x + it, y).neighbors()
                 }
+
+                val adjacentSymbols = symbols.filter { neighbor ->
+                    val c = lines[neighbor.y][neighbor.x]
+                    !(c.isDigit() || c == '.')
+                }
+
+                if (adjacentSymbols.isNotEmpty()) {
+                    sum += n.toLong()
+
+                    adjacentSymbols.forEach {
+                        if (lines[it.y][it.x] == '*') {
+                            numbers[Pos(x, y)] = n.toLong()
+                            adjacentGears.compute(it) { _, old ->
+                                (old ?: setOf()) + Pos(x, y)
+                            }
+                        }
+                    }
+                }
+
                 x += n.length
             } else x++
         }
     }
-    return listOf(sum)
+
+    println(adjacentGears)
+
+    val part2 = adjacentGears.filterValues { it.size == 2 }
+        .values.sumOf { it.map { numbers.getValue(it) }.reduce(Long::times) }
+    return listOf(sum, part2)
 }
