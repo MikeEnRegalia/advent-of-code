@@ -1,5 +1,8 @@
 package aoc2023
 
+import kotlin.math.max
+import kotlin.math.min
+
 fun main() = day05(String(System.`in`.readAllBytes())).forEach(::println)
 
 private fun day05(input: String): List<Any?> {
@@ -10,18 +13,54 @@ private fun day05(input: String): List<Any?> {
             .map { it.split(" ").map(String::toLong) }
     }
 
-    var data = seeds.toSet()
+    var part1 = seeds.toSet()
     for (conversion in conversions) {
-        val newData = data.map { d ->
+        val newData = part1.map { d ->
             conversion.firstNotNullOfOrNull {
                 val dest = it[0]
                 val src = it[1]
                 val l = it[2]
-                if (d in src until src + l) dest + (d - src) else null
+                if (d in src..src + l) dest + (d - src) else null
             } ?: d
         }
-        data = newData.toSet()
+        part1 = newData.toSet()
     }
 
-    return listOf(data.min())
+    var data = seeds.chunked(2).map { it[0]..it[0] + it[1] }
+
+    data class MapResult(val mapped: LongRange?, val remaining: Set<LongRange>)
+
+    fun LongRange.convert(dest: Long, src: Long, l: Long): MapResult {
+        val delta = dest - src
+        val srcRange = src..src + l
+        val mapped = when {
+            last < srcRange.first || srcRange.last < first -> null
+            else -> max(srcRange.first, first)..min(srcRange.last, last)
+        }
+        if (mapped == null) return MapResult(null, setOf(this))
+
+        val newData = mapped.first + delta..mapped.last + delta
+        val oldData = buildSet {
+            if (mapped.first > first) add(first until mapped.first)
+            if (mapped.last < last) add(mapped.last + 1..last)
+        }
+        return MapResult(newData, oldData)
+    }
+
+
+    for (conversion in conversions) {
+        val newData = mutableListOf<LongRange>()
+        val oldData = data.toMutableList()
+        for ((dest, src, l) in conversion) {
+            for (oldRange in oldData.toList()) {
+                oldData -= oldRange
+                val (mapped, remaining) = oldRange.convert(dest, src, l)
+                if (mapped != null) newData += mapped
+                oldData.addAll(remaining)
+            }
+        }
+        data = oldData + newData
+    }
+
+    return listOf(part1.min(), data.minOf { it.first })
 }
