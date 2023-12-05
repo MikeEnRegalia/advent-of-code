@@ -32,7 +32,7 @@ private fun day05(input: String): List<Any?> {
 
     fun LongRange.convert(dest: Long, src: Long, l: Long): MapResult {
         val delta = dest - src
-        val srcRange = src..src + l
+        val srcRange = src until src + l
         val mapped = when {
             last < srcRange.first || srcRange.last < first -> null
             else -> max(srcRange.first, first)..min(srcRange.last, last)
@@ -51,15 +51,18 @@ private fun day05(input: String): List<Any?> {
     for (conversion in conversions) {
         val newData = mutableListOf<LongRange>()
         val oldData = data.toMutableList()
+        val remainingData = mutableListOf<LongRange>()
         for ((dest, src, l) in conversion) {
-            for (oldRange in oldData.toList()) {
-                oldData -= oldRange
+            remainingData.clear()
+            while (oldData.isNotEmpty()) {
+                val oldRange = oldData.removeFirst()
                 val (mapped, remaining) = oldRange.convert(dest, src, l)
                 if (mapped != null) newData += mapped
-                oldData.addAll(remaining)
+                remainingData.addAll(remaining)
             }
+            oldData.addAll(remainingData)
         }
-        data = oldData + newData
+        data = remainingData + newData
     }
 
     return listOf(part1.min(), data.minOf { it.first })
