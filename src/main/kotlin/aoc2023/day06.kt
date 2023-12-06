@@ -1,22 +1,23 @@
 package aoc2023
 
-import kotlin.math.max
-import kotlin.math.min
+import util.remove
 
-fun main() = day06(String(System.`in`.readAllBytes())).forEach(::println)
+fun main() = day06(generateSequence(::readlnOrNull).toList()).forEach(::println)
 
-private fun day06(input: String): List<Any?> {
-    val races = input.split("\n").map { it.split(" ").mapNotNull(String::toIntOrNull) }.let { lines ->
-        lines.first().indices.map { i -> lines[0][i] to lines[1][i]}
-    }
+private fun day06(lines: List<String>): List<Any?> {
+    data class Race(val duration: Long, val distance: Long)
 
-    val part1 = races.map { (duration, distance) ->
-        (0..duration).count { d ->
-            val speed = d
-            val dist = speed * (duration - d)
-            dist > distance
-        }
-    }.map(Int::toLong).reduce(Long::times)
+    val races = lines
+        .map { it.split(" ").mapNotNull(String::toLongOrNull) }
+        .let { lines -> lines.first().indices.map { i -> Race(lines[0][i], lines[1][i]) } }
 
-    return listOf(part1)
+    fun Race.wonIfWoundUpFor(woundUpFor: Long) = woundUpFor * (duration - woundUpFor) > distance
+
+    fun List<Race>.solve() = map { race ->
+        (0L..race.duration).count { race.wonIfWoundUpFor(it) }
+    }.reduce(Int::times)
+
+    val part2Race = lines.map { it.filter(Char::isDigit).toLong() }.let { Race(it[0], it[1]) }
+
+    return listOf(races, listOf(part2Race)).map { it.solve() }
 }
