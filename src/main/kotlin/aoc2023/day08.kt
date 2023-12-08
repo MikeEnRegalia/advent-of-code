@@ -5,30 +5,27 @@ fun main() = day08(generateSequence(::readlnOrNull).toList()).forEach(::println)
 private fun day08(lines: List<String>): List<Any?> {
     val moves = lines[0]
 
-    data class Foo(val left: String, val right: String)
-
-    val dirs = lines.drop(2).map {
-        it.filter { it.isLetter() }.chunked(3).let { data ->
-            data[0] to Foo(data[1], data[2])
+    val paths = lines.drop(2).associate {
+        it.filter(Char::isLetter).chunked(3).let { data ->
+            data[0] to Pair(data[1], data[2])
         }
-    }.toMap()
+    }
 
-    fun part1(start: String, predicate: (String) -> Boolean): Int {
+    fun part1(start: String, predicate: (String) -> Boolean): Long {
         var curr = start
         var n = 0
         while (!predicate(curr)) {
-            val move = moves[n % moves.length]
-            curr = dirs.getValue(curr).let { if (move == 'L') it.left else it.right }
+            val (left, right) = paths.getValue(curr)
+            curr = if (moves[n % moves.length] == 'L') left else right
             n++
         }
-        return n
+        return n.toLong()
     }
 
     return listOf(
         part1("AAA") { it == "ZZZ" },
-        dirs.keys.filter { it.endsWith("A") }
+        paths.keys.filter { it.endsWith("A") }
             .map { part1(it) { it.endsWith("Z") } }
-            .map(Int::toLong)
             .reduce(::findLCM))
 }
 
@@ -37,9 +34,7 @@ fun findLCM(a: Long, b: Long): Long {
     val maxLcm = a * b
     var lcm = larger
     while (lcm <= maxLcm) {
-        if (lcm % a == 0L && lcm % b == 0L) {
-            return lcm
-        }
+        if (lcm % a == 0L && lcm % b == 0L) return lcm
         lcm += larger
     }
     return maxLcm
