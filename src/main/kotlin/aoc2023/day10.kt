@@ -2,17 +2,11 @@ package aoc2023
 
 import kotlin.math.min
 
-fun main() = day10(generateSequence(::readlnOrNull).toList()).forEach(::println)
+fun main() {
+    val lines = generateSequence(::readlnOrNull).toList()
 
-private const val connectsFromWest = "7-J"
-private const val connectsFromEast = "F-L"
-private const val connectsFromNorth = "L|J"
-private const val connectsFromSouth = "F|7"
-
-private fun day10(lines: List<String>): List<Any?> {
     data class Pos(val x: Int, val y: Int) {
         val inGrid by lazy { x in lines[0].indices && y in lines.indices }
-        val atGridBorder by lazy { neighbors().count() < 4 }
         val outsideGrid by lazy { neighbors().count() <= 1 }
 
         val c: Char by lazy {
@@ -83,15 +77,11 @@ private fun day10(lines: List<String>): List<Any?> {
 
         return path to D.values.max()
     }
-
     val (path, part1) = findPath()
-
     fun Pos.isTile() = c != '?' && this !in path
-
     val leftTiles = mutableSetOf<Pos>()
     val rightTiles = mutableSetOf<Pos>()
-
-    for ((prev, curr, next) in path.plus(path.take(2)).windowed(3)) {
+    for ((prev, curr, next) in path.plus<Pos>(path.take<Pos>(2)).windowed<Pos>(3)) {
 
         fun List<Pos>.addTiles(set: MutableSet<Pos>) = filter(Pos::isTile).forEach { set.add(it) }
 
@@ -122,7 +112,6 @@ private fun day10(lines: List<String>): List<Any?> {
             }
         }
     }
-
     fun Set<Pos>.exploreTiles(): Set<Pos> {
         val found = toMutableSet()
         val followed = mutableSetOf<Pos>()
@@ -138,5 +127,10 @@ private fun day10(lines: List<String>): List<Any?> {
         .single { it.none(Pos::outsideGrid) }
         .size
 
-    return listOf(part1, part2)
+    listOf(part1, part2).forEach(::println)
 }
+
+private const val connectsFromWest = "7-J"
+private const val connectsFromEast = "F-L"
+private const val connectsFromNorth = "L|J"
+private const val connectsFromSouth = "F|7"
