@@ -12,7 +12,7 @@ private const val connectsFromSouth = "F|7"
 private fun day10(lines: List<String>): List<Any?> {
     data class Pos(val x: Int, val y: Int) {
         val inGrid by lazy { x in lines[0].indices && y in lines.indices }
-        val atGridBorder by lazy { x == 0 || y == 0 || x == lines[0].indices.last || y == lines.indices.last }
+        val atGridBorder by lazy { neighbors().count() < 4 }
 
         val c: Char by lazy {
             when {
@@ -127,15 +127,15 @@ private fun day10(lines: List<String>): List<Any?> {
         val followed = mutableSetOf<Pos>()
         while (true) {
             val pos = found.firstOrNull { it !in followed } ?: return found
-            pos.also { followed += it }.neighbors().filter(Pos::isTile)
-                .forEach { found += it }
+            pos.neighbors().filter(Pos::isTile).forEach { found += it }
+            followed += pos
         }
     }
 
     val part2 = listOf(leftTiles, rightTiles)
         .map(MutableSet<Pos>::exploreTiles)
-        .single { it.none(Pos::atGridBorder) }
-        .size
+        .singleOrNull { it.none(Pos::atGridBorder) && it.isNotEmpty() }
+        ?.size ?: 0
 
     return listOf(part1, part2)
 }
