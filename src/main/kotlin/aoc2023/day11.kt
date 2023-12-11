@@ -23,8 +23,8 @@ private fun day11(space: List<String>): List<Any?> {
         for (b in galaxies) {
             if (!galaxyPairs.add(setOf(a, b))) continue
 
-            val rx = intRangeUntil(a.x, b.x)
-            val ry = intRangeUntil(a.y, b.y)
+            val rx = listOf(a, b).map { it.x }.sorted().let { (a, b) -> a until b }
+            val ry = listOf(a, b).map { it.y }.sorted().let { (a, b) -> a until b }
 
             val dx = doubleColumns.count { it in rx }
             val dy = doubleRows.count { it in ry }
@@ -39,4 +39,3 @@ private fun day11(space: List<String>): List<Any?> {
     return listOf(part1, part2)
 }
 
-private fun intRangeUntil(a: Int, b: Int) = listOf(a, b).sorted().let { (a, b) -> a until b }
