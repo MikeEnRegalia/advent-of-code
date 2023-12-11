@@ -35,17 +35,17 @@ private fun day10(lines: List<String>): List<Any?> {
             }
         }
 
-        val w by lazy { dx(dx = -1) }
-        val e by lazy { dx(dx = 1) }
-        val n by lazy { dx(dy = -1) }
-        val s by lazy { dx(dy = 1) }
+        val w by lazy { translate(dx = -1) }
+        val e by lazy { translate(dx = 1) }
+        val n by lazy { translate(dy = -1) }
+        val s by lazy { translate(dy = 1) }
 
-        val nw by lazy { dx(dx = -1, dy = -1) }
-        val ne by lazy { dx(dx = 1, dy = -1) }
-        val sw by lazy { dx(dx = -1, dy = 1) }
-        val se by lazy { dx(dx = 1, dy = 1) }
+        val nw by lazy { translate(-1, -1) }
+        val ne by lazy { translate(1, -1) }
+        val sw by lazy { translate(-1, 1) }
+        val se by lazy { translate(1, 1) }
 
-        private fun dx(dx: Int = 0, dy: Int = 0) = copy(x = x + dx, y = y + dy)
+        private fun translate(dx: Int = 0, dy: Int = 0) = copy(x = x + dx, y = y + dy)
 
         fun neighbors() = sequenceOf(w, e, n, s).filter { it.inGrid }
 
