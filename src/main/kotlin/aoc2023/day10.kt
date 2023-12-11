@@ -88,39 +88,29 @@ private fun day10(lines: List<String>): List<Any?> {
         fun MutableSet<Pos>.addIfTile(p: Pos, dx: Int = 0, dy: Int = 0) = p.copy(x = p.x + dx, y = p.y + dy)
             .let { if (it.isTile()) add(it) else null }
 
-        when {
-            p.c == '|' -> {
-                (if (dy > 0) rightTiles else leftTiles).addIfTile(p, dx = -1)
-                (if (dy > 0) leftTiles else rightTiles).addIfTile(p, dx = 1)
-            }
-
-            p.c == '-' -> {
-                (if (dx > 0) rightTiles else leftTiles).addIfTile(p, dy = 1)
-                (if (dx > 0) leftTiles else rightTiles).addIfTile(p, dy = -1)
-            }
-
-            p.c == 'F' -> {
+        when (p.c) {
+            'F' -> {
                 (if (dx > 0) rightTiles else leftTiles).addIfTile(p, dx = 1, dy = 1)
                 (if (dx > 0) leftTiles else rightTiles).addIfTile(p, dx = 0, dy = -1)
                 (if (dx > 0) leftTiles else rightTiles).addIfTile(p, dx = -1, dy = -1)
                 (if (dx > 0) leftTiles else rightTiles).addIfTile(p, dx = -1, dy = 0)
             }
 
-            p.c == '7' -> {
+            '7' -> {
                 (if (dx > 0) rightTiles else leftTiles).addIfTile(p, dx = -1, dy = 1)
                 (if (dx > 0) leftTiles else rightTiles).addIfTile(p, dx = 0, dy = -1)
                 (if (dx > 0) leftTiles else rightTiles).addIfTile(p, dx = 1, dy = -1)
                 (if (dx > 0) leftTiles else rightTiles).addIfTile(p, dx = 1, dy = 0)
             }
 
-            p.c == 'J' -> {
+            'J' -> {
                 (if (dx > 0) leftTiles else rightTiles).addIfTile(p, dx = -1, dy = -1)
                 (if (dx > 0) rightTiles else leftTiles).addIfTile(p, dx = 1, dy = 0)
                 (if (dx > 0) rightTiles else leftTiles).addIfTile(p, dx = 1, dy = 1)
                 (if (dx > 0) rightTiles else leftTiles).addIfTile(p, dx = 0, dy = 1)
             }
 
-            p.c == 'L' -> {
+            'L' -> {
                 (if (dx > 0) leftTiles else rightTiles).addIfTile(p, dx = 1, dy = -1)
                 (if (dx > 0) rightTiles else leftTiles).addIfTile(p, dx = 0, dy = 1)
                 (if (dx > 0) rightTiles else leftTiles).addIfTile(p, dx = -1, dy = 1)
@@ -129,9 +119,9 @@ private fun day10(lines: List<String>): List<Any?> {
         }
     }
 
-    val tiles = listOf(leftTiles, rightTiles).map { seeds ->
-        val toFollow = seeds.toMutableList()
-        val tiles = seeds.toMutableSet()
+    fun Set<Pos>.expand(): Set<Pos> {
+        val toFollow = toMutableList()
+        val tiles = toMutableSet()
         while (toFollow.isNotEmpty()) {
             toFollow.removeLast().neighbors().filter { it.isTile() }.forEach {
                 if (it !in tiles) {
@@ -140,8 +130,11 @@ private fun day10(lines: List<String>): List<Any?> {
                 }
             }
         }
-        tiles
+        return tiles
     }
+
+    val tiles = listOf(leftTiles, rightTiles)
+        .map { it.expand() }
         .singleOrNull { tiles ->
             tiles.none { it.x == 0 || it.y == 0 || it.x == lines[0].indices.last || it.y == lines.indices.last }
         }
