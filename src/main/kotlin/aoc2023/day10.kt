@@ -93,7 +93,7 @@ private fun day10(lines: List<String>): List<Any?> {
 
     for ((prev, curr, next) in path.plus(path.take(2)).windowed(3)) {
 
-        fun List<Pos>.addTile(set: MutableSet<Pos>) = filter(Pos::isTile).forEach { set.add(it) }
+        fun List<Pos>.addTiles(set: MutableSet<Pos>) = filter(Pos::isTile).forEach { set.add(it) }
 
         val rightIfEastward = if (next.x > prev.x) rightTiles else leftTiles
         val leftIfEastward = if (next.x > prev.x) leftTiles else rightTiles
@@ -101,23 +101,23 @@ private fun day10(lines: List<String>): List<Any?> {
         with(curr) {
             when (c) {
                 'F' -> {
-                    listOf(se).addTile(rightIfEastward)
-                    listOf(w, nw, n).addTile(leftIfEastward)
+                    listOf(se).addTiles(rightIfEastward)
+                    listOf(w, nw, n).addTiles(leftIfEastward)
                 }
 
                 '7' -> {
-                    listOf(sw).addTile(rightIfEastward)
-                    listOf(n, ne, e).addTile(leftIfEastward)
+                    listOf(sw).addTiles(rightIfEastward)
+                    listOf(n, ne, e).addTiles(leftIfEastward)
                 }
 
                 'J' -> {
-                    listOf(nw).addTile(leftIfEastward)
-                    listOf(e, se, s).addTile(rightIfEastward)
+                    listOf(nw).addTiles(leftIfEastward)
+                    listOf(e, se, s).addTiles(rightIfEastward)
                 }
 
                 'L' -> {
-                    listOf(ne).addTile(leftIfEastward)
-                    listOf(w, sw, s).addTile(rightIfEastward)
+                    listOf(ne).addTiles(leftIfEastward)
+                    listOf(w, sw, s).addTiles(rightIfEastward)
                 }
             }
         }
