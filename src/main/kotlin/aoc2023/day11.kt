@@ -15,10 +15,10 @@ private fun day11(space: List<String>): List<Any?> {
     val doubleRows = space.indices.filter { y -> space[y].all { it == '.' } }
     val doubleColumns = space[0].indices.filter { x -> space.map { it[x] }.all { it == '.' } }
 
-    val galaxyPairs = mutableSetOf<Set<Galaxy>>()
     var part1 = 0L
     var part2 = 0L
 
+    val galaxyPairs = mutableSetOf<Set<Galaxy>>()
     for (a in galaxies) {
         for (b in galaxies) {
             if (!galaxyPairs.add(setOf(a, b))) continue
@@ -32,7 +32,7 @@ private fun day11(space: List<String>): List<Any?> {
             val dist = rx.size() + ry.size()
 
             part1 += dist + dx + dy
-            part2 += dist + 999999 * dx + 999999 * dy
+            part2 += dist + 999999 * (dx + dy)
         }
     }
 
