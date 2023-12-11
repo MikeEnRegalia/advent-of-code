@@ -1,7 +1,5 @@
 package aoc2023
 
-import kotlin.math.min
-
 fun main() {
     val lines = generateSequence(::readlnOrNull).toList()
 
@@ -65,7 +63,7 @@ fun main() {
         while (true) {
             curr.pipeNeighbors().filter { it !in V }.forEach {
                 val d = D.getValue(curr) + 1
-                D.compute(it) { _, old -> min(old ?: Int.MAX_VALUE, d) }
+                D.compute(it) { _, old -> if (old == null || old < d) d else old }
             }
             V += curr
             val remaining = D.keys - V
@@ -77,11 +75,14 @@ fun main() {
 
         return path to D.values.max()
     }
+
     val (path, part1) = findPath()
     fun Pos.isTile() = c != '?' && this !in path
+
     val leftTiles = mutableSetOf<Pos>()
     val rightTiles = mutableSetOf<Pos>()
-    for ((prev, curr, next) in path.plus<Pos>(path.take<Pos>(2)).windowed<Pos>(3)) {
+
+    for ((prev, curr, next) in path.plus(path.take(2)).windowed(3)) {
 
         fun List<Pos>.addTiles(set: MutableSet<Pos>) = filter(Pos::isTile).forEach { set.add(it) }
 
@@ -112,6 +113,7 @@ fun main() {
             }
         }
     }
+
     fun Set<Pos>.exploreTiles(): Set<Pos> {
         val found = toMutableSet()
         val followed = mutableSetOf<Pos>()
