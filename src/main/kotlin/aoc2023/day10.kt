@@ -129,8 +129,6 @@ private fun day10(lines: List<String>): List<Any?> {
         }
     }
 
-    val allTiles = lines.sumOf { it.count { it == '.' } }
-
     val tiles = listOf(leftTiles, rightTiles).map { seeds ->
         val toFollow = seeds.toMutableList()
         val tiles = seeds.toMutableSet()
