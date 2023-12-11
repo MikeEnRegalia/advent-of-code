@@ -18,7 +18,7 @@ private fun day10(lines: List<String>): List<Any?> {
             when {
                 !inGrid -> 'X'
                 lines[y][x] == 'S' -> {
-                    val (e, s, w, n) = listOf(d(dx = 1), d(dy = 1), d(dx = -1), d(dy = -1)).map { it.c }
+                    val (e, s, w, n) = listOf(e, s, w, n).map { it.c }
                     when {
                         e in connectsFromWest && w in connectsFromEast -> '-'
                         s in connectsFromNorth && n in connectsFromSouth -> '|'
@@ -34,9 +34,19 @@ private fun day10(lines: List<String>): List<Any?> {
             }
         }
 
-        fun d(dx: Int = 0, dy: Int = 0) = copy(x = x + dx, y = y + dy)
+        val w by lazy { dx(dx = -1) }
+        val e by lazy { dx(dx = 1) }
+        val n by lazy { dx(dy = -1) }
+        val s by lazy { dx(dy = 1) }
 
-        fun neighbors() = sequenceOf(d(dx = 1), d(dx = -1), d(dy = 1), d(dy = -1)).filter { it.inGrid }
+        val nw by lazy { dx(dx = -1, dy = -1) }
+        val ne by lazy { dx(dx = 1, dy = -1) }
+        val sw by lazy { dx(dx = -1, dy = 1) }
+        val se by lazy { dx(dx = 1, dy = 1) }
+
+        private fun dx(dx: Int = 0, dy: Int = 0) = copy(x = x + dx, y = y + dy)
+
+        fun neighbors() = sequenceOf(w, e, n, s).filter { it.inGrid }
 
         fun pipeNeighbors() = neighbors().filter {
             val dx = it.x - x
@@ -82,46 +92,44 @@ private fun day10(lines: List<String>): List<Any?> {
 
     for ((prev, curr, next) in path.plus(path.take(2)).windowed(3)) {
 
-        fun List<Pos>.addIfTile(set: MutableSet<Pos>) = filter(Pos::isTile).forEach { set.add(it) }
+        fun List<Pos>.addTile(set: MutableSet<Pos>) = filter(Pos::isTile).forEach { set.add(it) }
 
         val rightIfEastward = if (next.x > prev.x) rightTiles else leftTiles
         val leftIfEastward = if (next.x > prev.x) leftTiles else rightTiles
 
-        when (curr.c) {
-            'F' -> {
-                listOf(curr.d(1, 1)).addIfTile(rightIfEastward)
-                listOf(curr.d(0, -1), curr.d(-1, -1), curr.d(-1, 0)).addIfTile(leftIfEastward)
-            }
+        with(curr) {
+            when (c) {
+                'F' -> {
+                    listOf(se).addTile(rightIfEastward)
+                    listOf(w, nw, n).addTile(leftIfEastward)
+                }
 
-            '7' -> {
-                listOf(curr.d(-1, 1)).addIfTile(rightIfEastward)
-                listOf(curr.d(0, -1), curr.d(1, -1), curr.d(1, 0)).addIfTile(leftIfEastward)
-            }
+                '7' -> {
+                    listOf(sw).addTile(rightIfEastward)
+                    listOf(n, ne, e).addTile(leftIfEastward)
+                }
 
-            'J' -> {
-                listOf(curr.d(-1, -1)).addIfTile(leftIfEastward)
-                listOf(curr.d(1, 0), curr.d(1, 1), curr.d(0, 1)).addIfTile(rightIfEastward)
-            }
+                'J' -> {
+                    listOf(nw).addTile(leftIfEastward)
+                    listOf(e, se, s).addTile(rightIfEastward)
+                }
 
-            'L' -> {
-                listOf(curr.d(1, -1)).addIfTile(leftIfEastward)
-                listOf(curr.d(0, 1), curr.d(-1, 1), curr.d(-1, 0)).addIfTile(rightIfEastward)
+                'L' -> {
+                    listOf(ne).addTile(leftIfEastward)
+                    listOf(w, sw, s).addTile(rightIfEastward)
+                }
             }
         }
     }
 
     fun Set<Pos>.exploreTiles(): Set<Pos> {
-        val toFollow = toMutableList()
-        val tiles = toMutableSet()
-        while (toFollow.isNotEmpty()) {
-            toFollow.removeLast().neighbors().filter { it.isTile() }.forEach {
-                if (it !in tiles) {
-                    toFollow += it
-                    tiles += it
-                }
-            }
+        val found = toMutableSet()
+        val followed = mutableSetOf<Pos>()
+        while (true) {
+            val pos = found.firstOrNull { it !in followed } ?: return found
+            pos.also { followed += it }.neighbors().filter(Pos::isTile)
+                .forEach { found += it }
         }
-        return tiles
     }
 
     val part2 = listOf(leftTiles, rightTiles)
