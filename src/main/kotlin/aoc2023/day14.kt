@@ -11,15 +11,12 @@ fun main() {
     val height = data.keys.maxOf { it.y } + 1
 
     fun rollNorth() {
-        for (y in 0 until height) {
-            for (x in 0 until width) {
-                val c = data[Pos(x, y)]
-                if (c == 'O') {
-                    val newY = (0 until y).reversed().takeWhile { data[Pos(x, it)] == null }.lastOrNull()
-                    if (newY != null) {
-                        data -= Pos(x, y)
-                        data[Pos(x, newY)] = 'O'
-                    }
+        for (y in 0 until height) for (x in 0 until width) {
+            if (data[Pos(x, y)] == 'O') {
+                val newY = (0 until y).reversed().takeWhile { data[Pos(x, it)] == null }.lastOrNull()
+                if (newY != null) {
+                    data -= Pos(x, y)
+                    data[Pos(x, newY)] = 'O'
                 }
             }
         }
