@@ -7,8 +7,7 @@ fun main() {
         l.mapIndexedNotNull { x, c -> if (c == '.') null else Pos(x, y) to c }
     }.toMap(mutableMapOf())
 
-    val width = data.keys.maxOf { it.x } + 1
-    val height = data.keys.maxOf { it.y } + 1
+    val (width, height) = data.keys.maxOf { it.x } + 1 to data.keys.maxOf { it.y } + 1
 
     fun rollNorth() {
         for (y in 0 until height) for (x in 0 until width) {
@@ -37,7 +36,8 @@ fun main() {
         val key = data.entries.toSet() as Any to data.summarize()
         if (key !in history) history.add(key) else {
             val cycleStart = history.indexOf(key)
-            println(history[cycleStart - 1 + (1_000_000_000 % history.size - cycleStart)].second)
+            val cycleLength = history.size - cycleStart
+            println(history[cycleStart - 1 + (1_000_000_000 - cycleStart) % cycleLength].second)
             return
         }
     }
