@@ -1,12 +1,13 @@
 package aoc2023
 
+import aoc2021b.splitMap
 import kotlin.math.min
 
 fun main() {
     fun List<String>.findH(skip: Int? = null) = indices.drop(1).filter { y ->
-        val toTake = min(y, size - y)
-        val above = drop(y - toTake).take(toTake)
-        val below = drop(y).take(toTake).reversed()
+        val (above, below) = min(y, size - y).let { n ->
+            drop(y - n).take(n) to drop(y).take(n).reversed()
+        }
         above == below
     }.firstOrNull { skip == null || it != skip }
 
@@ -19,9 +20,10 @@ fun main() {
 
     fun List<Pair<Int?, Int?>>.summarize() = fold(0) { acc, (v, h) -> acc + (v ?: 0) + 100 * (h ?: 0) }
 
-    val data = String(System.`in`.readAllBytes()).split("\n\n").map { it.split("\n") }
+    val data = String(System.`in`.readAllBytes()).split("\n\n").map(String::lines)
 
-    println(data.map { it.findV() to it.findH() }.summarize())
+    val part1 = data.map { it.findV() to it.findH() }.summarize()
+    println(part1)
 
     fun List<String>.variations(): Sequence<List<String>> = indices.asSequence().flatMap { y ->
         first().indices.map { x ->
@@ -33,15 +35,12 @@ fun main() {
         }
     }
 
+    fun List<String>.findReflection(t: (List<String>) -> Int?) = variations().mapNotNull(t).firstOrNull()
+
     val part2 = data.map { smudged ->
-        val oldV = smudged.findV()
-        val oldH = smudged.findH()
+        val (oldV, oldH) = smudged.findV() to smudged.findH()
+        smudged.findReflection { it.findV(skip = oldV) } to smudged.findReflection { it.findH(skip = oldH) }
+    }.summarize()
 
-        val v = smudged.variations().mapNotNull { it.findV(skip = oldV) }.firstOrNull()
-        val h = smudged.variations().mapNotNull { it.findH(skip = oldH) }.firstOrNull()
-
-        v to h
-    }
-
-    println(part2.summarize())
+    println(part2)
 }
