@@ -19,8 +19,8 @@ fun main() {
         }
     }
 
-    fun rotate() {
-        data = data.mapKeys { (k, _) -> Pos(height - 1 - k.y, k.x) } as MutableMap
+    fun rotate90() {
+        data = data.mapKeysTo(mutableMapOf()) { (k, _) -> Pos(height - 1 - k.y, k.x) }
     }
 
     fun Map<Pos, Char>.summarize() = filterValues { it == 'O' }.keys.sumOf { height - it.y }
@@ -31,7 +31,7 @@ fun main() {
         repeat(4) {
             rollNorth()
             if (history.isEmpty() && it == 0) println(data.summarize())
-            rotate()
+            rotate90()
         }
 
         val toCache = data.entries.toSet() to data.summarize()
