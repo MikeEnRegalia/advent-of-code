@@ -5,7 +5,7 @@ fun main() {
 
     var data = generateSequence(::readLine).flatMapIndexed { y, l ->
         l.mapIndexedNotNull { x, c -> if (c == '.') null else Pos(x, y) to c }
-    }.toMap().toMutableMap()
+    }.toMap(mutableMapOf())
 
     val width = data.keys.maxOf { it.x } + 1
     val height = data.keys.maxOf { it.y } + 1
