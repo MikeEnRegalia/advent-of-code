@@ -12,13 +12,10 @@ fun main() {
 
     fun rollNorth() {
         for (y in 0 until height) for (x in 0 until width) {
-            if (data[Pos(x, y)] == 'O') {
-                val newY = (0 until y).reversed().takeWhile { data[Pos(x, it)] == null }.lastOrNull()
-                if (newY != null) {
-                    data -= Pos(x, y)
-                    data[Pos(x, newY)] = 'O'
-                }
-            }
+            if (data[Pos(x, y)] != 'O') continue
+            val y2 = (0 until y).reversed().takeWhile { data[Pos(x, it)] == null }.lastOrNull() ?: continue
+            data -= Pos(x, y)
+            data[Pos(x, y2)] = 'O'
         }
     }
 
@@ -31,12 +28,9 @@ fun main() {
     val history = mutableListOf<Pair<Any, Int>>()
 
     while (true) {
-        rollNorth()
-        if (history.isEmpty()) println(data.summarize())
-        rotate()
-
-        repeat(3) {
+        repeat(4) {
             rollNorth()
+            if (history.isEmpty() && it == 0) println(data.summarize())
             rotate()
         }
 
