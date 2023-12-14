@@ -34,14 +34,10 @@ fun main() {
             rotate90()
         }
 
-        val toCache = data.entries.toSet() to data.summarize()
-        if (toCache !in history) history.add(toCache) else {
-            val cycleStart = history.indexOf(toCache)
-            var pos = 0
-            for (i in 0..<1_000_000_000 - 1) {
-                pos = if (pos == history.indices.last) cycleStart else pos + 1
-            }
-            println(history[pos].second)
+        val key = data.entries.toSet() as Any to data.summarize()
+        if (key !in history) history.add(key) else {
+            val cycleStart = history.indexOf(key)
+            println(history[cycleStart - 1 + (1_000_000_000 % history.size - cycleStart)].second)
             return
         }
     }
