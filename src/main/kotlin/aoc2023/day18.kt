@@ -7,32 +7,34 @@ fun main() {
     data class Rectangle(val from: Pos, val to: Pos = from) {
         val xRange = from.x..to.x
         val yRange = from.y..to.y
-        val corners = listOf(from, to, Pos(from.x, to.y), Pos(to.x, from.y))
-        val area = (to.x - from.x + 1) * (to.y - from.y + 1)
+        val width = to.x - from.x + 1
+        val height = to.y - from.y + 1
+        val area = width * height
+        val corners by lazy { listOf(from, to, Pos(from.x, to.y), Pos(to.x, from.y)) }
         operator fun contains(pos: Pos) = pos.x in xRange && pos.y in yRange
-        operator fun contains(r: Rectangle) = r.from in this && r.to in this
+        operator fun contains(r: Rectangle) = r.corners.all { it in this }
         fun growLeft() = copy(from = Pos(from.x - 1, from.y))
         fun growUp() = copy(from = Pos(from.x, from.y - 1))
         fun growRight() = copy(to = Pos(to.x + 1, to.y))
         fun growDown() = copy(to = Pos(to.x, to.y + 1))
-        fun overlapsWith(it: Rectangle) = corners.any { c -> c in it } || it.corners.any { c -> c in this }
+        fun overlapsWith(other: Rectangle) = corners.any { it in other } || other.corners.any { it in this }
         fun surrounding(): Sequence<Pos> {
-            val X = xRange.first - 1..xRange.last + 1
-            val Y = yRange.first - 1..yRange.last + 1
-            return X.asSequence().flatMap { x ->
-                Y.asSequence().filter { y -> x == X.first || x == X.last || y == Y.first || y == Y.last }
-                    .map { y -> Pos(x, y) }
-            }
+            val X = from.x - 1..to.x + 1
+            val Y = from.y - 1..to.y + 1
+            return sequenceOf(
+                X.asSequence().map { Pos(it, Y.first) },
+                X.asSequence().map { Pos(it, Y.last) },
+                Y.asSequence().map { Pos(X.first, it) },
+                Y.asSequence().map { Pos(X.last, it) },
+            ).flatten()
         }
 
         override fun toString() = "<$from, $to>"
     }
 
     fun solve(instructions: List<Pair<String, Long>>) {
-        val trenches = mutableSetOf<Rectangle>()
-
         var pos = Pos(0, 0)
-        trenches += Rectangle(Pos(0, 0), Pos(0, 0))
+        val trenches = mutableSetOf(Rectangle(pos))
 
         instructions.forEach { (direction, n) ->
             val (trench, newPos) = when (direction) {
@@ -57,7 +59,6 @@ fun main() {
             this in SPACE && trenches.none { overlapsWith(it) } && outside.none { overlapsWith(it) }
 
         fun Rectangle.grow(): Rectangle {
-            if (!qualifies()) throw Exception()
             var grown = this
             while (true) {
                 var r = grown
@@ -65,33 +66,27 @@ fun main() {
                 r.growRight().takeIf(Rectangle::qualifies)?.also { r = it }
                 r.growUp().takeIf(Rectangle::qualifies)?.also { r = it }
                 r.growDown().takeIf(Rectangle::qualifies)?.also { r = it }
-                if (r == grown) {
-                    if (!grown.qualifies()) throw Exception()
-                    return grown
-                }
+                if (r == grown) return grown
                 grown = r
             }
         }
 
-        SPACE.xRange.asSequence().flatMap { x ->
-            SPACE.yRange.asSequence()
-                .filter { y -> x == SPACE.xRange.first || x == SPACE.xRange.last || y == SPACE.yRange.first || y == SPACE.yRange.last }
-                .map { y -> Pos(x, y) }
-        }.map(::Rectangle).forEach { seed ->
-            val toFollow = mutableListOf(seed)
+        fun Rectangle.addToOutside() {
+            val toFollow = mutableListOf(this)
             while (toFollow.isNotEmpty()) {
-                val curr = toFollow.removeLast().takeIf { it.qualifies() }?.grow() ?: continue
+                val curr = toFollow.removeLast().takeIf(Rectangle::qualifies)?.grow() ?: continue
                 outside += curr
-                curr.surrounding().map { Rectangle(it) }.forEach { toFollow += it }
+                curr.surrounding().filter { trenches.none { t -> it in t} }.forEach { toFollow += Rectangle(it) }
             }
         }
 
-        for (x in SPACE.xRange) {
-            for (y in SPACE.yRange) {
-                val o = outside.filter { Pos(x, y) in it }
-                if (o.size > 1) throw Exception("$x,$y: $o")
-            }
-        }
+        sequenceOf(
+            SPACE.xRange.asSequence().map { Pos(it, SPACE.yRange.first) },
+            SPACE.xRange.asSequence().map { Pos(it, SPACE.yRange.last) },
+            SPACE.yRange.asSequence().map { Pos(SPACE.xRange.first, it) },
+            SPACE.yRange.asSequence().map { Pos(SPACE.xRange.last, it) },
+        ).flatten().map(::Rectangle).forEach(Rectangle::addToOutside)
+
         println(SPACE.area - outside.sumOf(Rectangle::area))
     }
 
