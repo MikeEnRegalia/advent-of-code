@@ -1,5 +1,6 @@
 package aoc2023
 
+import kotlin.Int.Companion.MAX_VALUE
 import kotlin.math.min
 
 fun main() {
@@ -12,20 +13,21 @@ fun main() {
         .filter { it.x in xRange && it.y in yRange }
 
     data class State(val pos: Pos, val prev: Pos? = null, val straightFor: Int = 0)
-
     fun Set<Pos>.onStraightLine() = all { it.x == first().x } || all { it.y == first().y }
 
-    fun State.next() = pos.neighbors()
-        .filter { it != prev }
-        .map { State(it, prev = pos, straightFor = if (setOfNotNull(it, pos, prev).onStraightLine()) straightFor + 1 else 1 ) }
+    fun State.move(newPos: Pos) = State(
+        newPos,
+        prev = pos,
+        straightFor = if (setOfNotNull(newPos, pos, prev).onStraightLine()) straightFor + 1 else 1
+    )
+
+    fun State.next() = pos.neighbors().filter { it != prev }
+        .map(::move)
         .filter { it.straightFor <= 3 }
 
-    fun State.ultraNext() = pos.neighbors()
-        .filter { it != prev }
-        .filter {
-            if (straightFor >= 4) true else setOfNotNull(it, pos, prev).onStraightLine()
-        }
-        .map { State(it, prev = pos, straightFor = if (setOfNotNull(it, pos, prev).onStraightLine()) straightFor + 1 else 1 ) }
+    fun State.ultraNext() = pos.neighbors().filter { it != prev }
+        .filter { if (straightFor >= 4) true else setOfNotNull(it, pos, prev).onStraightLine() }
+        .map(::move)
         .filter { it.straightFor <= 10 }
 
     fun solve(t: (State) -> List<State>) {
@@ -37,8 +39,7 @@ fun main() {
         while (true) {
             t(curr).filter { it !in V }.forEach {
                 val d = D.getValue(curr) + grid[it.pos.y][it.pos.x].digitToInt()
-                if (d > xRange.last * 2 * 9) return@forEach
-                D.compute(it) { _, old -> min(old ?: Int.MAX_VALUE, d) }
+                D.compute(it) { _, old -> min(old ?: MAX_VALUE, d) }
                 N += it
             }
             curr = N.minByOrNull { D.getValue(it) } ?: break
