@@ -6,9 +6,7 @@ fun main() {
         Pair(
             a.lines().associate { line -> line.split("{").let { it[0] to it[1].dropLast(1).split(",") } },
             b.lines().map { line ->
-                line.drop(1).dropLast(1).split(",").associate {
-                    it.split("=").let { (k, v) -> k to v.toInt() }
-                }
+                line.drop(1).dropLast(1).split(",").associate { it.split("=").let { (k, v) -> k to v.toInt() } }
             }
         )
     }
