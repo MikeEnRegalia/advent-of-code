@@ -1,4 +1,4 @@
-import State.*
+import Tracker.State.*
 
 fun main() {
     with(generateSequence(::readLine).toList()) {
@@ -15,7 +15,42 @@ private data class Trench(val x: Long, val y: Long, val height: Long) {
     val yRange = y..y + height
 }
 
-private enum class State { outside, entering, inside, leaving }
+private data class Tracker(
+    val ranges: List<LongRange> = listOf(),
+    val entered: Trench? = null,
+    val prev: Trench? = null,
+    val s: State = outside
+) {
+    enum class State { outside, entering, inside, leaving }
+
+    fun count(y: Long, trench: Trench): Tracker {
+        val (prevIsStart, prevIsEnd) = (y == prev?.yRange?.first) to (y == prev?.yRange?.last)
+        val (isStart, isEnd) = (y == trench.yRange.first) to (y == trench.yRange.last)
+        return when {
+            s == outside && (isStart || isEnd) -> copy(entered = trench, prev = trench, s = entering)
+            s == outside -> copy(entered = trench, prev = trench, s = inside)
+            s == entering && (prevIsStart && isStart || prevIsEnd && isEnd) -> Tracker(
+                ranges = ranges + listOf(entered!!.x..trench.x),
+                s = outside
+            )
+
+            s == entering -> copy(s = inside, prev = null)
+            s == inside && (isStart || isEnd) -> copy(s = leaving, prev = trench)
+            s == leaving && (prevIsStart && isStart || prevIsEnd && isEnd) -> copy(
+                s = inside,
+                prev = null
+            )
+
+            s == inside || s == leaving -> copy(
+                ranges = ranges + listOf(entered!!.x..trench.x),
+                entered = null,
+                s = outside
+            )
+
+            else -> throw Exception()
+        }
+    }
+}
 
 fun solve(instructions: List<Pair<String, Long>>): Long {
     val trenches = buildSet {
@@ -25,44 +60,11 @@ fun solve(instructions: List<Pair<String, Long>>): Long {
             "U" -> y -= n.also { add(Trench(x, y - n, n)) }
             "L", "R" -> x += if (direction == "L") -n else n
         }
-    }
+    }.sortedBy { it.x }
 
-    data class CountingState(
-        val ranges: List<LongRange> = listOf(),
-        val entered: Trench? = null,
-        val prev: Trench? = null,
-        val mode: State = outside
-    )
-
-    return (trenches.minOf { it.y }..trenches.maxOf { it.y + it.height }).sumOf { y ->
-        trenches.filter { y in it.yRange }.sortedBy { it.x }.fold(CountingState()) { acc, trench ->
-            with(acc) {
-                val (prevIsStart, prevIsEnd) = (y == prev?.yRange?.first) to (y == prev?.yRange?.last)
-                val (isStart, isEnd) = (y == trench.yRange.first) to (y == trench.yRange.last)
-                when {
-                    mode == outside && (isStart || isEnd) -> copy(entered = trench, prev = trench, mode = entering)
-                    mode == outside -> copy(entered = trench, prev = trench, mode = inside)
-                    mode == entering && (prevIsStart && isStart || prevIsEnd && isEnd) -> CountingState(
-                        ranges = ranges + listOf(entered!!.x..trench.x),
-                        mode = outside
-                    )
-
-                    mode == entering -> copy(mode = inside, prev = null)
-                    mode == inside && (isStart || isEnd) -> copy(mode = leaving, prev = trench)
-                    mode == leaving && (prevIsStart && isStart || prevIsEnd && isEnd) -> copy(
-                        mode = inside,
-                        prev = null
-                    )
-
-                    mode == inside || mode == leaving -> copy(
-                        ranges = ranges + listOf(entered!!.x..trench.x),
-                        entered = null,
-                        mode = outside
-                    )
-
-                    else -> throw Exception()
-                }
-            }
-        }.ranges.sumOf { it.last - it.first + 1 }
+    return with(trenches) {
+        (minOf { it.y }..maxOf { it.y + it.height }).sumOf { y ->
+            filter { y in it.yRange }.fold(Tracker()) { t, n -> t.count(y, n) }.ranges.sumOf { it.last - it.first + 1 }
+        }
     }
 }
