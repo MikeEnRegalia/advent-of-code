@@ -26,9 +26,9 @@ fun main() {
         for (rule in rules) {
             if (":" !in rule) return applyWorkflow(rule)
             val (newWf, condition) = rule.parseRule()
-            val (attr, haveLessThan, value) = condition
+            val (attr, lt, value) = condition
             val actualValue = getValue(attr)
-            val condWorks = if (haveLessThan) actualValue < value else actualValue > value
+            val condWorks = if (lt) actualValue < value else actualValue > value
             if (condWorks) return applyWorkflow(newWf)
         }
         return "R"
@@ -36,49 +36,45 @@ fun main() {
 
     println(parts.filter { it.applyWorkflow("in") == "A" }.sumOf { it.values.sum() })
 
-    fun Map<String, List<IntRange>>.simulate(wf: String): Long {
-        var remaining = toMutableMap()
-        return when (wf) {
-            "R" -> 0L
-            "A" -> values.map { it.sumOf { it.last - it.first + 1 } }.map(Int::toLong).reduce(Long::times)
-            else -> {
-                var sum = 0L
-                for (rule in workflows.getValue(wf)) {
-                    if (values.any { it.isEmpty() }) break
-                    if (":" !in rule) {
-                        sum += remaining.simulate(rule)
-                        break
-                    }
+    fun Map<String, List<IntRange>>.simulate(wf: String): Long = when (wf) {
+        "R" -> 0L
+        "A" -> values.map { it.sumOf { it.last - it.first + 1 } }.map(Int::toLong).reduce(Long::times)
+        else -> {
+            var remaining = toMutableMap()
+            var sum = 0L
+            for (rule in workflows.getValue(wf)) {
+                if (values.any(List<IntRange>::isEmpty)) break
+                if (":" !in rule) {
+                    sum += remaining.simulate(rule)
+                    break
+                }
 
-                    val (newWf, condition) = rule.parseRule()
-                    val (attr, lessThan, value) = condition
+                val (newWf, condition) = rule.parseRule()
+                val (attr, lessThan, value) = condition
 
-                    fun List<IntRange>.filterLessThanValue(v: Int) = mapNotNull {
-                        if (it.first >= v) null else it.first..min(it.last, v - 1)
-                    }
+                fun List<IntRange>.filterLessThanValue(v: Int) =
+                    mapNotNull { if (it.first >= v) null else it.first..min(it.last, v - 1) }
 
-                    fun List<IntRange>.filterGreaterThanValue(v: Int) = mapNotNull {
-                        if (it.last <= v) null else max(v + 1, it.first)..it.last
-                    }
+                fun List<IntRange>.filterGreaterThanValue(v: Int) =
+                    mapNotNull { if (it.last <= v) null else max(v + 1, it.first)..it.last }
 
-                    val newRanges = remaining.mapValues { (k, v) ->
-                        if (k != attr) v else {
-                            if (lessThan) v.filterLessThanValue(value) else v.filterGreaterThanValue(value)
-                        }
-                    }
-
-                    sum += newRanges.simulate(newWf)
-
-                    remaining = remaining.mapValuesTo(mutableMapOf()) { (k, v) ->
-                        if (k != attr) v else {
-                            if (lessThan) v.filterGreaterThanValue(value - 1) else v.filterLessThanValue(
-                                value + 1
-                            )
-                        }
+                val newRanges = remaining.mapValues { (k, v) ->
+                    if (k != attr) v else {
+                        if (lessThan) v.filterLessThanValue(value) else v.filterGreaterThanValue(value)
                     }
                 }
-                sum
+
+                sum += newRanges.simulate(newWf)
+
+                remaining = remaining.mapValuesTo(mutableMapOf()) { (k, v) ->
+                    if (k != attr) v else {
+                        if (lessThan) v.filterGreaterThanValue(value - 1) else v.filterLessThanValue(
+                            value + 1
+                        )
+                    }
+                }
             }
+            sum
         }
     }
 
