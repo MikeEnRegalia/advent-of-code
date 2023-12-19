@@ -22,14 +22,12 @@ fun main() {
 
     fun Map<String, Int>.applyWorkflow(wf: String): String {
         if (wf == "R" || wf == "A") return wf
-        val rules = workflows.getValue(wf)
-        for (rule in rules) {
+        for (rule in workflows.getValue(wf)) {
             if (":" !in rule) return applyWorkflow(rule)
             val (newWf, condition) = rule.parseRule()
             val (attr, lt, value) = condition
-            val actualValue = getValue(attr)
-            val condWorks = if (lt) actualValue < value else actualValue > value
-            if (condWorks) return applyWorkflow(newWf)
+            val useWf = getValue(attr).let { if (lt) it < value else it > value }
+            if (useWf) return applyWorkflow(newWf)
         }
         return "R"
     }
@@ -50,28 +48,22 @@ fun main() {
                 }
 
                 val (newWf, condition) = rule.parseRule()
-                val (attr, lessThan, value) = condition
+                val (attr, lt, value) = condition
 
-                fun List<IntRange>.filterLessThanValue(v: Int) =
+                fun List<IntRange>.lessThan(v: Int) =
                     mapNotNull { if (it.first >= v) null else it.first..min(it.last, v - 1) }
 
-                fun List<IntRange>.filterGreaterThanValue(v: Int) =
+                fun List<IntRange>.greaterThan(v: Int) =
                     mapNotNull { if (it.last <= v) null else max(v + 1, it.first)..it.last }
 
-                val newRanges = remaining.mapValues { (k, v) ->
-                    if (k != attr) v else {
-                        if (lessThan) v.filterLessThanValue(value) else v.filterGreaterThanValue(value)
-                    }
+                val newRanges = remaining.toMutableMap().apply {
+                    set(attr, getValue(attr).let { if (lt) it.lessThan(value) else it.greaterThan(value) })
                 }
 
                 sum += newRanges.simulate(newWf)
 
-                remaining = remaining.mapValuesTo(mutableMapOf()) { (k, v) ->
-                    if (k != attr) v else {
-                        if (lessThan) v.filterGreaterThanValue(value - 1) else v.filterLessThanValue(
-                            value + 1
-                        )
-                    }
+                remaining = remaining.toMutableMap().apply {
+                    set(attr, getValue(attr).let { if (lt) it.greaterThan(value - 1) else it.lessThan(value + 1) })
                 }
             }
             sum
