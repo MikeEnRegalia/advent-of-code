@@ -2,7 +2,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 fun main() {
-    val (workflows, parts) = String(System.`in`.readAllBytes()).split("\n\n").map { it.lines() }.let { (a, b) ->
+    val (workflows, parts) = String(System.`in`.readAllBytes()).split("\n\n").map(String::lines).let { (a, b) ->
         Pair(
             a.associate { line -> line.split("{").let { it[0] to it[1].dropLast(1).split(",") } },
             b.map { line ->
