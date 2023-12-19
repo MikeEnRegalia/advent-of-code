@@ -1,8 +1,8 @@
 package aoc2023
 
-fun main() = day03(System.`in`.bufferedReader().lines().toList()).forEach(::println)
+fun main() {
+    val lines = generateSequence(::readLine).toList()
 
-private fun day03(lines: List<String>): List<Any?> {
     data class Pos(val x: Int, val y: Int)
 
     fun Pos.neighbors() = (-1..1).asSequence()
@@ -11,12 +11,10 @@ private fun day03(lines: List<String>): List<Any?> {
         .filter { it.y in lines.indices && it.x in lines[y].indices }
         .toList()
 
-
     var part1 = 0L
     val numbers = mutableMapOf<Pos, Long>()
     val gears = mutableMapOf<Pos, Set<Pos>>()
-
-    for ((y, row) in lines.withIndex()) {
+    for ((y, row) in lines.withIndex<String>()) {
         var x = 0
         while (x in row.indices) {
             if (!row[x].isDigit()) x++
@@ -29,10 +27,10 @@ private fun day03(lines: List<String>): List<Any?> {
                     !(c.isDigit() || c == '.')
                 }
 
-                if (symbols.isNotEmpty()) {
+                if (symbols.isNotEmpty<Pos>()) {
                     part1 += n.toLong()
 
-                    symbols.filter { lines[it.y][it.x] == '*' }.forEach {
+                    symbols.filter<Pos> { lines[it.y][it.x] == '*' }.forEach<Pos> {
                         numbers[Pos(x, y)] = n.toLong()
                         gears.compute(it) { _, old -> (old ?: setOf()) + Pos(x, y) }
                     }
@@ -42,10 +40,9 @@ private fun day03(lines: List<String>): List<Any?> {
             }
         }
     }
-
     val part2 = gears
         .filterValues { it.size == 2 }
         .values.sumOf { it.map(numbers::getValue).reduce(Long::times) }
-
-    return listOf(part1, part2)
+    listOf(part1, part2).forEach(::println)
 }
+

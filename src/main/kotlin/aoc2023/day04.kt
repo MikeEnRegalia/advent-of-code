@@ -1,11 +1,10 @@
 package aoc2023
 
-fun main() = day04(System.`in`.bufferedReader().lines().toList()).forEach(::println)
-
-private fun day04(lines: List<String>): List<Any?> {
+fun main() {
+    val lines = generateSequence(::readLine).toList()
     var part1 = 0
     val part2Cards = MutableList(lines.size) { 1 }
-    lines.forEachIndexed { game, line ->
+    lines.forEachIndexed<String> { game, line ->
         val (winningNumbers, myNumbers) = line.split("|")
             .map { it.split(" ").mapNotNull(String::toIntOrNull) }
 
@@ -19,5 +18,5 @@ private fun day04(lines: List<String>): List<Any?> {
 
         part1 += score
     }
-    return listOf(part1, part2Cards.sumOf { it })
+    listOf(part1, part2Cards.sumOf { it }).forEach(::println)
 }
