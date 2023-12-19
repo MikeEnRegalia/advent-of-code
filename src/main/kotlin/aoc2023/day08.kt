@@ -1,10 +1,8 @@
 package aoc2023
 
-fun main() = day08(generateSequence(::readlnOrNull).toList()).forEach(::println)
-
-private fun day08(lines: List<String>): List<Any?> {
+fun main() {
+    val lines = generateSequence(::readlnOrNull).toList()
     val moves = lines[0]
-
     val paths = lines.drop(2).associate {
         it.filter(Char::isLetter).chunked(3).let { data ->
             data[0] to Pair(data[1], data[2])
@@ -21,12 +19,11 @@ private fun day08(lines: List<String>): List<Any?> {
         }
         return n.toLong()
     }
-
-    return listOf(
+    listOf(
         part1("AAA") { it == "ZZZ" },
         paths.keys.filter { it.endsWith("A") }
             .map { part1(it) { it.endsWith("Z") } }
-            .reduce(::findLCM))
+            .reduce(::findLCM)).forEach(::println)
 }
 
 fun findLCM(a: Long, b: Long): Long {

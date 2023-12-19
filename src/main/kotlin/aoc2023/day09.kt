@@ -1,8 +1,6 @@
 package aoc2023
 
-fun main() = day09(generateSequence(::readlnOrNull).toList()).forEach(::println)
-
-private fun day09(lines: List<String>): List<Any?> {
+fun main() {
     fun String.predict(): Pair<Int, Int> {
         val data = mutableListOf<MutableList<Int>>()
         data += split(" ").map(String::toInt).toMutableList()
@@ -18,6 +16,6 @@ private fun day09(lines: List<String>): List<Any?> {
         return data.first().first() to data.first().last()
     }
 
-    val data = lines.map { it.predict() }
-    return listOf(data.sumOf { it.second }, data.sumOf { it.first })
+    val data = generateSequence(::readlnOrNull).map(String::predict).toList()
+    listOf(data.sumOf { it.second }, data.sumOf { it.first }).forEach(::println)
 }
