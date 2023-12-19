@@ -3,20 +3,16 @@ package aoc2023
 import kotlin.math.max
 import kotlin.math.min
 
-fun main() = day05(String(System.`in`.readAllBytes())).forEach(::println)
-
-private fun day05(input: String): List<Any?> {
-    val chunks = input.split("\n\n")
+fun main() {
+    val chunks = String(System.`in`.readAllBytes()).split("\n\n")
     val seeds = chunks[0].split(" ").mapNotNull(String::toLongOrNull)
     val conversions = chunks.drop(1).map { chunk ->
         chunk.split("\n").drop(1)
             .map { it.split(" ").map(String::toLong) }
     }
-
     val part1 = seeds.map { it..it }
     val part2 = seeds.chunked(2).map { it[0]..it[0] + it[1] }
-
-    return listOf(part1, part2).map { convert(conversions, it) }
+    listOf(part1, part2).map { convert(conversions, it) }.forEach(::println)
 }
 
 private fun convert(conversions: List<List<List<Long>>>, seeds: List<LongRange>): Long {
