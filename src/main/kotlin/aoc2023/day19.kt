@@ -2,10 +2,10 @@ import kotlin.math.max
 import kotlin.math.min
 
 fun main() {
-    val (workflows, parts) = String(System.`in`.readAllBytes()).split("\n\n").let { (a, b) ->
+    val (workflows, parts) = String(System.`in`.readAllBytes()).split("\n\n").map { it.lines() }.let { (a, b) ->
         Pair(
-            a.lines().associate { line -> line.split("{").let { it[0] to it[1].dropLast(1).split(",") } },
-            b.lines().map { line ->
+            a.associate { line -> line.split("{").let { it[0] to it[1].dropLast(1).split(",") } },
+            b.map { line ->
                 line.drop(1).dropLast(1).split(",").associate { it.split("=").let { (k, v) -> k to v.toInt() } }
             }
         )
@@ -24,8 +24,7 @@ fun main() {
             if (":" !in rule) return applyWorkflow(rule)
             val (newWf, condition) = rule.parseRule()
             val (attr, lt, value) = condition
-            val useWf = getValue(attr).let { if (lt) it < value else it > value }
-            if (useWf) return applyWorkflow(newWf)
+            if (getValue(attr).let { if (lt) it < value else it > value }) return applyWorkflow(newWf)
         }
         return "R"
     }
