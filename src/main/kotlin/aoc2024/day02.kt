@@ -14,11 +14,7 @@ fun main() {
 
     val part2 = lines.map(::prepare).count {
         if (check(it)) return@count true
-
-        for (j in it.indices) {
-            if (check(it.take<Int>(j) + it.drop<Int>(j + 1))) return@count true
-        }
-        false
+        (it.indices.map { j -> it.take(j) + it.drop(j + 1) }).any(::check)
     }
     println(part2)
 }
