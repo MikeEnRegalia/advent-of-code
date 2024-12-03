@@ -11,5 +11,5 @@ fun main() {
         .sumOf { it[0] * it[1] }
 
     println(calc(code))
-    println(code.split("""don't\(\).*?(do\(\)|$)""".toRegex()).sumOf { calc(it) })
+    println(code.split("""don't\(\).*?(do\(\)|$)""".toRegex()).sumOf(::calc))
 }
