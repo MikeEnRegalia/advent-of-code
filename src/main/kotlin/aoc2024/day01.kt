@@ -3,7 +3,7 @@ package aoc2024
 import kotlin.math.abs
 
 fun main() {
-    val lines = String(System.`in`.readAllBytes()).trim().lines()
+    val lines = generateSequence(::readLine).toList()
     val set1 = lines
         .map { it.split(" ").filterNot(String::isBlank)}
         .map { it.first() }

@@ -7,7 +7,7 @@ fun main() {
 
     fun check(l: List<Int>) = l.windowed(2).map { it[1] - it[0] }.all { it in 1..3 }
 
-    val lines = String(System.`in`.readAllBytes()).trim().lines()
+    val lines = generateSequence(::readLine).toList()
 
     val part1 = lines.map(::prepare).count(::check)
     println(part1)
