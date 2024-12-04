@@ -20,6 +20,6 @@ fun main() {
         sequenceOf(
             (-1..1).map { lines.getOrNull(y + it)?.getOrNull(x + it) },
             (-1..1).map { lines.getOrNull(y + it)?.getOrNull(x - it) },
-        ).map { it.joinToString("") }.count { it == "MAS" || it == "SAM" } == 2
+        ).map { it.joinToString("") }.all { it == "MAS" || it == "SAM" }
     }.also(::println)
 }
