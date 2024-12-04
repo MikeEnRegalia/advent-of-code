@@ -16,7 +16,6 @@ fun main() {
             part1 += wordsAt(x, y).count { it == "XMAS" || it == "SAMX" }
         }
     }
-
     println(part1)
 
     fun xWordsAt(x: Int, y: Int) = sequenceOf(
@@ -30,6 +29,5 @@ fun main() {
             part2 += if (xWordsAt(x, y).count { it == "MAS" || it == "SAM" } == 2) 1 else 0
         }
     }
-
     println(part2)
 }
