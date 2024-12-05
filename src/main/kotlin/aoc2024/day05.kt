@@ -16,12 +16,10 @@ fun main() {
 
     val fixed = (updates - correctlyOrdered.toSet()).map { update ->
         buildList {
-            val remainingRules = rules.filter(update::containsAll).toMutableList()
             while (true) {
-                val remainingPages = update - toSet()
-                val smallest = remainingPages.singleOrNull { page -> page !in remainingRules.map { it[1] } } ?: break
-                this.add(smallest)
-                remainingRules.removeAll { it[0] == smallest }
+                val remainingRules = rules.filter(update::containsAll).filter { it[0] !in this }
+                val page = (update - toSet()).singleOrNull { page -> page !in remainingRules.map { it[1] } } ?: break
+                add(page)
             }
         }
     }
