@@ -12,22 +12,18 @@ fun main() {
             update.indexOf(rule[0]) < update.indexOf(rule[1])
         }
     }
-
     println(correctlyOrdered.checksum())
 
     val fixed = (updates - correctlyOrdered.toSet()).map { update ->
-        val ordered = buildList {
+        buildList {
             val remainingRules = rules.filter(update::containsAll).toMutableList()
             while (true) {
                 val remainingPages = update - toSet()
                 val smallest = remainingPages.singleOrNull { page -> page !in remainingRules.map { it[1] } } ?: break
-                add(smallest)
+                this.add(smallest)
                 remainingRules.removeAll { it[0] == smallest }
             }
         }
-
-        ordered.filter { it in update }
     }
-
     println(fixed.checksum())
 }
