@@ -33,30 +33,24 @@ fun main() {
             when (next.p.content()) {
                 null -> break
                 '#' -> curr = curr.turn()
-                else -> {
-                    curr = next
-                }
+                else -> curr = next
             }
         }
     }
+    println(visited.size)
 
     val loopingObstacles = (visited - start).filter { point ->
+        val walked = mutableSetOf<Pos>()
         var curr = Pos(start, 0)
-        val walked = mutableSetOf(curr)
-        while (true) {
+        while (walked.add(curr)) {
             val next = curr.next()
-            when (if (next.p == point) '#' else next.p.content()) {
+            curr = when (if (next.p == point) '#' else next.p.content()) {
                 null -> return@filter false
-                '#' -> curr = curr.turn()
-                else -> {
-                    curr = next
-                    if (!walked.add(curr)) break
-                }
+                '#' -> curr.turn()
+                else -> next
             }
         }
         true
     }
-
-    println(visited.size)
     println(loopingObstacles.size)
 }
