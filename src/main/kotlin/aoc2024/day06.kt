@@ -15,21 +15,19 @@ fun main() {
         fun turn() = copy(dir = (dir + 1) % 4)
     }
 
-    fun points() = sequence {
+    val start = sequence {
         for (y in grid.indices) for (x in grid[y].indices) yield(Point(x, y))
-    }
-
-    val start = points().single { it.content() == '^' }
+    }.single { it.content() == '^' }
 
     val visited = buildSet {
         var curr = Pos(start, 0)
         while (true) {
             add(curr.p)
             val next = curr.next()
-            when (next.p.content()) {
+            curr = when (next.p.content()) {
                 null -> break
-                '#' -> curr = curr.turn()
-                else -> curr = next
+                '#' -> curr.turn()
+                else -> next
             }
         }
     }
