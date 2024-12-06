@@ -3,14 +3,10 @@ package aoc2024
 fun main() {
     val grid = generateSequence(::readLine).toList()
 
+    val directions = listOf(0 to -1, 1 to 0, 0 to 1, -1 to 0)
+
     data class Point(val x: Int, val y: Int) {
-        fun next(dir: Int) = when (dir) {
-            0 -> copy(y = y - 1)
-            1 -> copy(x = x + 1)
-            2 -> copy(y = y + 1)
-            3 -> copy(x = x - 1)
-            else -> throw IllegalArgumentException("Unknown direction")
-        }
+        fun next(dir: Int) = directions[dir].let { (dx, dy) -> copy(x = x + dx, y = y + dy) }
         fun content() = grid.getOrNull(y)?.getOrNull(x)
     }
 
