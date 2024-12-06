@@ -25,31 +25,28 @@ fun main() {
 
     val start = points().single { it.content() == '^' }
 
-    fun part1(): Set<Point> {
+    val visited = buildSet {
         var curr = Pos(start, 0)
-        val visited = mutableSetOf(curr.p)
         while (true) {
+            add(curr.p)
             val next = curr.next()
             when (next.p.content()) {
-                null -> return visited
+                null -> break
                 '#' -> curr = curr.turn()
                 else -> {
                     curr = next
-                    visited += curr.p
                 }
             }
         }
     }
 
-    val visited = part1()
-
-    fun part2() = (visited - start).count { point ->
+    val loopingObstacles = (visited - start).filter { point ->
         var curr = Pos(start, 0)
         val walked = mutableSetOf(curr)
         while (true) {
             val next = curr.next()
             when (if (next.p == point) '#' else next.p.content()) {
-                null -> return@count false
+                null -> return@filter false
                 '#' -> curr = curr.turn()
                 else -> {
                     curr = next
@@ -61,5 +58,5 @@ fun main() {
     }
 
     println(visited.size)
-    println(part2())
+    println(loopingObstacles.size)
 }
