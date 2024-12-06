@@ -25,13 +25,13 @@ fun main() {
 
     val start = points().single { it.content() == '^' }
 
-    fun part1(): Int {
+    fun part1(): Set<Point> {
         var curr = Pos(start, 0)
         val visited = mutableSetOf(curr.p)
         while (true) {
             val next = curr.next()
             when (next.p.content()) {
-                null -> return visited.size
+                null -> return visited
                 '#' -> curr = curr.turn()
                 else -> {
                     curr = next
@@ -41,7 +41,9 @@ fun main() {
         }
     }
 
-    fun part2() = points().count { point ->
+    val visited = part1()
+
+    fun part2() = (visited - start).count { point ->
         var curr = Pos(start, 0)
         val walked = mutableSetOf(curr)
         while (true) {
@@ -58,6 +60,6 @@ fun main() {
         true
     }
 
-    println(part1())
+    println(visited.size)
     println(part2())
 }
