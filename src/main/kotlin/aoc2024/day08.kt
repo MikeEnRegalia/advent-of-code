@@ -26,16 +26,15 @@ fun main() {
                 else -> {
                     var f = 0
                     while (true) {
-                        val antinodes = a.antinodesFor(b, f)
-                        if (antinodes.isEmpty()) break
+                        val antinodes = a.antinodesFor(b, f).takeIf { it.isNotEmpty() } ?: break
                         addAll(antinodes)
                         f++
                     }
                 }
             }
         }
-    }
+    }.size
 
-    println(antinodes(simple = true).size)
-    println(antinodes(simple = false).size)
+    println(antinodes(simple = true))
+    println(antinodes(simple = false))
 }
