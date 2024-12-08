@@ -12,38 +12,30 @@ fun main() {
         }
     }
 
-    val antennas = sequence {
+    val allAntennas = sequence {
         for (y in grid.indices) for (x in grid[y].indices) {
-            grid[y][x].takeIf { it !in ".#" }?.let { yield(Point(x, y, it))}
+            grid[y][x].takeIf { it !in ".#" }?.let { yield(Point(x, y, it)) }
         }
     }.toList()
 
-    fun antinodes(full: Boolean): Set<Point> {
-        return buildSet {
-            for (antenna in antennas.map { it.antenna }.toSet()) {
-                val interferingAntennas = antennas.filter { it.antenna == antenna }
-                if (interferingAntennas.size < 2) continue
-
-                for (a in interferingAntennas) {
-                    for (b in interferingAntennas.filter { a != it }) {
-                        if (full) {
-                            var f = 0
-                            while (true) {
-                                val antinodes = a.antinodesFor(b, f)
-                                if (antinodes.isEmpty()) break
-                                addAll(antinodes)
-                                f++
-                            }
-
-                        } else {
-                            addAll(a.antinodesFor(b, 1))
-                        }
+    fun antinodes(simple: Boolean) = buildSet {
+        for (antenna in allAntennas.map { it.antenna }.toSet()) {
+            val antennas = allAntennas.filter { it.antenna == antenna }.takeIf { it.size > 1 } ?: continue
+            for (a in antennas) for (b in antennas.filter { a != it }) when {
+                simple -> addAll(a.antinodesFor(b, 1))
+                else -> {
+                    var f = 0
+                    while (true) {
+                        val antinodes = a.antinodesFor(b, f)
+                        if (antinodes.isEmpty()) break
+                        addAll(antinodes)
+                        f++
                     }
                 }
             }
         }
     }
 
-    println(antinodes(full = false).size)
-    println(antinodes(full = true).size)
+    println(antinodes(simple = true).size)
+    println(antinodes(simple = false).size)
 }
