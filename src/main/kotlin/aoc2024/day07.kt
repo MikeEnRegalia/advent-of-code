@@ -4,22 +4,15 @@ fun main() {
     val lines = generateSequence(::readLine).toList()
     fun List<String>.check(concat: Boolean) = mapNotNull { line ->
         val numbers = line.split(" ", ":").filter(String::isNotBlank).map(String::toLong)
-        fun List<Long>.test(base: Long, target: Long): Boolean {
-            if (isEmpty()) return base == target
-            val first = first()
-            if (size == 1) {
-                if (base * first == target || base + first == target || concat && "$base$first".toLong() == target)
-                    return true
-            }
-            val next = drop(1)
-            return next.test(base + first, target)
-                    || next.test(base * first, target)
-                    || concat && next.test("$base$first".toLong(), target)
+        fun List<Long>.test(x: Long, n: Long): Boolean {
+            if (isEmpty()) return x == n
+            val (first, rest) = first() to drop(1)
+            val (a, b, c) = Triple(x * first, x + first, "$x$first".toLong())
+            if (size == 1 && (a == n || b == n || concat && c == n)) return true
+            return rest.test(b, n) || rest.test(a, n) || concat && rest.test(c, n)
         }
 
-        val target = numbers.first()
-        val args = numbers.drop(1)
-        target.takeIf { args.test(0L, it) }
+        numbers.first().takeIf { numbers.drop(1).test(0L, it) }
     }.sum()
 
     println(lines.check(false))
