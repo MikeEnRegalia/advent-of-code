@@ -6,21 +6,15 @@ fun main() {
 
     data class Point(val x: Int, val y: Int, val antenna: Char) {
         fun antinodesFor(other: Point, f: Int): Set<Point> {
-            val dx = f * (x - other.x)
-            val dy = f * (y - other.y)
-            val a1 = Point(x + dx, y + dy, '#')
-            val a2 = Point(other.x - dx, other.y - dy, '#')
-            return buildSet {
-                if (gridAt(a1.x, a1.y) != null) add(a1)
-                if (gridAt(a2.x, a2.y) != null) add(a2)
-            }
+            val (dx, dy) = f * (x - other.x) to f * (y - other.y)
+            val (a1, a2) = Point(x + dx, y + dy, '#') to Point(other.x - dx, other.y - dy, '#')
+            return sequenceOf(a1, a2).filter { gridAt(it.x, it.y) != null }.toSet()
         }
     }
 
     val antennas = sequence {
         for (y in grid.indices) for (x in grid[y].indices) {
-            val c = grid[y][x]
-            if (c !in ".#") yield(Point(x, y, c))
+            grid[y][x].takeIf { it !in ".#" }?.let { yield(Point(x, y, it))}
         }
     }.toList()
 
