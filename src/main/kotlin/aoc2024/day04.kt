@@ -1,10 +1,9 @@
 package aoc2024
 
 fun main() {
-    val lines = generateSequence(::readLine).toList()
-    fun gridAt(x: Int, y: Int) = lines.getOrNull(y)?.getOrNull(x)
-
-    fun points() = sequence { for (y in lines.indices) for (x in lines[y].indices) yield(x to y) }
+    val grid = generateSequence(::readLine).toList()
+    fun gridAt(x: Int, y: Int) = grid.getOrNull(y)?.getOrNull(x)
+    fun points() = sequence { for (y in grid.indices) for (x in grid[y].indices) yield(x to y) }
 
     points().sumOf { (x, y) ->
         sequenceOf(
