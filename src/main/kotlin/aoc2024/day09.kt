@@ -23,7 +23,7 @@ fun main() {
     }
 
     fun part2() = chunks.toMutableMap().apply {
-        for (id in mapNotNull { it.value.id }.sortedByDescending { it }) {
+        for (id in mapNotNull { it.value.id }.sortedDescending()) {
             val (fileIndex, fileChunk) = entries.single { it.value.id == id }
             val (freeIndex, freeChunk) = entries
                 .filter { it.value.id == null && it.key < fileIndex && it.value.size >= fileChunk.size }
