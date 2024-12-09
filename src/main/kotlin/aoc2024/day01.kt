@@ -7,6 +7,6 @@ fun main() {
     val firsts = data.map { it[0] }.sorted()
     val seconds = data.map { it[1] }.sorted()
 
-    println(firsts.withIndex().sumOf { (i, n) -> abs(seconds[i] - n) })
+    println(firsts.zip(seconds).sumOf { (a, b) -> abs(a - b) })
     println(firsts.sumOf { n -> n * seconds.filter { it == n }.size })
 }
