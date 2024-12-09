@@ -1,9 +1,9 @@
 package aoc2024
 
 fun main() {
+    fun List<String>.parse(sep: Char) = filter { sep in it }.map { it.split(sep).map(String::toInt) }
     val lines = generateSequence(::readLine).toList()
-    val rules = lines.filter { '|' in it }.map { it.split("|").map(String::toInt) }
-    val updates = lines.filter { ',' in it }.map { it.split(",").map(String::toInt) }
+    val (rules, updates) = listOf('|', ',').map { lines.parse(it) }
 
     fun List<List<Int>>.checksum() = sumOf { it[it.size / 2] }
 
