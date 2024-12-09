@@ -3,8 +3,8 @@ package aoc2024
 fun main() {
     data class Chunk(val id: Int?, val size: Int)
 
-    val chunks = buildMap<Int, Chunk> {
-        for ((i, size) in readln().map(Char::digitToInt).withIndex()) {
+    val chunks = readln().map(Char::digitToInt).foldIndexed(mutableMapOf<Int, Chunk>()) { i, acc, size ->
+        acc.apply {
             this[values.sumOf { it.size }] = Chunk(if (i % 2 == 0) i / 2 else null, size)
         }
     }
