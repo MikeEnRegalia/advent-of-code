@@ -1,14 +1,14 @@
 package aoc2024
 
 fun main() {
-    data class Chunk(val id: Int?, val size: Int)
+    data class Chunk(val size: Int, val id: Int? = null)
 
     val chunks = readln().map(Char::digitToInt).foldIndexed(mutableMapOf<Int, Chunk>()) { i, acc, size ->
-        acc.apply { this[values.sumOf { it.size }] = Chunk(if (i % 2 == 0) i / 2 else null, size) }
+        acc.apply { this[values.sumOf { it.size }] = Chunk(size, if (i % 2 == 0) i / 2 else null) }
     }
 
     fun Map<Int, Chunk>.toFS() = entries.sortedBy { it.key }.map { it.value }
-        .flatMap { (id, size) -> (0..<size).map { id } }
+        .flatMap { (size, id) -> (0..<size).map { id } }
 
     fun part1() = chunks.toFS().toMutableList().also { fs ->
         var free = -1
@@ -29,13 +29,12 @@ fun main() {
                 .filter { it.value.id == null && it.key < fileIndex && it.value.size >= fileChunk.size }
                 .minByOrNull { it.key } ?: continue
 
-            this[fileIndex] = Chunk(null, fileChunk.size)
+            this[fileIndex] = Chunk(fileChunk.size)
             this[freeIndex] = fileChunk
 
             val remainingFree = freeChunk.size - fileChunk.size
-            if (remainingFree > 0) {
-                this[freeIndex + fileChunk.size] = Chunk(null, remainingFree)
-            }
+            if (remainingFree > 0)
+                this[freeIndex + fileChunk.size] = Chunk(remainingFree)
         }
     }.toFS()
 
