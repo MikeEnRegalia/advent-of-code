@@ -7,12 +7,11 @@ fun main() {
         acc.apply { this[values.sumOf { it.size }] = Chunk(if (i % 2 == 0) i / 2 else null, size) }
     }
 
-    fun Map<Int, Chunk>.toFS() = mutableListOf<Int?>().also { list ->
-        entries.sortedBy { it.key }.map { it.value }
-            .forEach { (id, size) -> repeat(size) { list.add(id) } }
+    fun Map<Int, Chunk>.toFS() = entries.sortedBy { it.key }.map { it.value }.flatMap {
+        (id, size) -> (0..<size).map { id }
     }
 
-    fun part1() = chunks.toFS().also { fs ->
+    fun part1() = chunks.toFS().toMutableList().also { fs ->
         var free = -1
         var file = fs.size
         while (true) {
