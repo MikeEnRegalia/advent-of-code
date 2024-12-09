@@ -7,9 +7,8 @@ fun main() {
         acc.apply { this[values.sumOf { it.size }] = Chunk(if (i % 2 == 0) i / 2 else null, size) }
     }
 
-    fun Map<Int, Chunk>.toFS() = entries.sortedBy { it.key }.map { it.value }.flatMap {
-        (id, size) -> (0..<size).map { id }
-    }
+    fun Map<Int, Chunk>.toFS() = entries.sortedBy { it.key }.map { it.value }
+        .flatMap { (id, size) -> (0..<size).map { id } }
 
     fun part1() = chunks.toFS().toMutableList().also { fs ->
         var free = -1
