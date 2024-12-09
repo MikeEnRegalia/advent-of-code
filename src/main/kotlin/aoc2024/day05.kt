@@ -2,17 +2,13 @@ package aoc2024
 
 fun main() {
     fun List<String>.parse(sep: Char) = filter { sep in it }.map { it.split(sep).map(String::toInt) }
-    val lines = generateSequence(::readLine).toList()
-    val (rules, updates) = listOf('|', ',').map { lines.parse(it) }
-
-    fun List<List<Int>>.checksum() = sumOf { it[it.size / 2] }
+    val (rules, updates) = with(generateSequence(::readLine).toList()) { listOf('|', ',').map { parse(it) } }
 
     val correctlyOrdered = updates.filter { update ->
         rules.filter(update::containsAll).all { rule ->
             update.indexOf(rule[0]) < update.indexOf(rule[1])
         }
     }
-    println(correctlyOrdered.checksum())
 
     val fixed = (updates - correctlyOrdered.toSet()).map { update ->
         buildList {
@@ -23,5 +19,6 @@ fun main() {
             }
         }
     }
-    println(fixed.checksum())
+
+    listOf(correctlyOrdered, fixed).map { l -> l.sumOf { it[it.size / 2] } }.forEach(::println)
 }
