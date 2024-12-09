@@ -4,9 +4,7 @@ fun main() {
     data class Chunk(val id: Int?, val size: Int)
 
     val chunks = readln().map(Char::digitToInt).foldIndexed(mutableMapOf<Int, Chunk>()) { i, acc, size ->
-        acc.apply {
-            this[values.sumOf { it.size }] = Chunk(if (i % 2 == 0) i / 2 else null, size)
-        }
+        acc.apply { this[values.sumOf { it.size }] = Chunk(if (i % 2 == 0) i / 2 else null, size) }
     }
 
     fun Map<Int, Chunk>.toFS() = mutableListOf<Int?>().also { list ->
