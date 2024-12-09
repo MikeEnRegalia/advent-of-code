@@ -3,25 +3,10 @@ package aoc2024
 import kotlin.math.abs
 
 fun main() {
-    val lines = generateSequence(::readLine).toList()
-    val set1 = lines
-        .map { it.split(" ").filterNot(String::isBlank)}
-        .map { it.first() }
-        .map(String::toInt)
-        .sorted()
+    val data = generateSequence(::readLine).map { it.split("""\s+""".toRegex()).map(String::toInt) }.toList()
+    val firsts = data.map { it[0] }.sorted()
+    val seconds = data.map { it[1] }.sorted()
 
-    val set2 = lines.map { it.split(" ").filterNot { it.isBlank()}[1]}.map { it.toInt() }.sorted()
-    var sum = 0
-    for ((i, n) in set1.withIndex()) {
-        var m = set2[i]
-        sum += abs(m - n)
-    }
-
-    println(sum)
-
-    var sum2 = 0
-    for (n in set1) {
-        sum2 += n * set2.filter { it == n}.size
-    }
-    println(sum2)
+    println(firsts.withIndex().sumOf { (i, n) -> abs(seconds[i] - n) })
+    println(firsts.sumOf { n -> n * seconds.filter { it == n }.size })
 }
