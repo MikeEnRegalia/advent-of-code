@@ -13,9 +13,8 @@ fun main() {
     }
 
     val allAntennas = sequence {
-        for (y in grid.indices) for (x in grid[y].indices) {
+        for (y in grid.indices) for (x in grid[y].indices)
             grid[y][x].takeIf { it !in ".#" }?.let { yield(Point(x, y, it)) }
-        }
     }.toList()
 
     fun antinodes(simple: Boolean) = buildSet {
