@@ -9,26 +9,26 @@ fun main() {
         }
     }
 
-    fun Map<Int, Chunk>.buildList() = mutableListOf<Int>().also { list ->
+    fun Map<Int, Chunk>.buildList() = mutableListOf<Int?>().also { list ->
         entries.sortedBy { it.key }.map { it.value }
-            .forEach { (id, size) -> repeat(size) { list.add(id ?: -1) } }
+            .forEach { (id, size) -> repeat(size) { list.add(id) } }
     }
 
-    val part1 = originalChunks.buildList().also { fs ->
+    fun part1() = originalChunks.buildList().also { fs ->
         var nextFree = -1
         var nextFile = fs.size
         while (true) {
-            while (nextFree < 0 || fs[nextFree] != -1) nextFree++
-            while (nextFile >= fs.size || fs[nextFile] == -1) nextFile--
+            while (nextFree < 0 || fs[nextFree] != null) nextFree++
+            while (nextFile >= fs.size || fs[nextFile] == null) nextFile--
             if (nextFree > nextFile) break
             fs[nextFree] = fs[nextFile]
-            fs[nextFile] = -1
+            fs[nextFile] = null
         }
     }
 
-    val part2 = originalChunks.toMutableMap().also { new ->
-        for (fileId in new.mapNotNull { it.value.id }.sortedByDescending { it }) {
-            val (fileIndex, fileChunk) = new.entries.single { it.value.id == fileId }
+    fun part2() = originalChunks.toMutableMap().also { new ->
+        for (id in new.mapNotNull { it.value.id }.sortedByDescending { it }) {
+            val (fileIndex, fileChunk) = new.entries.single { it.value.id == id }
             val (freeIndex, freeChunk) = new.entries
                 .filter { it.value.id == null && it.key < fileIndex && it.value.size >= fileChunk.size }
                 .minByOrNull { it.key } ?: continue
@@ -43,7 +43,7 @@ fun main() {
         }
     }.buildList()
 
-    fun List<Int>.checksum() = mapIndexedNotNull { i, it -> if (it == -1) null else (i * it).toLong() }.sum()
+    fun List<Int?>.checksum() = mapIndexedNotNull { i, it -> it?.times(i)?.toLong() }.sum()
 
-    listOf(part1, part2).map(MutableList<Int>::checksum).also(::println)
+    sequenceOf(::part1, ::part2).map { it().checksum() }.forEach(::println)
 }
