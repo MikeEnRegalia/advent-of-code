@@ -3,45 +3,45 @@ package aoc2024
 fun main() {
     data class Chunk(val id: Int?, val size: Int)
 
-    val originalChunks = buildMap<Int, Chunk> {
+    val chunks = buildMap<Int, Chunk> {
         for ((i, size) in readln().map(Char::digitToInt).withIndex()) {
             this[values.sumOf { it.size }] = Chunk(if (i % 2 == 0) i / 2 else null, size)
         }
     }
 
-    fun Map<Int, Chunk>.buildList() = mutableListOf<Int?>().also { list ->
+    fun Map<Int, Chunk>.toFS() = mutableListOf<Int?>().also { list ->
         entries.sortedBy { it.key }.map { it.value }
             .forEach { (id, size) -> repeat(size) { list.add(id) } }
     }
 
-    fun part1() = originalChunks.buildList().also { fs ->
-        var nextFree = -1
-        var nextFile = fs.size
+    fun part1() = chunks.toFS().also { fs ->
+        var free = -1
+        var file = fs.size
         while (true) {
-            while (nextFree < 0 || fs[nextFree] != null) nextFree++
-            while (nextFile >= fs.size || fs[nextFile] == null) nextFile--
-            if (nextFree > nextFile) break
-            fs[nextFree] = fs[nextFile]
-            fs[nextFile] = null
+            while (free < 0 || fs[free] != null) free++
+            while (file >= fs.size || fs[file] == null) file--
+            if (free > file) break
+            fs[free] = fs[file]
+            fs[file] = null
         }
     }
 
-    fun part2() = originalChunks.toMutableMap().also { new ->
-        for (id in new.mapNotNull { it.value.id }.sortedByDescending { it }) {
-            val (fileIndex, fileChunk) = new.entries.single { it.value.id == id }
-            val (freeIndex, freeChunk) = new.entries
+    fun part2() = chunks.toMutableMap().apply {
+        for (id in mapNotNull { it.value.id }.sortedByDescending { it }) {
+            val (fileIndex, fileChunk) = entries.single { it.value.id == id }
+            val (freeIndex, freeChunk) = entries
                 .filter { it.value.id == null && it.key < fileIndex && it.value.size >= fileChunk.size }
                 .minByOrNull { it.key } ?: continue
 
-            new[fileIndex] = Chunk(null, fileChunk.size)
-            new[freeIndex] = fileChunk
+            this[fileIndex] = Chunk(null, fileChunk.size)
+            this[freeIndex] = fileChunk
 
-            val newFreeSize = freeChunk.size - fileChunk.size
-            if (newFreeSize > 0) {
-                new[freeIndex + fileChunk.size] = Chunk(null, newFreeSize)
+            val remainingFree = freeChunk.size - fileChunk.size
+            if (remainingFree > 0) {
+                this[freeIndex + fileChunk.size] = Chunk(null, remainingFree)
             }
         }
-    }.buildList()
+    }.toFS()
 
     fun List<Int?>.checksum() = mapIndexedNotNull { i, it -> it?.times(i)?.toLong() }.sum()
 
