@@ -11,11 +11,10 @@ fun main() {
         .flatMap { (size, id) -> (0..<size).map { id } }
 
     fun part1() = chunks.toFS().toMutableList().also { fs ->
-        var free = -1
-        var file = fs.size
+        var (free, file) = 0 to fs.lastIndex
         while (true) {
-            while (free < 0 || fs[free] != null) free++
-            while (file >= fs.size || fs[file] == null) file--
+            while (fs[free] != null) free++
+            while (fs[file] == null) file--
             if (free > file) break
             fs[free] = fs[file]
             fs[file] = null
