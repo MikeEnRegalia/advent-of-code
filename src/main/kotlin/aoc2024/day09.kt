@@ -43,7 +43,7 @@ fun main() {
         }
     }.buildList()
 
-    listOf(part1, part2)
-        .map { fs -> fs.mapIndexedNotNull { i, it -> if (it == -1) null else (i * it).toLong() }.sum() }
-        .also(::println)
+    fun List<Int>.checksum() = mapIndexedNotNull { i, it -> if (it == -1) null else (i * it).toLong() }.sum()
+
+    listOf(part1, part2).map(MutableList<Int>::checksum).also(::println)
 }
