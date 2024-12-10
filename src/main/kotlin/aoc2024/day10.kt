@@ -11,10 +11,9 @@ fun main() {
             fun height() = getOrNull(y)?.getOrNull(x) ?: -1
         }
 
-        flatMapIndexed { y, l -> l.mapIndexedNotNull { x, c -> c.takeIf { c == 0 }?.let { Location(x, y) } } }
-            .fold(0 to 0) { (part1, part2), head ->
-                val trails = mutableSetOf<List<Location>>()
-                var t = listOf(head)
+        val hikes = flatMapIndexed { y, l -> l.mapIndexedNotNull { x, c -> c.takeIf { c == 0 }?.let { Location(x, y) } } }
+            .fold(mutableSetOf<List<Location>>()) { acc, trailhead ->
+                var t = listOf(trailhead)
                 val V = mutableSetOf(t)
                 val D = mutableMapOf(t to 0)
                 while (true) {
@@ -22,10 +21,12 @@ fun main() {
                         D.compute(it) { _, v -> min(D.getValue(t) + 1, v ?: Int.MAX_VALUE) }
                     }
                     t = D.keys.firstOrNull { it !in V } ?: break
-                    if (t.last().height() == 9) trails += t
+                    if (t.last().height() == 9) acc += t
                     V += t
                 }
-                part1 + trails.map { it.last() }.distinct().size to part2 + trails.size
-            }.toList().forEach(::println)
+                acc
+            }
+        println(hikes.map { listOf(it.first(), it.last()) }.distinct().size)
+        println(hikes.size)
     }
 }
