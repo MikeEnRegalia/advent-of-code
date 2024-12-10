@@ -6,8 +6,11 @@ fun main() {
     val grid = generateSequence(::readLine).map { it.map { it.digitToInt() } }.toList()
 
     data class Point(val x: Int, val y: Int) {
-        fun neighbors() = sequenceOf(copy(x = x + 1), copy(x = x - 1), copy(y = y - 1), copy(y = y + 1))
+        fun neighbors() = sequenceOf(copy(x = x + 1), copy(x = x - 1), copy(y = y + 1), copy(y = y - 1))
         fun content() = grid.getOrNull(y)?.getOrNull(x)
+        override fun toString(): String {
+            return "($x,$y:${content()})"
+        }
     }
 
 
@@ -28,7 +31,7 @@ fun main() {
                     val d = distances.getValue(curr) + 1
                     distances.compute(neighbor) { _, v -> min(d, v ?: Int.MAX_VALUE) }
                 }
-                curr = distances.keys.filter { it !in visited}.minByOrNull { distances[it]!! } ?: break
+                curr = distances.keys.filter { it !in visited }.minByOrNull { distances[it]!! } ?: break
                 visited += curr
                 if (curr.content() == 9) found += curr
             }
@@ -36,6 +39,33 @@ fun main() {
         }
         return total
     }
-
     println(part1())
+
+    fun part2(): Int {
+        var total = 0
+        for (start in starts) {
+            val found = mutableSetOf<List<Point>>()
+            val visited = mutableSetOf(listOf(start))
+            val distances = mutableMapOf(listOf(start) to 0)
+            var curr = listOf(start)
+            while (true) {
+                println(curr)
+                curr.last().neighbors()
+                    .filter { it.content() == curr.last().content()!! + 1 }
+                    .map { curr + it }
+                    .filter { it !in visited }
+                    .forEach { neighbor ->
+                        distances.compute(neighbor) { _, v -> min(distances.getValue(curr) + 1, v ?: Int.MAX_VALUE) }
+                    }
+                curr = distances.keys.filter { it !in visited }.minByOrNull { distances[it]!! } ?: break
+                visited += curr
+                if (curr.last().content() == 9) found += curr
+            }
+            println(found)
+            total += found.size
+        }
+        return total
+    }
+
+    println(part2())
 }
