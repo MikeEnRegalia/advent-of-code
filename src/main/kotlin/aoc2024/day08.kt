@@ -2,13 +2,12 @@ package aoc2024
 
 fun main() {
     val grid = generateSequence(::readLine).toList()
-    fun gridAt(x: Int, y: Int) = grid.getOrNull(y)?.getOrNull(x)
 
     data class Point(val x: Int, val y: Int, val antenna: Char) {
         fun antinodesFor(other: Point, f: Int): Set<Point> {
             val (dx, dy) = f * (x - other.x) to f * (y - other.y)
             val (a1, a2) = Point(x + dx, y + dy, '#') to Point(other.x - dx, other.y - dy, '#')
-            return sequenceOf(a1, a2).filter { gridAt(it.x, it.y) != null }.toSet()
+            return sequenceOf(a1, a2).filter { grid.getOrNull(it.y)?.getOrNull(it.x) != null }.toSet()
         }
     }
 
