@@ -3,7 +3,7 @@ package aoc2024
 import kotlin.math.min
 
 fun main() {
-    val area = generateSequence(::readLine).map { it.map { it.digitToInt() } }.toList()
+    val area = generateSequence(::readLine).map { it.map(Char::digitToInt) }.toList()
 
     data class Location(val x: Int, val y: Int) {
         fun next() = sequenceOf(copy(x = x + 1), copy(x = x - 1), copy(y = y + 1), copy(y = y - 1))
@@ -29,7 +29,7 @@ fun main() {
             trail.next().filter { it !in V }.forEach { neighbor ->
                 D.compute(neighbor) { _, v -> min(D.getValue(trail) + 1, v ?: Int.MAX_VALUE) }
             }
-            trail = D.filter { it.key !in V }.minByOrNull { it.value }?.key ?: break
+            trail = D.filter { it.key !in V }.minByOrNull(Map.Entry<List<Location>, Int>::value)?.key ?: break
             V += trail
             if (trail.last().height() == 9) trails += trail
         }
