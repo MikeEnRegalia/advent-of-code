@@ -3,40 +3,29 @@ package aoc2024
 import kotlin.math.min
 
 fun main() {
-    val area = generateSequence(::readLine).map { it.map(Char::digitToInt) }.toList()
-
-    data class Location(val x: Int, val y: Int) {
-        fun next() = sequenceOf(copy(x = x + 1), copy(x = x - 1), copy(y = y + 1), copy(y = y - 1))
-            .filter { it.height() == height()?.plus(1) }
-
-        fun height() = area.getOrNull(y)?.getOrNull(x)
-    }
-    fun List<Location>.next() = last().next().map { this + it }
-
-    val heads = sequence {
-        for (y in area.indices) for (x in area[y].indices) if (area[y][x] == 0) yield(Location(x, y))
-    }
-
-    var part1 = 0
-    var part2 = 0
-
-    for (head in heads) {
-        val trails = mutableSetOf<List<Location>>()
-        var trail = listOf(head)
-        val V = mutableSetOf(trail)
-        val D = mutableMapOf(trail to 0)
-        while (true) {
-            trail.next().filter { it !in V }.forEach { neighbor ->
-                D.compute(neighbor) { _, v -> min(D.getValue(trail) + 1, v ?: Int.MAX_VALUE) }
-            }
-            trail = D.filter { it.key !in V }.minByOrNull(Map.Entry<List<Location>, Int>::value)?.key ?: break
-            V += trail
-            if (trail.last().height() == 9) trails += trail
+    with(generateSequence(::readLine).map { it.map(Char::digitToInt) }.toList()) {
+        data class Location(val x: Int, val y: Int) {
+            fun neighbors() = sequenceOf(d(dx = 1), d(dx = -1), d(dy = 1), d(dy = -1)).filter { isNext(it) }
+            fun d(dx: Int = 0, dy: Int = 0) = copy(x = x + dx, y = y + dy)
+            fun isNext(l: Location) = l.height() == height() + 1
+            fun height() = getOrNull(y)?.getOrNull(x) ?: -1
         }
-        part1 += trails.map { it.last() }.distinct().size
-        part2 += trails.size
-    }
 
-    println(part1)
-    println(part2)
+        flatMapIndexed { y, l -> l.mapIndexedNotNull { x, c -> c.takeIf { c == 0 }?.let { Location(x, y) } } }
+            .fold(0 to 0) { (part1, part2), head ->
+                val trails = mutableSetOf<List<Location>>()
+                var t = listOf(head)
+                val V = mutableSetOf(t)
+                val D = mutableMapOf(t to 0)
+                while (true) {
+                    t.last().neighbors().map { t + it }.forEach {
+                        D.compute(it) { _, v -> min(D.getValue(t) + 1, v ?: Int.MAX_VALUE) }
+                    }
+                    t = D.keys.firstOrNull { it !in V } ?: break
+                    if (t.last().height() == 9) trails += t
+                    V += t
+                }
+                part1 + trails.map { it.last() }.distinct().size to part2 + trails.size
+            }.toList().forEach(::println)
+    }
 }
