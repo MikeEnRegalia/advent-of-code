@@ -1,7 +1,7 @@
 package aoc2024
 
 fun main() {
-    val grid = generateSequence(::readln).toList()
+    val grid = generateSequence(::readlnOrNull).toList()
 
     data class Loc(val x: Int, val y: Int, val antenna: Char) {
         fun antinodesFor(other: Loc, f: Int = 1): Set<Loc> {
