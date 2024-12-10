@@ -7,10 +7,11 @@ fun main() {
 
     data class Location(val x: Int, val y: Int) {
         fun next() = sequenceOf(copy(x = x + 1), copy(x = x - 1), copy(y = y + 1), copy(y = y - 1))
-            .filter { it.content() == content()?.plus(1) }
+            .filter { it.height() == height()?.plus(1) }
 
-        fun content() = area.getOrNull(y)?.getOrNull(x)
+        fun height() = area.getOrNull(y)?.getOrNull(x)
     }
+    fun List<Location>.next() = last().next().map { this + it }
 
     val heads = sequence {
         for (y in area.indices) for (x in area[y].indices) if (area[y][x] == 0) yield(Location(x, y))
@@ -21,18 +22,16 @@ fun main() {
 
     for (head in heads) {
         val trails = mutableSetOf<List<Location>>()
-        val V = mutableSetOf(listOf(head))
-        val D = mutableMapOf(listOf(head) to 0)
-        var curr = listOf(head)
+        var trail = listOf(head)
+        val V = mutableSetOf(trail)
+        val D = mutableMapOf(trail to 0)
         while (true) {
-            curr.last().next().map { curr + it }
-                .filter { it !in V }
-                .forEach { neighbor ->
-                    D.compute(neighbor) { _, v -> min(D.getValue(curr) + 1, v ?: Int.MAX_VALUE) }
-                }
-            curr = D.keys.filter { it !in V }.minByOrNull { D[it]!! } ?: break
-            V += curr
-            if (curr.last().content() == 9) trails += curr
+            trail.next().filter { it !in V }.forEach { neighbor ->
+                D.compute(neighbor) { _, v -> min(D.getValue(trail) + 1, v ?: Int.MAX_VALUE) }
+            }
+            trail = D.filter { it.key !in V }.minByOrNull { it.value }?.key ?: break
+            V += trail
+            if (trail.last().height() == 9) trails += trail
         }
         part1 += trails.map { it.last() }.distinct().size
         part2 += trails.size
