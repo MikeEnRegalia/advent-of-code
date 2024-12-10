@@ -12,8 +12,8 @@ fun main() = generateSequence(::readLine).map { it.map(Char::digitToInt) }.toLis
 
     fun List<Loc>.next() = listOfNotNull(next(dx = 1), next(dx = -1), next(dy = 1), next(dy = -1))
 
-    fun Loc.hikes() = buildSet {
-        var t = listOf(this@hikes)
+    fun hikesFrom(head: Loc) = buildSet {
+        var t = listOf(head)
         val (V, D) = mutableSetOf(t) to mutableMapOf(t to 0)
         while (true) {
             t.next().forEach { D.compute(it) { _, v -> min(D.getValue(t) + 1, v ?: Int.MAX_VALUE) } }
@@ -24,7 +24,7 @@ fun main() = generateSequence(::readLine).map { it.map(Char::digitToInt) }.toLis
     }
 
     val hikes = grid.flatMapIndexed { y, l ->
-        l.mapIndexedNotNull { x, c -> c.takeIf { c == 0 }?.let { Loc(x, y).hikes() } }
+        l.mapIndexedNotNull { x, c -> c.takeIf { c == 0 }?.let { hikesFrom(Loc(x, y)) } }
     }.reduce(Set<List<Loc>>::union)
 
     sequenceOf(hikes.map { listOf(it.first(), it.last()) }.distinct(), hikes).forEach { println(it.size) }
