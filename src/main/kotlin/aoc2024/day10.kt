@@ -2,29 +2,28 @@ package aoc2024
 
 import kotlin.math.min
 
-fun main() = with(generateSequence(::readLine).map { it.map(Char::digitToInt) }.toList()) {
+fun main() = generateSequence(::readLine).map { it.map(Char::digitToInt) }.toList().let { grid ->
     data class Loc(val x: Int, val y: Int) {
-        fun d(dx: Int = 0, dy: Int = 0) = copy(x = x + dx, y = y + dy)
-        fun height() = getOrNull(y)?.getOrNull(x)
+        fun height() = grid.getOrNull(y)?.getOrNull(x)
     }
+
+    fun List<Loc>.next(dx: Int = 0, dy: Int = 0) = last().copy(x = last().x + dx, y = last().y + dy)
+        .takeIf { it.height() == (last().height() ?: 0) + 1 }?.let { this + it }
+
+    fun List<Loc>.next() = listOfNotNull(next(dx = 1), next(dx = -1), next(dy = 1), next(dy = -1))
 
     fun Loc.hikes() = buildSet {
         var t = listOf(this@hikes)
         val (V, D) = mutableSetOf(t) to mutableMapOf(t to 0)
         while (true) {
-            with(t.last()) {
-                sequenceOf(d(dx = 1), d(dx = -1), d(dy = 1), d(dy = -1))
-                    .filter { it.height() == (height() ?: 0) + 1 }
-                    .map { t + it }
-                    .forEach { D.compute(it) { _, v -> min(D.getValue(t) + 1, v ?: Int.MAX_VALUE) } }
-            }
+            t.next().forEach { D.compute(it) { _, v -> min(D.getValue(t) + 1, v ?: Int.MAX_VALUE) } }
             t = D.keys.firstOrNull { it !in V } ?: break
             if (t.last().height() == 9) add(t)
             V += t
         }
     }
 
-    val hikes = flatMapIndexed { y, l ->
+    val hikes = grid.flatMapIndexed { y, l ->
         l.mapIndexedNotNull { x, c -> c.takeIf { c == 0 }?.let { Loc(x, y).hikes() } }
     }.reduce(Set<List<Loc>>::union)
 
