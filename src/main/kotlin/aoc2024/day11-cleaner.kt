@@ -1,7 +1,9 @@
 package aoc2024
 
+import util.mapToCountAsLong
+
 fun main() {
-    var stones = readln().split(" ").map(String::toLong).groupingBy { it }.eachCount().mapValues { it.value.toLong() }
+    var stones = readln().split(" ").map(String::toLong).mapToCountAsLong()
     repeat(75) { i ->
         stones = stones.flatMap { (stone, n) ->
             when {
