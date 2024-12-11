@@ -1,26 +1,21 @@
 package aoc2024
 
 fun main() {
-    val originalNumbers = readln().split(" ").map { it.toLong() }.groupingBy { it }.eachCount()
+    val originalStones = readln().split(" ").map(String::toLong).groupingBy { it }.eachCount()
 
-    fun blink(times: Int) = originalNumbers.mapValues { it.value.toLong() }.toMutableMap().apply {
+    fun blink(times: Int): Long {
+        var stones = originalStones.mapValues { it.value.toLong() }
         repeat(times) { i ->
-            val entries = toMap().entries.toList()
-            clear()
-            for ((n, a) in entries) {
-                val newNumbers = when {
+            stones = buildMap {
+                for ((n, a) in stones.entries) when {
                     n == 0L -> listOf(1L)
-                    "$n".length % 2 == 0 -> "$n".let { digits ->
-                        listOf(digits.take(digits.length / 2).toLong(), digits.drop(digits.length / 2).toLong())
-                    }
-
+                    "$n".length % 2 == 0 -> "$n".let { it.chunked(it.length / 2).map(String::toLong) }
                     else -> listOf(n * 2024)
-                }
-                newNumbers.forEach { compute(it) { _, oldA -> (oldA ?: 0) + a } }
+                }.forEach { compute(it) { _, oldA -> (oldA ?: 0) + a } }
             }
         }
-    }.values.sum()
+        return stones.values.sum()
+    }
 
-    println(blink(25))
-    println(blink(75))
+    listOf(25, 75).forEach { println(blink(it)) }
 }
