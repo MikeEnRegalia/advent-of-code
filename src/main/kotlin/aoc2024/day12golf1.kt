@@ -1,27 +1,33 @@
 package aoc2024
 
+typealias Plot = Pair<Int, Int>
+typealias Area = Pair<Char, Set<Plot>>
+
 fun main() {
     val grid = generateSequence(::readLine).toList()
 
-    data class Plot(val x: Int, val y: Int) {
-        fun adj() = sequenceOf(copy(x = x - 1), copy(x = x + 1), copy(y = y - 1), copy(y = y + 1))
-        fun neighbors() = adj().filter { grid.getOrNull(it.y)?.getOrNull(it.x) == grid[y][x] }
-    }
+    fun Plot.adj() = sequenceOf(
+        copy(first = first - 1),
+        copy(first = first + 1),
+        copy(second = second - 1),
+        copy(second = second + 1)
+    )
 
-    data class Area(val id: Char, val plots: Set<Plot>)
+    fun Plot.neighbors() = adj().filter { grid.getOrNull(it.second)?.getOrNull(it.first) == grid[second][first] }
+
+    val allPlots = grid.flatMapIndexed { i, l -> l.indices.map { Pair(it, i) } }
 
     val areas = mutableSetOf<Area>()
-    for (y in grid.indices) for (x in grid[0].indices) {
-        val plot = Plot(x, y).takeIf { areas.none { a -> it in a.plots } } ?: continue
-        val areaPlots = mutableSetOf(plot)
-
-        var newPlots: List<Plot>
-        do {
-            newPlots = areaPlots.flatMap(Plot::neighbors).filter { it !in areaPlots }
-            areaPlots += newPlots
-        } while (newPlots.isNotEmpty())
-
-        areas += Area(grid[y][x], areaPlots.toSet())
+    for (plot in allPlots) {
+        if (areas.any { plot in it.second }) continue
+        areas += Area(grid[plot.second][plot.first], buildSet {
+            add(plot)
+            var newPlots: List<Plot>
+            do {
+                newPlots = flatMap(Plot::neighbors).filter { it !in this }
+                addAll(newPlots)
+            } while (newPlots.isNotEmpty())
+        })
     }
-    println(areas.sumOf { it.plots.size * it.plots.sumOf { 4 - it.neighbors().count() } })
+    println(areas.sumOf { it.second.size * it.second.sumOf { 4 - it.neighbors().count() } })
 }
