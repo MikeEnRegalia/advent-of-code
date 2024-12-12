@@ -28,42 +28,39 @@ fun main() {
 
     data class Fence(val facing: Char, val plot: Plot)
 
-    fun Area.fenceSides(): Set<Set<Fence>> = plots.flatMap { p ->
-        p.adj()
-            .filter { grid.getOrNull(it.y)?.getOrNull(it.x) != grid[p.y][p.x] }
-            .map { o ->
-                val facing = when {
-                    o.x == p.x - 1 -> 'W'
-                    o.x == p.x + 1 -> 'E'
-                    o.y == p.y - 1 -> 'N'
-                    o.y == p.y + 1 -> 'S'
-                    else -> throw IllegalStateException()
-                }
-                Fence(facing, p)
+    fun Plot.fences() = adj()
+        .filter { grid.getOrNull(it.y)?.getOrNull(it.x) != grid[y][x] }
+        .map { o ->
+            val facing = when {
+                o.x == x - 1 -> 'W'
+                o.x == x + 1 -> 'E'
+                o.y == y - 1 -> 'N'
+                o.y == y + 1 -> 'S'
+                else -> throw IllegalStateException()
             }
-    }.toSet().let { areaFences ->
-        val sides = mutableSetOf<Set<Fence>>()
-        val visited = mutableSetOf<Fence>()
-        for (fence in areaFences) {
-            if (fence in visited) continue
-
-            val toVisit = mutableSetOf(fence)
-            val side = mutableSetOf<Fence>()
-            while (true) {
-                side += toVisit
-                visited += toVisit
-                val next = toVisit.flatMap { f ->
-                    val neighbors = f.plot.neighbors().toSet()
-                    val neighboringFences = neighbors.map { Fence(f.facing, it) }
-                        .filter { it in areaFences && it.facing == f.facing && it !in visited }
-                    neighboringFences
-                }.takeIf { it.isNotEmpty() } ?: break
-                toVisit.clear()
-                toVisit += next
-            }
-            sides += side
+            Fence(facing, this)
         }
-        sides
+
+    fun Area.fenceSides(): Set<Set<Fence>> = plots.flatMap(Plot::fences).let { areaFences ->
+        buildSet {
+            for (fence in areaFences) {
+                if (any { fence in it }) continue
+
+                var toVisit = listOf(fence)
+                val side = mutableSetOf<Fence>()
+                while (true) {
+                    side += toVisit
+                    val next = toVisit.flatMap { f ->
+                        val neighbors = f.plot.neighbors().toSet()
+                        val neighboringFences = neighbors.map { Fence(f.facing, it) }
+                            .filter { it in areaFences && it.facing == f.facing && it !in side }
+                        neighboringFences
+                    }.takeIf { it.isNotEmpty() } ?: break
+                    toVisit = next
+                }
+                add(side)
+            }
+        }
     }
     println(areas.sumOf { it.plots.size * it.fenceSides().size })
 }
