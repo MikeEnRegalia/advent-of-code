@@ -11,17 +11,17 @@ fun main() {
     data class Area(val id: Char, val plots: Set<Plot>)
 
     val areas = mutableSetOf<Area>()
-    val visited = mutableSetOf<Plot>()
 
     for (y in grid.indices) for (x in grid[0].indices) {
-        val plot = Plot(x, y).takeIf { it !in visited } ?: continue
+        val plot = Plot(x, y).takeIf { areas.none { a -> it in a.plots } } ?: continue
         val areaPlots = mutableSetOf(plot)
-        while (true) {
-            val newPlots = areaPlots.flatMap { it.neighbors() }
-                .filter { it !in visited }.takeIf { it.isNotEmpty() } ?: break
+
+        var newPlots: List<Plot>
+        do {
+            newPlots = areaPlots.flatMap { it.neighbors() }.filter { it !in areaPlots }
             areaPlots += newPlots
-            visited += newPlots
-        }
+        } while (newPlots.isNotEmpty())
+
         areas += Area(grid[y][x], areaPlots.toSet())
     }
     println(areas.sumOf { it.plots.size * it.plots.sumOf { 4 - it.neighbors().count() } })
