@@ -8,13 +8,14 @@ fun main() {
         .map { it.split(" ").map { it.filter { it.isDigit() } }.filter { it.isNotBlank() }.map(String::toInt) }
         .chunked(3).toList()
 
-    val part1 = machines.sumOf { (a, b, p) ->
+    fun solve(add: Long = 0L) = machines.sumOf { (a, b, p) ->
         val (ax, ay) = a
         val (bx, by) = b
-        val (px, py) = p
+        val (_px, _py) = p
+        val (px, py) = _px + add to _py + add
 
-        val maxA = min((px / ax) + 1000, (py / ay) + 1000)
-        val maxB = min((px / bx) + 1000, (py / by) + 1000)
+        val maxA = min((px / ax), (py / ay))
+        val maxB = min((px / bx), (py / by))
 
         val pushes = (0..maxA).flatMap { fa ->
             (0..maxB).asSequence()
@@ -22,12 +23,13 @@ fun main() {
                 .map { fb -> fa to fb }
         }
 
-        val cost = pushes.minOfOrNull { (pa, pb) -> pa * 3 + pb }
+        val cost = pushes.minOfOrNull { (pa, pb) -> pa * 3L + pb }
 
         println("$maxA x $a $maxB x $b = $p: $pushes -> $cost")
 
-        cost ?: 0
+        cost ?: 0L
     }
 
-    println(part1)
+    println(solve())
+    println(solve(10_000_000_000_000L))
 }
