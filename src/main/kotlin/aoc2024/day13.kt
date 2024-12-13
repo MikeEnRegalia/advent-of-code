@@ -8,28 +8,45 @@ fun main() {
         .map { it.split(" ").map { it.filter { it.isDigit() } }.filter { it.isNotBlank() }.map(String::toInt) }
         .chunked(3).toList()
 
+    fun gcd(numbers: List<Long>): Long {
+        require(numbers.isNotEmpty()) { "List must not be empty" }
+        var result = numbers[0]
+        for (i in 1 until numbers.size) {
+            var num1 = result
+            var num2 = numbers[i]
+            while (num2 != 0L) {
+                val temp = num2
+                num2 = num1 % num2
+                num1 = temp
+            }
+            result = num1
+        }
+        return result
+    }
+
     fun solve(add: Long = 0L) = machines.sumOf { (a, b, p) ->
         val (ax, ay) = a
         val (bx, by) = b
-        val (_px, _py) = p
-        val (px, py) = _px + add to _py + add
+        val (__px, __py) = p
+        val (px, py) = __px + add to __py + add
+
 
         val maxA = min((px / ax), (py / ay))
         val maxB = min((px / bx), (py / by))
 
-        val pushes = (0..maxA).flatMap { fa ->
-            (0..maxB).asSequence()
-                .filter { fb -> fa * ax + fb * bx == px && fa * ay + fb * by == py }
-                .map { fb -> fa to fb }
+        val push = (maxA downTo 0).firstNotNullOfOrNull { fa ->
+            val rx = px - fa * ax
+            val ry = py - fa * ay
+            if (rx % bx != 0L || ry % by != 0L || rx / bx != ry / by) null else fa to rx / bx
         }
 
-        val cost = pushes.minOfOrNull { (pa, pb) -> pa * 3L + pb }
+        val cost = push?.let { (fa, fb) ->fa * 3L + fb }
 
-        println("$maxA x $a $maxB x $b = $p: $pushes -> $cost")
+        println("$maxA x $a $maxB x $b = $p: $push -> $cost")
 
         cost ?: 0L
     }
 
     println(solve())
-    println(solve(10_000_000_000_000L))
+    //println(solve(10_000_000_000_000L))
 }
