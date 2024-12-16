@@ -44,10 +44,10 @@ fun main() {
         U -= curr
     } while (U.isNotEmpty())
 
-    println(D.filterKeys { grid[it.pos] == 'E' }.values.min())
+    println(D.filterKeys { grid[it.pos] == 'E' }.minOf { it.value })
 
     with(P.filterKeys { grid[it.pos] == 'E' }.keys.toMutableSet()) {
         while (true) if (mapNotNull { P[it] }.none(::addAll)) break
-        println(map { it.pos }.toSet().size)
+        println(distinctBy { it.pos }.size)
     }
 }
