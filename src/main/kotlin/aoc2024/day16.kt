@@ -1,49 +1,48 @@
 package aoc2024
 
-import kotlin.math.min
-
 fun main() {
     data class Point(val x: Int, val y: Int)
+
+    fun Point.move(facing: Char) = when (facing) {
+        'N', 'S' -> copy(y = y + if (facing == 'N') -1 else 1)
+        'W', 'E' -> copy(x = x + if (facing == 'W') -1 else 1)
+        else -> throw IllegalArgumentException(facing.toString())
+    }
 
     val grid = generateSequence(::readLine).flatMapIndexed { y, s -> s.mapIndexed { x, c -> Point(x, y) to c } }.toMap()
 
     data class State(val pos: Point, val facing: Char) {
         fun next() = sequenceOf(forward(), turn(3), turn(1)).filterNotNull()
-        fun forward() = when (facing) {
-            'N' -> copy(pos = pos.copy(y = pos.y - 1))
-            'E' -> copy(pos = pos.copy(x = pos.x + 1))
-            'S' -> copy(pos = pos.copy(y = pos.y + 1))
-            'W' -> copy(pos = pos.copy(x = pos.x - 1))
-            else -> throw IllegalArgumentException(facing.toString())
-        }.takeIf { grid[it.pos].let { it != null && it in ".E" } }
-
+        fun forward() = copy(pos = pos.move(facing)).takeIf { s -> grid[s.pos].let { it != null && it in ".E" } }
         fun turn(d: Int) = copy(facing = "NESW".let { it[(it.indexOf(facing) + d) % it.length] })
     }
 
-    var curr = State(grid.filterValues { it == 'S' }.keys.single(), 'E')
+    val start = State(grid.filterValues { it == 'S' }.keys.single(), 'E')
 
-    val V = mutableSetOf(curr)
-    val D = mutableMapOf(curr to 0)
-    val U = mutableSetOf<State>()
+    val V = mutableSetOf<State>()
+    val D = mutableMapOf(start to 0)
+    val U = mutableSetOf(start)
     val P = mutableMapOf<State, Set<State>>()
 
-    while (true) {
-        curr.next().filter { it !in V }.forEach {
-            val cost = D.getValue(curr) + if (curr.facing == it.facing) 1 else 1000
-            U += it
-            val prevCost = D[it]
-            D.compute(it) { _, old -> min(old ?: Int.MAX_VALUE, cost) }
+    do {
+        val curr = U.minBy { D.getValue(it) }
+
+        for (next in curr.next().filter { it !in V }) {
+            U += next
+            val (prevCost, cost) = D[next] to D.getValue(curr) + if (curr.facing == next.facing) 1 else 1000
             when {
-                prevCost == null || cost < prevCost -> P[it] = setOf(curr)
-                cost == prevCost -> P[it] = P.getValue(it) + curr
+                prevCost == null || cost < prevCost -> {
+                    D[next] = cost
+                    P[next] = setOf(curr)
+                }
+
+                cost == prevCost -> P[next] = P.getValue(next) + curr
             }
         }
 
         V += curr
         U -= curr
-
-        curr = U.minByOrNull { D.getValue(it) } ?: break
-    }
+    } while (U.isNotEmpty())
 
     println(D.filterKeys { grid[it.pos] == 'E' }.values.min())
 
