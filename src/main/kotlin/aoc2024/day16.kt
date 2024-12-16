@@ -29,7 +29,7 @@ fun main() {
 
     var shortestPath = Int.MAX_VALUE
     while (true) {
-        curr.next()?.filter { it !in V }?.forEach {
+        curr.next().filter { it !in V }.forEach {
             val cost = D.getValue(curr) + if (curr.facing == it.facing) 1 else 1000
             if (cost <= shortestPath) {
                 U += it
