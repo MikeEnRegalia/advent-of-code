@@ -63,7 +63,7 @@ fun main() {
     println(shortestPath)
 
     with(P.filterKeys { grid[it.pos] == 'E' }.keys.toMutableSet()) {
-        while (true) if (!addAll(mapNotNull { P[it] }.flatten())) break
+        while (true) if (mapNotNull { P[it] }.none(::addAll)) break
         println(map { it.pos }.toSet().size)
     }
 }
