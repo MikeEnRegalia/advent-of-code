@@ -27,31 +27,25 @@ fun main() {
     val U = mutableSetOf<State>()
     val P = mutableMapOf<State, Set<State>>()
 
-    var shortestPath = Int.MAX_VALUE
     while (true) {
         curr.next().filter { it !in V }.forEach {
             val cost = D.getValue(curr) + if (curr.facing == it.facing) 1 else 1000
-            if (cost <= shortestPath) {
-                U += it
-                val prevCost = D[it]
-                D.compute(it) { _, old -> min(old ?: Int.MAX_VALUE, cost) }
-                when {
-                    prevCost == null || cost < prevCost -> P[it] = setOf(curr)
-                    cost == prevCost -> P[it] = P.getValue(it) + curr
-                }
+            U += it
+            val prevCost = D[it]
+            D.compute(it) { _, old -> min(old ?: Int.MAX_VALUE, cost) }
+            when {
+                prevCost == null || cost < prevCost -> P[it] = setOf(curr)
+                cost == prevCost -> P[it] = P.getValue(it) + curr
             }
         }
 
         V += curr
         U -= curr
 
-        if (grid[curr.pos] == 'E')
-            shortestPath = min(shortestPath, D.getValue(curr))
-
         curr = U.minByOrNull { D.getValue(it) } ?: break
     }
 
-    println(shortestPath)
+    println(D.filterKeys { grid[it.pos] == 'E' }.values.min())
 
     with(P.filterKeys { grid[it.pos] == 'E' }.keys.toMutableSet()) {
         while (true) if (mapNotNull { P[it] }.none(::addAll)) break
