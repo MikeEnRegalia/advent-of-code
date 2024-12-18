@@ -7,11 +7,11 @@ fun main() {
 
     val allObstacles = generateSequence(::readLine)
         .map { it.split(",").map(String::toInt).let { (x, y) -> Point(x, y) } }.toList()
+    fun pickObstacles(n: Int) = allObstacles.take(n).toSet()
 
-    val obstacles = allObstacles.take(1024).toMutableSet()
     val (topLeft, lowerRight) = Point(0, 0) to Point(70, 70)
 
-    fun solve(): Int? {
+    fun findExit(obstacles: Set<Point>): Int? {
         val U = mutableSetOf(topLeft)
         val D = mutableMapOf(topLeft to 0)
         val V = mutableSetOf<Point>()
@@ -31,8 +31,13 @@ fun main() {
         return null
     }
 
-    println(solve())
+    println(findExit(pickObstacles(1024)))
 
-    allObstacles.drop(1024).asSequence().onEach(obstacles::add).first { solve() == null }
-        .also { (x, y) -> println("$x,$y") }
+    (1024..allObstacles.lastIndex).toList().binarySearch { i ->
+        when {
+            findExit(pickObstacles(i + 1)) != null -> -1
+            findExit(pickObstacles(i)) == null -> 1
+            else -> 0
+        }
+    }.let { allObstacles[1024 + it] }.also { (x, y) -> println("$x,$y") }
 }
