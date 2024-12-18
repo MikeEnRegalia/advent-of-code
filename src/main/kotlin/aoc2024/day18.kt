@@ -13,9 +13,9 @@ fun main() {
         it.split(",").map(String::toInt).let { (x, y) -> Point(x, y) }
     }.toList()
 
-    fun solve(n: Int): Int? {
-        val obstacles = allObstacles.take(n).toSet()
+    val obstacles = allObstacles.take(1024).toMutableSet()
 
+    fun solve(): Int? {
         val U = mutableSetOf(start)
         val D = mutableMapOf(start to 0)
         val V = mutableSetOf<Point>()
@@ -40,8 +40,9 @@ fun main() {
         return null
     }
 
-    println(solve(1024))
+    println(solve())
 
-    println((1025..allObstacles.lastIndex).first { solve(it) == null }
-        .let { allObstacles[it - 1] }.let { (x, y) -> "$x,$y" })
+    allObstacles.asSequence().drop(1024)
+        .onEach { obstacles += it }
+        .first { solve() == null }.also { (x, y) -> println("$x,$y") }
 }
