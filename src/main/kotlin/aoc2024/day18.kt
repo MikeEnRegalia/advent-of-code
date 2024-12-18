@@ -36,7 +36,6 @@ fun main() {
 
     println(solve())
 
-    allObstacles.asSequence().drop(1024)
-        .onEach { obstacles += it }
-        .first { solve() == null }.also { (x, y) -> println("$x,$y") }
+    allObstacles.asSequence().drop(1024).onEach(obstacles::add).first { solve() == null }
+        .also { (x, y) -> println("$x,$y") }
 }
