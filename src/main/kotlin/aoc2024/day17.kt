@@ -22,7 +22,7 @@ fun main() {
                 else -> throw IllegalArgumentException(arg.toString())
             }
 
-            fun denominator() = if (comboOp <= 0L) 1L else (0L until comboOp).map { 2L }.reduce(Long::times)
+            fun denominator() = if (comboOp == 0L) 1L else (0L until comboOp).map { 2L }.reduce(Long::times)
 
             when (op) {
                 0 -> regA /= denominator()
