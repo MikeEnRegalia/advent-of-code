@@ -2,14 +2,14 @@ package aoc2024
 
 fun main() {
     val lines = generateSequence(::readLine).toList()
-    val cache = mutableMapOf<String, Boolean>()
+    val cache = mutableMapOf("" to false)
 
     fun String.match(): Boolean = cache.getOrPut(this) {
-        lines[0].split(", ").any { towel ->
+        lines[0].split(", ").any {
             when {
-                !startsWith(towel) -> false
-                equals(towel) -> true
-                else -> drop(towel.length).match()
+                !startsWith(it) -> false
+                equals(it) -> true
+                else -> drop(it.length).match()
             }
         }
     }
