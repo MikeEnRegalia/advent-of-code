@@ -1,19 +1,18 @@
 package aoc2024
 
 fun main() {
-    val (towels, patterns) = with(generateSequence(::readLine).toList()) { first().split(", ") to drop(2) }
+    val lines = generateSequence(::readLine).toList()
+    val cache = mutableMapOf<String, Boolean>()
 
-    val cache = mutableMapOf<String, Long>()
-
-    fun String.match(): Long = cache.getOrPut(this) {
-        towels.sumOf { towel ->
+    fun String.match(): Boolean = cache.getOrPut(this) {
+        lines[0].split(", ").any { towel ->
             when {
-                !startsWith(towel) -> 0L
-                length == towel.length -> 1L
+                !startsWith(towel) -> false
+                equals(towel) -> true
                 else -> drop(towel.length).match()
             }
         }
     }
 
-    println(patterns.map(String::match).count { it > 0 })
+    println(lines.drop(2).count(String::match))
 }
