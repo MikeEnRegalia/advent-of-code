@@ -6,7 +6,7 @@ fun main() {
     val patterns = lines.drop(2)
     val cache = mutableMapOf<String, Long>()
 
-    fun String.match(): Long = if (this in cache) cache.getValue(this) else towels.sumOf { towel ->
+    fun String.match(): Long = cache[this] ?: towels.sumOf { towel ->
         when {
             !startsWith(towel) -> 0L
             length == towel.length -> 1L
@@ -14,7 +14,7 @@ fun main() {
         }
     }.also { cache[this] = it }
 
-    with (patterns.map(String::match)) {
+    with(patterns.map(String::match)) {
         println(count { it > 0 })
         println(sum())
     }
