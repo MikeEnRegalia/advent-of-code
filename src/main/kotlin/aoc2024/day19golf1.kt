@@ -5,13 +5,7 @@ fun main() {
     val cache = mutableMapOf("" to false)
 
     fun String.match(): Boolean = cache.getOrPut(this) {
-        lines[0].split(", ").any {
-            when {
-                !startsWith(it) -> false
-                equals(it) -> true
-                else -> drop(it.length).match()
-            }
-        }
+        lines[0].split(", ").filter(::startsWith).any { this == it || removePrefix(it).match() }
     }
 
     println(lines.drop(2).count(String::match))
