@@ -7,21 +7,19 @@ fun main() {
     fun Point.next() = sequenceOf(copy(x = x + 1), copy(y = y + 1), copy(x = x - 1), copy(y = y - 1))
         .filter { it in grid }
 
-    data class State(val pos: Point)
+    fun Point.walk(): List<Point> = next().filter { grid[it] != '#' }.toList()
 
-    fun State.next(): List<State> = pos.next().filter { grid[it] != '#' }.map { copy(pos = it) }.toList()
+    val start = grid.filterValues { it == 'S' }.keys.single()
 
-    val start = State(grid.filterValues { it == 'S' }.keys.single())
-
-    val V = mutableSetOf<State>()
+    val V = mutableSetOf<Point>()
     val D = mutableMapOf(start to 0)
     val U = mutableSetOf(start)
-    val P = mutableMapOf<State, Set<State>>()
+    val P = mutableMapOf<Point, Set<Point>>()
 
     do {
         val curr = U.minBy { D.getValue(it) }
 
-        for (next in curr.next().filter { it !in V }) {
+        for (next in curr.walk().filter { it !in V }) {
             U += next
             val (prevCost, cost) = D[next] to D.getValue(curr) + 1
             when {
@@ -38,5 +36,13 @@ fun main() {
         U -= curr
     } while (U.isNotEmpty())
 
-    println(D.filterKeys { grid[it.pos] == 'E' }.values.min())
+    val cheatSavings = grid.filter { it.key in D.keys && it.value != '#' }.keys.flatMap { s ->
+        s.next().filter { grid[it] == '#' }.flatMap { o ->
+            o.next().filter { it in D.keys && grid[it] != '#' && D.getValue(it) > D.getValue(s) }.map { e ->
+                D.getValue(e) - D.getValue(s) - 2
+            }
+        }
+    }.filter { it > 0 }
+
+    println(cheatSavings.count { it >= 100 })
 }
