@@ -4,6 +4,7 @@ import kotlin.math.abs
 
 fun main() {
     data class Point(val x: Int, val y: Int)
+    fun Point.distanceTo(o: Point) = abs(x - o.x) + abs(y - o.y)
 
     val grid = generateSequence(::readLine).flatMapIndexed { y, s -> s.mapIndexed { x, c -> Point(x, y) to c } }.toMap()
     fun Point.next() = sequenceOf(copy(x = x + 1), copy(y = y + 1), copy(x = x - 1), copy(y = y - 1))
@@ -39,18 +40,17 @@ fun main() {
         return D
     }
 
-    val D = solve(grid.filterValues { it == 'S' }.keys.single())
 
-    val path = grid.filter { it.key in D.keys && it.value in "S.E" }.keys
-
-    fun Point.surrounding(d: Int) = (-d..d).flatMap { dy ->
-        (-d..d).mapNotNull { dx -> Point(x + dx, y + dy).takeIf { it != this && abs(it.x - x) + abs(it.y - y) <= d } }
+    fun Point.surrounding(maxD: Int) = (-maxD..maxD).flatMap { dy ->
+        (-maxD..maxD).mapNotNull { dx -> Point(x + dx, y + dy).takeIf { it != this && distanceTo(it) <= maxD } }
     }
+
+    val D = solve(grid.filterValues { it == 'S' }.keys.single())
+    val path = grid.filter { it.key in D.keys && it.value != '#' }.keys
 
     fun savings(maxD: Int, min: Int) = path.flatMap { s ->
         s.surrounding(maxD).filter(path::contains).mapNotNull { e ->
-            val d = abs(e.x - s.x) + abs(e.y - s.y)
-            (D.getValue(e) - D.getValue(s) - d).takeIf { it >= min }
+            (D.getValue(e) - D.getValue(s) - s.distanceTo(e)).takeIf { it >= min }
         }
     }
 
