@@ -7,11 +7,9 @@ fun main() {
     fun Point.next() = sequenceOf(copy(x = x + 1), copy(y = y + 1), copy(x = x - 1), copy(y = y - 1))
         .filter { it in grid }
 
-    data class State(val pos: Point, val removingObstacles: Boolean = false, val cheat: List<Point> = listOf())
+    data class State(val pos: Point)
 
-    fun State.next(): List<State> = when {
-        else -> pos.next().map { copy(pos = it) }.filter { grid[pos] != '#' }.toList()
-    }
+    fun State.next(): List<State> = pos.next().filter { grid[it] != '#' }.map { copy(pos = it) }.toList()
 
     val start = State(grid.filterValues { it == 'S' }.keys.single())
 
@@ -40,5 +38,5 @@ fun main() {
         U -= curr
     } while (U.isNotEmpty())
 
-    println(D.filterKeys { grid[it.pos] == 'E'}.values.min())
+    println(D.filterKeys { grid[it.pos] == 'E' }.values.min())
 }
