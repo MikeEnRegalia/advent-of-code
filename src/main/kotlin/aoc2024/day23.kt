@@ -5,18 +5,16 @@ fun main() {
 
     val computers = links.flatten().toSet()
 
-    val parties = links.flatMap { connection ->
-        computers.mapNotNull { third ->
-            when {
-                third in connection -> null
-                connection.all { setOf(it, third) in links } -> connection + third
-                else -> null
-            }
-        }
-            .toSet()
-    }.toSet()
+    val tLinks = links.filter { link -> link.any { it.startsWith("t") } }
 
-    println(parties.count { party -> party.any { it.startsWith("t") } })
+    val parties = buildSet {
+        for (link in tLinks) for (c in computers) {
+            if (link.all { setOf(it, c) in links })
+                add(link + c)
+        }
+    }
+
+    println(parties.count())
 
     val bigParties = mutableSetOf<Set<String>>()
 
