@@ -12,15 +12,11 @@ fun main() {
         .count()
         .also(::println)
 
-    val bigParties = mutableSetOf<Set<String>>()
-
-    for (computer in nodes) {
-        if (bigParties.any { computer in it }) continue
-        bigParties.add(buildSet {
+    val bigParties = buildSet {
+        for (computer in nodes) add(buildSet {
             add(computer)
-            do {
-                nodes.firstOrNull { node -> all { setOf(it, node) in links } }?.let { add(it) } ?: break
-            } while (true)
+            generateSequence { nodes.firstOrNull { node -> all { setOf(it, node) in links } } }
+                .forEach(::add)
         })
     }
 
