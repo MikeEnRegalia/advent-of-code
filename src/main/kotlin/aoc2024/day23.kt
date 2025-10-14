@@ -1,17 +1,15 @@
 package aoc2024
 
 fun main() {
-    val connections = generateSequence { readlnOrNull() }
-        .map { it.split("-").toSet() }
-        .toSet()
+    val links = generateSequence { readlnOrNull()?.split("-")?.toSet() }.toSet()
 
-    val computers = connections.flatten().toSet()
+    val computers = links.flatten().toSet()
 
-    val parties = connections.flatMap { connection ->
+    val parties = links.flatMap { connection ->
         computers.mapNotNull { third ->
             when {
                 third in connection -> null
-                connection.all { setOf(it, third) in connections } -> connection + third
+                connection.all { setOf(it, third) in links } -> connection + third
                 else -> null
             }
         }
@@ -30,7 +28,7 @@ fun main() {
             do {
                 computers
                     .filter { it !in this }
-                    .firstOrNull { node -> all { setOf(it, node) in connections } }
+                    .firstOrNull { node -> all { setOf(it, node) in links } }
                     ?.let { add(it) } ?: break
 
             } while (true)
