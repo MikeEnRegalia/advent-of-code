@@ -19,4 +19,24 @@ fun main() {
     }.toSet()
 
     println(parties.count { party -> party.any { it.startsWith("t") } })
+
+    val bigParties = mutableSetOf<Set<String>>()
+
+    for (computer in computers) {
+        if (bigParties.any { computer in it }) continue
+
+        val party = buildSet {
+            add(computer)
+            do {
+                computers
+                    .filter { it !in this }
+                    .firstOrNull { node -> all { setOf(it, node) in connections } }
+                    ?.let { add(it) } ?: break
+
+            } while (true)
+        }
+        bigParties.add(party)
+    }
+
+    println(bigParties.maxBy { it.size }.sorted().joinToString(","))
 }
