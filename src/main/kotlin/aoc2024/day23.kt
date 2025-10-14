@@ -1,22 +1,19 @@
 package aoc2024
 
 fun main() {
-    val links = generateSequence { readlnOrNull()?.split("-")?.toSet() }.toSet()
-    val nodes = links.flatten().toSet()
+    val links = generateSequence(::readlnOrNull).map { it.split("-").toSet() }.toSet()
+    fun Set<String>.areAllConnectedTo(other: String) = all { setOf(it, other) in links }
 
-    links
-        .filter { it.any { n -> n.startsWith("t") } }
-        .flatMap { link -> nodes.filter { c -> link.all { n -> setOf(n, c) in links } }.map { link + it } }
-        .distinct()
-        .count()
+    val computers = links.flatten().toSet()
+
+    links.filter { link -> link.any { it.startsWith("t") } }
+        .flatMap { link -> computers.filter { link.areAllConnectedTo(it) }.map { link + it } }
+        .distinct().count()
         .also(::println)
 
-    val bigParties = nodes.map {
-        mutableSetOf(it).apply {
-            generateSequence { nodes.firstOrNull { new -> all { n -> setOf(n, new) in links } } }
-                .forEach(::add)
-        }
+    val parties = computers.map { mutableSetOf(it) }.onEach {
+        it.addAll(generateSequence { computers.firstOrNull(it::areAllConnectedTo) })
     }
 
-    println(bigParties.maxBy { it.size }.sorted().joinToString(","))
+    println(parties.maxBy { it.size }.sorted().joinToString(","))
 }
