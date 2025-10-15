@@ -27,18 +27,19 @@ fun main() {
 
     fun String.leadsTo(vararg operations: String) = gates.mapNotNull { (a, op, b) ->
         if (a == this || b == this) op else null
-    }.toSet().let { operations.all { op -> op in it }}
+    }.let { operations.all { op -> op in it }}
 
     val invalidGates = gates.filterNot { (a, op, b, _, wire) ->
+        val firstInputs = setOf("x00", "y00")
         when (op) {
             "OR" -> wire == Z.first() || wire.leadsTo("XOR", "AND")
             "AND" -> when {
-                setOf(a, b) == setOf("x00", "y00") -> wire.leadsTo("XOR", "AND")
+                setOf(a, b) == firstInputs -> wire.leadsTo("XOR", "AND")
                 else -> wire.leadsTo("OR")
             }
 
             "XOR" -> when {
-                wire == "z00" -> setOf(a, b) == setOf("x00", "y00")
+                wire == "z00" -> setOf(a, b) == firstInputs
                 setOf(a, b).any { it.startsWith("x") } -> wire.leadsTo("XOR", "AND")
                 else -> wire in Z
             }
