@@ -29,7 +29,7 @@ fun main() {
         if (a == this || b == this) op else null
     }.toSet().let { operations.all { op -> op in it }}
 
-    val bogus = gates.filterNot { (a, op, b, _, wire) ->
+    val invalidGates = gates.filterNot { (a, op, b, _, wire) ->
         when (op) {
             "OR" -> wire == Z.first() || wire.leadsTo("XOR", "AND")
             "AND" -> when {
@@ -47,5 +47,5 @@ fun main() {
         }
     }
 
-    println(bogus.map { it.last() }.sorted().joinToString(","))
+    println(invalidGates.map { it.last() }.sorted().joinToString(","))
 }
