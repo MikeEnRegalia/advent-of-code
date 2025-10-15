@@ -6,11 +6,11 @@ fun main() {
     val init = lines.filter { ':' in it }.associate { it.split(": ").let { it[0] to (it[1].toInt() == 1) } }
     val gates = lines.filter { "->" in it }.map { it.split(" ") }
 
-    val targetWires = gates.map { it.last() }.filter { it.startsWith("z") }.sortedDescending()
+    val Z = gates.map { it.last() }.filter { it.startsWith("z") }.sortedDescending()
 
     val wires = init.toMutableMap()
 
-    while (targetWires.any { it !in wires }) {
+    while (Z.any { it !in wires }) {
         for ((aWire, op, bWire, _, resultWire) in gates) {
             val a = wires[aWire] ?: continue
             val b = wires[bWire] ?: continue
@@ -23,23 +23,29 @@ fun main() {
         }
     }
 
-    println(targetWires.joinToString("") { if (wires[it] == true) "1" else "0" }.toLong(2))
+    println(Z.joinToString("") { if (wires[it] == true) "1" else "0" }.toLong(2))
 
-    val lastWire = "z${targetWires.lastIndex}"
+    fun String.leadsTo(vararg operations: String) = gates.mapNotNull { (a, op, b) ->
+        if (a == this || b == this) op else null
+    }.toSet().let { operations.all { op -> op in it }}
 
-    fun String.connectedOperations() = gates.mapNotNull { (a, op, b) ->
-        if (listOf(a, b).any { it == this }) op else null
-    }
-
-    val bogus = gates.filterNot { (_, op, _, _, wire) ->
+    val bogus = gates.filterNot { (a, op, b, _, wire) ->
         when (op) {
-            "OR" -> wire == lastWire || "XOR" in wire.connectedOperations()
-            "AND" -> "OR" in wire.connectedOperations()
-            "XOR" -> wire in targetWires || "XOR" in wire.connectedOperations()
+            "OR" -> wire == Z.first() || wire.leadsTo("XOR", "AND")
+            "AND" -> when {
+                setOf(a, b) == setOf("x00", "y00") -> wire.leadsTo("XOR", "AND")
+                else -> wire.leadsTo("OR")
+            }
+
+            "XOR" -> when {
+                wire == "z00" -> setOf(a, b) == setOf("x00", "y00")
+                setOf(a, b).any { it.startsWith("x") } -> wire.leadsTo("XOR", "AND")
+                else -> wire in Z
+            }
+
             else -> true
         }
-    }.onEach(::println)
+    }
 
-    // not dgr,dtv,mtj,njb,vvm,z12,z29,z37
     println(bogus.map { it.last() }.sorted().joinToString(","))
 }
