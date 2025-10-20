@@ -18,8 +18,9 @@ fun main() {
         }
     }
 
-    val result = apples.groupBy { it.size }.values.minBy { it.size }.single()
+    with(apples.groupBy { it.size }.values.minBy { it.size }.single()) {
+        println(joinToString(""))
+        println(joinToString("") { it.take(1) })
+    }
 
-    println(result.joinToString(""))
-    println(result.joinToString("") { it.take(1) })
 }
