@@ -3,6 +3,7 @@
 **/build/
 !src/**/build/
 src/main/resources/challenges
+out/
 
 # Ignore Gradle GUI config
 gradle-app.setting
