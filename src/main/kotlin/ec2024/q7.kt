@@ -1,37 +1,41 @@
 package ec2024
 
 fun main() {
-    val squires = generateSequence(::readLine).map {
-        it.split(":").let { (squire, plan) -> squire to plan.split(",") }
+    data class Runner(val name: String, val plan: String)
+
+    val runners = generateSequence(::readLine).map {
+        it.split(":").let { (name, plan) -> Runner(name, plan.split(",").joinToString("")) }
     }.toList()
 
-    fun List<String>.score(rounds: Int, track: List<String>? = null): Int {
+    fun String.score(rounds: Int, track: String? = null): Int {
         var power = 10
         var sum = 0
 
-        repeat((track?.size ?: 1) * rounds) { i ->
-            val track = track?.get(i % track.size).takeIf { it == "-" || it == "+" }
-            when (track ?: this[i % size]) {
-                "+" -> power += 1
-                "-" -> power -= 1
+        repeat((track?.length ?: 1) * rounds) { i ->
+            val track = track?.get(i % track.length).takeIf { it == '-' || it == '+' }
+            when (track ?: this[i % length]) {
+                '+' -> power += 1
+                '-' -> power -= 1
             }
             sum += power
         }
         return sum
     }
 
-    println(squires.map { (squire, plan) -> squire to plan.score(10) }.sortedByDescending { it.second }
-        .joinToString("") { it.first })
+    data class Result(val name: String, val score: Int)
+
+    println(runners.map { Result(it.name, it.plan.score(10)) }.sortedByDescending { it.score }
+        .joinToString("") { it.name })
 
     val knightsTrack = "-=++=-==++=++=-=+=-=+=+=--=-=++=-==++=-+=-=+=-=+=+=++=-+==++=++=-=-=--" +
             "-=++==-" +
             "--==++++==+=+++-=+=-=+=-+-=+-=+-=+=-=+=--=+++=++=+++==++==--=+=++==+++-".reversed() +
             "-=+=+=-="
 
-    println(squires.map { (squire, plan) -> squire to plan.score(10, knightsTrack.map { it.toString() }) }
-        .sortedByDescending { it.second }.joinToString("") { it.first })
+    println(runners.map { Result(it.name, it.plan.score(10, knightsTrack)) }
+        .sortedByDescending { it.score }.joinToString("") { it.name })
 
-    val finalTrack = buildList {
+    val finalTrack = buildString {
 
         val finalTrackMap = """
         S+= +=-== +=++=     =+=+=--=    =-= ++=     +=-  =+=++=-+==+ =++=-=-=--
@@ -50,7 +54,7 @@ fun main() {
 
         val visited = mutableSetOf<Pos>()
         var curr = Pos(1, 0)
-        add("+")
+        append("+")
 
         fun Pos.next(): Pos? = if (this == Pos(1, 0)) Pos(2, 0) else sequenceOf(
             copy(x = x + 1), copy(x = x - 1), copy(y = y + 1), copy(y = y - 1)
@@ -64,25 +68,21 @@ fun main() {
         while (true) {
             visited += curr
             curr = curr.next() ?: break
-            add(finalTrackMap[curr.y][curr.x].toString())
+            append(finalTrackMap[curr.y][curr.x].toString())
         }
     }
 
-
-    println(finalTrack.joinToString(""))
-
-    fun String.permute(result: String = ""): List<String> =
-        if (isEmpty()) listOf(result) else flatMapIndexed { i, c -> removeRange(i, i + 1).permute(result + c) }
-
-
-    val maxOtherScores = squires.maxOf { (_, plan) -> plan.score(2024, finalTrack) }
-
-    var winningPlans = 0
-
-    for (plan in "+++++---===".permute().toSet()) {
-        val result = plan.map { it.toString() }.score(2024, finalTrack)
-        if (result > maxOtherScores) winningPlans++
+    fun String.permute(result: String = ""): Set<String> = when {
+        isEmpty() -> setOf(result)
+        else -> mapIndexed { i, c -> c to removeRange(i, i + 1) }.toSet()
+            .flatMap { (c, rest) -> rest.permute(result + c) }
+            .toSet()
     }
 
-    println(winningPlans)
+    val maxOtherScores = runners.map { it.plan }.maxOf { it.score(2024, finalTrack) }
+
+    "+++++---===".permute().parallelStream()
+        .filter { it.score(2024, finalTrack) > maxOtherScores }
+        .count()
+        .also(::println)
 }
