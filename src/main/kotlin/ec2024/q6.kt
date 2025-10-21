@@ -9,11 +9,11 @@ fun main() {
 
     val apples = branches.filter { "@" in it.children }.map { branch ->
         buildList {
-            var branch = branch
+            var curr = branch
             add("@")
             while (true) {
-                add(0, branch.parent)
-                branch = branches.singleOrNull { branch.parent in it.children } ?: break
+                add(0, curr.parent)
+                curr = branches.singleOrNull { curr.parent in it.children } ?: break
             }
         }
     }
