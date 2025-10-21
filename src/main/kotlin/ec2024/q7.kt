@@ -50,6 +50,7 @@ fun main() {
 
         val visited = mutableSetOf<Pos>()
         var curr = Pos(1, 0)
+        add("+")
 
         fun Pos.next(): Pos? = if (this == Pos(1, 0)) Pos(2, 0) else sequenceOf(
             copy(x = x + 1), copy(x = x - 1), copy(y = y + 1), copy(y = y - 1)
@@ -67,16 +68,21 @@ fun main() {
         }
     }
 
+
+    println(finalTrack.joinToString(""))
+
     fun String.permute(result: String = ""): List<String> =
         if (isEmpty()) listOf(result) else flatMapIndexed { i, c -> removeRange(i, i + 1).permute(result + c) }
+
+
+    val maxOtherScores = squires.maxOf { (_, plan) -> plan.score(2024, finalTrack) }
 
     var winningPlans = 0
 
     for (plan in "+++++---===".permute().toSet()) {
-        val result = (squires + ("@" to plan.map { it.toString() }))
-            .associate { (squire, plan) -> squire to plan.score(2024, finalTrack) }
-        val score = result.getValue("@")
-        if (result.all { it.key == "@" || it.value < score }) winningPlans++
+        val result = plan.map { it.toString() }.score(2024, finalTrack)
+        if (result > maxOtherScores) winningPlans++
     }
+
     println(winningPlans)
 }
