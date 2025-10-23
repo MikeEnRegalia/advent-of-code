@@ -3,22 +3,20 @@ package ec2024
 fun main() {
     val grids = generateSequence(::readLine).toList()
 
-    val runicWords = mutableListOf<String>()
-    for (offsetY in grids.indices.filter { it % 9 == 0 }) {
-        for (offsetX in grids[offsetY].indices.filter { it % 9 == 0 }) {
-            val grid = grids
-                .filterIndexed { i, _ -> i in (offsetY..<offsetY + 8) }
-                .map { it.filterIndexed { j, _ -> j in (offsetX..<offsetX + 8) } }
+    fun List<String>.subGrid(x: Int, y: Int, size: Int) =
+        filterIndexed { i, _ -> i in (y..<y + size) }
+            .map { it.filterIndexed { i, _ -> i in (x..<x + size) } }
 
-            val runicWord = buildString {
-                for (y in 2..5) {
-                    for (x in 2..5) {
-                        val runes = (grid.map { it[x] } + grid[y].toList()).filter { it !in " ." }
-                        append(runes.maxBy { rune -> runes.count { it == rune } })
-                    }
-                }
-            }
-            runicWords += runicWord
+    fun getRunicWord(grid: List<String>) = buildString {
+        for (y in 2..5) for (x in 2..5) {
+            val runes = (grid.map { it[x] } + grid[y].toList()).filter { it != '.' }
+            append(runes.maxBy { rune -> runes.count { it == rune } })
+        }
+    }
+
+    val runicWords = grids.indices.filter { it % 9 == 0 }.flatMap { offsetY ->
+        grids[offsetY].indices.filter { it % 9 == 0 }.map { offsetX ->
+            getRunicWord(grids.subGrid(offsetX, offsetY, 8))
         }
     }
 
