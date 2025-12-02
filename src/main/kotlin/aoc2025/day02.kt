@@ -9,19 +9,16 @@ fun main() {
 
     for (range in ranges) for (id in range) {
         val s = id.toString()
-        var b1 = false
-        var b2 = false
-        for (l in 1..s.length / 2) {
+        for (l in (1..s.length / 2).reversed()) {
             val chunks = s.chunked(l)
             if (chunks.distinct().size == 1) {
                 if (chunks.size == 2) {
-                    b1 = true
+                    part1 += id
                 }
-                b2 = true
+                part2 += id
+                break
             }
         }
-        if (b1) part1 += id
-        if (b2) part2 += id
     }
 
     println(part1)
