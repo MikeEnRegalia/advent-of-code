@@ -1,7 +1,7 @@
 package aoc2025
 
 fun main() {
-    val ranges = readln().split(",").map { s -> s.split("-").map(String::toLong) }
+    val ranges = readln().split(",").map { it.split("-").map(String::toLong) }
 
     var part1 = 0L
     var part2 = 0L
