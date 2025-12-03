@@ -5,16 +5,28 @@ fun main() {
         .map { it.map(Char::digitToInt) }
         .toList()
 
-    fun List<Int>.pick(pos: Int, picked: List<Long>, n: Int): Long {
-        if (n == 0) return picked.joinToString("").toLong()
-        val candidates = (pos..indices.last - (n - 1)).toList()
-        val max = candidates.maxOf { this[it] }
-        return candidates
-            .filter { this[it] == max }
-            .maxOf { pick(it + 1, picked + this[it].toLong(), n - 1) }
+    fun List<Int>.solve(n: Int): Long {
+        var curr = listOf<Int>()
+
+        fun List<Int>.pick(n: Int, pos: Int = 0, picked: List<Int> = listOf()): List<Int>? {
+            if (n == 0) return picked
+
+            val candidates = (pos..indices.last - (n - 1)).toList()
+            val max = candidates.maxOf { this[it] }
+
+            if (picked.size in curr.indices && curr[picked.size] >= max) return null
+
+            return candidates
+                .filter { this[it] == max }
+                .mapNotNull { pick(n - 1,it + 1, picked + max) }
+                .maxByOrNull { it.joinToString("").toLong() }
+                ?.also { curr = it }
+        }
+
+        return pick(n)!!.joinToString("").toLong()
     }
 
-    println(banks.sumOf { it.pick(0, listOf(), 2) })
-    println(banks.sumOf { it.pick(0, listOf(), 12) })
+    println(banks.sumOf { it.solve(2) })
+    println(banks.sumOf { it.solve(12) })
 
 }
