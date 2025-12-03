@@ -9,7 +9,7 @@ fun main() {
         fun List<Int>.pick(n: Int, pos: Int = 0, picked: List<Int> = listOf()): List<Int>? {
             if (n == 0) return picked
 
-            val candidates = (pos..indices.last - (n - 1)).toList()
+            val candidates = pos..indices.last - (n - 1)
             val max = candidates.maxOf { this[it] }
 
             if (picked.size in solution.indices && solution[picked.size] >= max) return null
@@ -20,7 +20,6 @@ fun main() {
                 .maxByOrNull { it.joinToString("").toLong() }
                 ?.also { solution = it }
         }
-
         pick(n)
 
         return solution.joinToString("").toLong()
