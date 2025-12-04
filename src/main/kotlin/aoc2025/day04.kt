@@ -6,8 +6,7 @@ fun main() {
     }.toMutableSet()
 
     fun liftable() = grid.filter { (px, py) ->
-        (-1..1).flatMap { y -> (-1..1).map { px + it to py + y } }
-            .count { it in grid } <= 4
+        (-1..1).flatMap { y -> (-1..1).map { px + it to py + y } }.count { it in grid } <= 4
     }.toSet()
 
     var lifted = 0
