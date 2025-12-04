@@ -1,25 +1,24 @@
 package aoc2025
 
 fun main() {
-    data class Position(val x: Int, val y: Int)
-
     val grid = generateSequence(::readLine).flatMapIndexed { y, line ->
-        line.mapIndexedNotNull { x, char -> if (char == '@') Position(x, y) else null }
+        line.mapIndexedNotNull { x, char -> if (char == '@') x to y else null }
+    }.toMutableSet()
+
+    fun liftable() = grid.filter { (px, py) ->
+        (-1..1).flatMap { y -> (-1..1).map { px + it to py + y } }
+            .count { it in grid } <= 4
     }.toSet()
 
-    fun Set<Position>.liftable() = filter { p ->
-            (-1..1).flatMap { y -> (-1..1).map { x -> Position(p.x + x, p.y + y) } }
-                .count { it != p && it in this } < 4
-        }.toSet()
-
-    println(grid.liftable().count())
-
-    val part2 = grid.toMutableSet()
+    var lifted = 0
     while (true) {
-        val liftable = part2.liftable()
+        val liftable = liftable()
+        if (lifted == 0) println(liftable.size)
+
         if (liftable.isEmpty()) break
-        part2 -= liftable
+        grid -= liftable
+        lifted += liftable.size
     }
 
-    println(grid.size - part2.size)
+    println(lifted)
 }
