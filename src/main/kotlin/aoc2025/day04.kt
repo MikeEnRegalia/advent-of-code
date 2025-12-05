@@ -1,14 +1,19 @@
 package aoc2025
 
-fun main() = generateSequence(::readLine)
-    .flatMapIndexed { y, line -> line.mapIndexedNotNull { x, char -> if (char == '@') x to y else null } }
-    .toMutableSet().let { grid ->
-        generateSequence {
-            grid.filter { (px, py) ->
-                (-1..1).flatMap { y -> (-1..1).map { px + it to py + y } }.count { it in grid } <= 4
-            }.also { grid -= it }.size.takeIf { it > 0 }
-        }.toList().run {
-            println(first())
-            println(sum())
-        }
+fun main() {
+    val grid = generateSequence(::readLine)
+        .flatMapIndexed { y, line -> line.mapIndexedNotNull { x, char -> if (char == '@') x to y else null } }
+        .toMutableSet()
+
+    fun Pair<Int, Int>.isRemovable() = (-1..1).flatMap { dy -> (-1..1).map { first + it to second + dy } }
+        .count(grid::contains) <= 4
+
+    val removals = generateSequence {
+        grid.filter(Pair<Int, Int>::isRemovable).also(grid::removeAll).size.takeIf { it > 0 }
     }
+
+    with(removals.toList()) {
+        println(first())
+        println(sum())
+    }
+}
