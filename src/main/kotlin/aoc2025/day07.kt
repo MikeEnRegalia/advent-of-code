@@ -3,19 +3,20 @@ package aoc2025
 fun main() {
     val lines = generateSequence(::readLine).toList()
 
-    val beams = mutableSetOf(lines.first().indexOf("S"))
+    val firstLine = lines.first()
+
     var splits = 0
-    for (line in lines.drop(1)) {
-        for (i in lines.first().indices) {
-            if (line[i] == '^' && i in beams) {
-                beams -= i
-                beams += i - 1
-                beams += i + 1
-                splits++
-            }
-        }
-        println(line.mapIndexed { i, c -> if (i in beams) '|' else c }.joinToString(""))
+    val beams = Array(firstLine.length) { i -> if (i == firstLine.indexOf("S")) 1L else 0L }
+
+    for (line in lines) for (i in firstLine.indices) {
+        if (line[i] != '^' || beams[i] == 0L) continue
+        splits++
+        val n = beams[i]
+        beams[i] = 0
+        beams[i - 1] += n
+        beams[i + 1] += n
     }
 
     println(splits)
+    println(beams.sum())
 }
