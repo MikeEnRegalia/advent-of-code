@@ -6,16 +6,13 @@ fun main() {
 
     val cache = mutableMapOf<Pair<String, Set<String>>, Long>()
 
-    fun follow(curr: String, target: String, visit: Set<String> = setOf(), seen: Set<String> = setOf()): Long =
-        cache.getOrPut(curr to seen) {
-            when {
-                curr == target -> if (seen == visit) 1 else 0
-                else -> links.getValue(curr).sumOf {
-                    follow(it, target, visit, if (it in visit) seen + it else seen)
-                }
-            }
+    fun String.findOut(visit: Set<String> = setOf(), seen: Set<String> = setOf()): Long = cache.getOrPut(this to seen) {
+        when {
+            this == "out" -> if (seen == visit) 1 else 0
+            else -> links.getValue(this).sumOf { it.findOut(visit, if (it in visit) seen + it else seen) }
         }
+    }
 
-    println(follow("you", "out"))
-    println(follow("svr", "out", setOf("fft", "dac")))
+    println("you".findOut())
+    println("svr".findOut(setOf("fft", "dac")))
 }
