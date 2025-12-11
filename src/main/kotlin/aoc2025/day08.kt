@@ -18,6 +18,10 @@ fun main() {
     val circuits = points.map { mutableSetOf(it) }.toMutableSet()
 
     for ((n, c) in connections.withIndex()) {
+        if (n == 1000) {
+            println(circuits.map { it.size }.sortedDescending().take(3).reduce { a, b -> a * b })
+        }
+
         val (a, b) = c.first() to c.last()
 
         val ca = circuits.single { a in it }
@@ -26,9 +30,6 @@ fun main() {
         if (ca != cb) {
             ca.addAll(cb)
             circuits.removeIf { it == cb }
-        }
-        if (n == 999) {
-            println(circuits.map { it.size }.sortedDescending().take(3).reduce { a, b -> a * b })
         }
         if (circuits.size == 1) {
             println(a.x * b.x)
