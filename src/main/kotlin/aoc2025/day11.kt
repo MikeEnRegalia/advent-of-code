@@ -1,8 +1,7 @@
 package aoc2025
 
 fun main() {
-    val links = generateSequence(::readLine)
-        .associate { line -> line.split(": ").let { it[0] to it[1].split(" ") } }
+    val links = generateSequence(::readLine).associate { line -> line.split(": ").let { it[0] to it[1].split(" ") } }
 
     val cache = mutableMapOf<Pair<String, Set<String>>, Long>()
 
