@@ -12,7 +12,7 @@ fun main() {
         line.split(",").map { it.toLong() }.let { Point(it[0], it[1], it[2]) }
     }.toSet()
 
-    val connections = points.flatMap { a -> points.filter { it != a }.map { b -> setOf(a, b) } }
+    val connections = points.flatMap { a -> points.filter { it != a }.map { setOf(a, it) } }
         .distinct().sortedBy { it.first().distanceTo(it.last()) }
 
     val circuits = points.map { mutableSetOf(it) }.toMutableSet()
